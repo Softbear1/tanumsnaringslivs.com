@@ -1,0 +1,31 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #FAFAF8;
+  --primary: #1B3A4B;
+  --accent: #2E7D5E;
+  --accent-light: #E8F5EF;
+  --muted: #6B7280;
+  --border: #E5E7EB;
+  --card: #FFFFFF;
+  --boost: #D97706;
+  --boost-bg: #FFFBEB;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--primary);
+  -webkit-font-smoothing: antialiased;
+}
+
+.card-shadow {
+  box-shadow: 0 1px 3px rgba(27, 58, 75, 0.06), 0 4px 16px rgba(27, 58, 75, 0.06);
+}
+
+.card-shadow-hover {
+  box-shadow: 0 4px 12px rgba(27, 58, 75, 0.10), 0 16px 40px rgba(27, 58, 75, 0.10);
+}

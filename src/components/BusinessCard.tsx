@@ -1,0 +1,122 @@
+"use client";
+import { Phone, Mail, Globe, MapPin, Star, Zap } from "lucide-react";
+import { Business, getCategory } from "@/lib/data";
+import clsx from "clsx";
+
+type Props = {
+  business: Business;
+  isAd?: boolean;
+};
+
+export default function BusinessCard({ business, isAd }: Props) {
+  const cat = getCategory(business.categoryId);
+
+  return (
+    <div
+      className={clsx(
+        "relative bg-white rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1 group",
+        "card-shadow hover:card-shadow-hover",
+        business.boosted && "ring-1 ring-[var(--boost)]/30"
+      )}
+    >
+      {/* Category color strip */}
+      <div className="h-1 w-full" style={{ backgroundColor: cat?.color ?? "#6B7280" }} />
+
+      <div className="p-5">
+        {/* Header row */}
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex items-center gap-3">
+            {/* Logo circle */}
+            <div
+              className="w-12 h-12 rounded-xl flex items-center justify-center font-bold text-sm flex-shrink-0"
+              style={{ backgroundColor: cat?.bgColor ?? "#F3F4F6", color: cat?.color ?? "#374151" }}
+            >
+              {business.initials}
+            </div>
+            <div>
+              <h3 className="font-semibold text-[var(--primary)] text-base leading-tight">
+                {business.name}
+              </h3>
+              <span
+                className="inline-block text-[11px] font-medium mt-1 px-2 py-0.5 rounded-full"
+                style={{ backgroundColor: cat?.bgColor ?? "#F3F4F6", color: cat?.color ?? "#374151" }}
+              >
+                {cat?.name}
+              </span>
+            </div>
+          </div>
+
+          <div className="flex flex-col items-end gap-1">
+            {business.boosted && (
+              <span className="flex items-center gap-1 text-[10px] font-bold text-[var(--boost)] bg-[var(--boost-bg)] px-2 py-0.5 rounded-full">
+                <Zap className="w-2.5 h-2.5" />
+                BOOST
+              </span>
+            )}
+            {isAd && (
+              <span className="text-[10px] text-[var(--muted)] bg-gray-100 px-2 py-0.5 rounded-full">
+                Annonserat
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Description */}
+        <p className="text-sm text-[var(--muted)] leading-relaxed mb-4 line-clamp-2">
+          {business.description}
+        </p>
+
+        {/* Rating */}
+        <div className="flex items-center gap-1 mb-4">
+          {[1, 2, 3, 4, 5].map((s) => (
+            <Star
+              key={s}
+              className="w-3.5 h-3.5"
+              fill={s <= Math.round(business.rating) ? "#FBBF24" : "none"}
+              stroke={s <= Math.round(business.rating) ? "#FBBF24" : "#D1D5DB"}
+            />
+          ))}
+          <span className="text-xs text-[var(--muted)] ml-1">
+            {business.rating.toFixed(1)} ({business.reviewCount} recensioner)
+          </span>
+        </div>
+
+        {/* Divider */}
+        <div className="border-t border-[var(--border)] mb-4" />
+
+        {/* Contact info */}
+        <div className="space-y-2">
+          <a
+            href={`tel:${business.phone.replace(/\s/g, "")}`}
+            className="flex items-center gap-2.5 text-sm text-[var(--muted)] hover:text-[var(--accent)] transition-colors group/link"
+          >
+            <Phone className="w-4 h-4 flex-shrink-0" />
+            <span>{business.phone}</span>
+          </a>
+          <a
+            href={`mailto:${business.email}`}
+            className="flex items-center gap-2.5 text-sm text-[var(--muted)] hover:text-[var(--accent)] transition-colors group/link"
+          >
+            <Mail className="w-4 h-4 flex-shrink-0" />
+            <span className="truncate">{business.email}</span>
+          </a>
+          {business.website && (
+            <a
+              href={`https://${business.website}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2.5 text-sm text-[var(--muted)] hover:text-[var(--accent)] transition-colors group/link"
+            >
+              <Globe className="w-4 h-4 flex-shrink-0" />
+              <span className="truncate">{business.website}</span>
+            </a>
+          )}
+          <div className="flex items-center gap-2.5 text-sm text-[var(--muted)]">
+            <MapPin className="w-4 h-4 flex-shrink-0" />
+            <span className="truncate">{business.address}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
