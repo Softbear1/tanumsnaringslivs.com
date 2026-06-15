@@ -1,7 +1,12 @@
 import type { NextConfig } from "next";
+import { setupDevPlatform } from "@cloudflare/next-on-pages/next-dev";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Required for Cloudflare Pages edge runtime
 };
+
+if (process.env.NODE_ENV === "development") {
+  await setupDevPlatform();
+}
 
 export default nextConfig;

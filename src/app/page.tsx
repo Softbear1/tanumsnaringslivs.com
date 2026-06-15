@@ -1,3 +1,4 @@
+export const runtime = "edge";
 import { createServerClient } from "@/lib/supabase";
 import { staticCategories, staticBusinesses, Category, Business } from "@/lib/data";
 import Header from "@/components/Header";
