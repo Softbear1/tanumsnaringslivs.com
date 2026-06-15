@@ -1,68 +1,71 @@
 "use client";
 export const runtime = "edge";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { createBrowserClient } from "@/lib/supabase-browser";
-import { staticCategories } from "@/lib/data";
+import { createBrowserClient } from "@/lib/supabase";
 import BusinessForm from "@/components/admin/BusinessForm";
-import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
 
-export default function NyttForetagPage() {
-  const router = useRouter();
+export default function NyForetagPage() {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const supabase = createBrowserClient();
+  const [categories, setCategories] = useState<Array<{ id: string; name: string }>>([]);
+  const [loaded, setLoaded] = useState(false);
+
+  // Load categories on first render
+  if (!loaded) {
+    setLoaded(true);
+    const supabase = createBrowserClient();
+    supabase.from("categories").select("id, name").order("sort_order").then(({ data }) => {
+      if (data) setCategories(data);
+    });
+  }
 
   async function handleSubmit(data: {
-    name: string; category_id: string; description: string;
-    phone: string; email: string; website: string; address: string; initials: string;
+    name: string;
+    category_id: string;
+    description: string;
+    phone: string;
+    email: string;
+    website: string | null;
+    address: string;
+    initials: string;
   }) {
     setLoading(true);
-    setError("");
+    const supabase = createBrowserClient();
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { router.push("/admin/logga-in"); return; }
+    if (!user) throw new Error("Inte inloggad");
 
     const { error } = await supabase.from("businesses").insert({
       ...data,
-      website: data.website || null,
       owner_id: user.id,
-      boosted: false,
-      featured: false,
-      rating: 0,
-      review_count: 0,
-      active: true,
     });
 
-    if (error) {
-      setError("Något gick fel. Försök igen.");
-      setLoading(false);
-    } else {
-      router.push("/admin");
-    }
+    setLoading(false);
+    if (error) throw new Error(error.message);
+    window.location.href = "/admin";
   }
 
   return (
-    <div className="min-h-screen bg-[var(--bg)]">
-      <div className="max-w-2xl mx-auto px-4 sm:px-6 py-10">
-        <a href="/admin" className="flex items-center gap-2 text-sm text-[var(--muted)] hover:text-[var(--primary)] transition-colors mb-8">
-          <ArrowLeft className="w-4 h-4" />
-          Tillbaka till mina företag
-        </a>
-        <h1 className="text-2xl font-bold text-[var(--primary)] mb-2">Lägg till företag</h1>
-        <p className="text-sm text-[var(--muted)] mb-8">Fyll i uppgifterna nedan så visas ditt företag i katalogen.</p>
+    <div className="min-h-screen bg-[var(--background)]">
+      <header className="bg-[var(--primary)] text-white shadow">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 py-4 flex items-center gap-4">
+          <Link href="/admin" className="text-white/70 hover:text-white transition-colors">
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </Link>
+          <h1 className="font-semibold">Lägg till företag</h1>
+        </div>
+      </header>
 
-        {error && (
-          <div className="mb-4 text-sm text-red-600 bg-red-50 px-4 py-3 rounded-xl">{error}</div>
-        )}
-
-        <div className="bg-white rounded-2xl card-shadow p-6">
+      <main className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
+        <div className="bg-white rounded-2xl border border-[var(--border)] shadow-sm p-6 sm:p-8">
           <BusinessForm
-            categories={staticCategories}
+            categories={categories}
             onSubmit={handleSubmit}
             loading={loading}
           />
         </div>
-      </div>
+      </main>
     </div>
   );
 }

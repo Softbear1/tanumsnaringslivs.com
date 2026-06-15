@@ -1,186 +1,197 @@
 "use client";
 import { useState } from "react";
-import { Category, Business } from "@/lib/data";
-import { staticCategories } from "@/lib/data";
 
-type FormData = {
+interface Category {
+  id: number | string;
   name: string;
-  category_id: string;
-  description: string;
-  phone: string;
-  email: string;
-  website: string;
-  address: string;
-  initials: string;
-};
+}
 
-type Props = {
+interface Props {
   categories: Category[];
-  business?: Business;
-  onSubmit: (data: FormData) => Promise<void>;
+  business?: {
+    name?: string;
+    category_id?: string;
+    description?: string;
+    phone?: string;
+    email?: string;
+    website?: string | null;
+    address?: string;
+    initials?: string;
+  };
+  onSubmit: (data: {
+    name: string;
+    category_id: string;
+    description: string;
+    phone: string;
+    email: string;
+    website: string | null;
+    address: string;
+    initials: string;
+  }) => Promise<void>;
   loading: boolean;
-};
+}
 
 export default function BusinessForm({ categories, business, onSubmit, loading }: Props) {
-  const [form, setForm] = useState<FormData>({
-    name: business?.name ?? "",
-    category_id: business?.categoryId ?? categories[0]?.id ?? "",
-    description: business?.description ?? "",
-    phone: business?.phone ?? "",
-    email: business?.email ?? "",
-    website: business?.website ?? "",
-    address: business?.address ?? "",
-    initials: business?.initials ?? "",
-  });
+  const [name, setName] = useState(business?.name ?? "");
+  const [categoryId, setCategoryId] = useState(business?.category_id ?? "");
+  const [description, setDescription] = useState(business?.description ?? "");
+  const [phone, setPhone] = useState(business?.phone ?? "");
+  const [email, setEmail] = useState(business?.email ?? "");
+  const [website, setWebsite] = useState(business?.website ?? "");
+  const [address, setAddress] = useState(business?.address ?? "");
+  const [initials, setInitials] = useState(business?.initials ?? "");
+  const [error, setError] = useState<string | null>(null);
 
-  const cat = categories.find((c) => c.id === form.category_id) ?? staticCategories[0];
-
-  function set(field: keyof FormData, value: string) {
-    setForm((prev) => ({ ...prev, [field]: value }));
+  function handleInitials(v: string) {
+    setInitials(v.toUpperCase().slice(0, 3));
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    await onSubmit(form);
+    setError(null);
+    try {
+      await onSubmit({
+        name,
+        category_id: categoryId,
+        description,
+        phone,
+        email,
+        website: website || null,
+        address,
+        initials,
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Något gick fel");
+    }
   }
 
-  return (
-    <form onSubmit={handleSubmit} className="space-y-5">
-      {/* Initials preview */}
-      <div className="flex items-center gap-4 p-4 bg-[var(--bg)] rounded-xl">
-        <div
-          className="w-16 h-16 rounded-xl flex items-center justify-center font-bold text-lg flex-shrink-0"
-          style={{ backgroundColor: cat?.bgColor ?? "#F3F4F6", color: cat?.color ?? "#374151" }}
-        >
-          {form.initials || "??"}
-        </div>
-        <div>
-          <p className="font-semibold text-[var(--primary)]">{form.name || "Företagsnamn"}</p>
-          <span
-            className="inline-block text-xs font-medium px-2 py-0.5 rounded-full mt-1"
-            style={{ backgroundColor: cat?.bgColor, color: cat?.color }}
-          >
-            {cat?.name}
-          </span>
-        </div>
-      </div>
+  const inputClass = "w-full px-4 py-3 rounded-xl border border-[var(--border)] text-[var(--primary)] placeholder:text-[var(--muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)] transition-shadow bg-white";
+  const labelClass = "block text-sm font-medium text-[var(--primary)] mb-1";
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-        <Field label="Företagsnamn" required>
+  return (
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="grid sm:grid-cols-2 gap-6">
+        <div className="sm:col-span-2">
+          <label className={labelClass}>Företagsnamn *</label>
           <input
             type="text"
-            value={form.name}
-            onChange={(e) => set("name", e.target.value)}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
             required
             placeholder="Mitt Företag AB"
             className={inputClass}
           />
-        </Field>
+        </div>
 
-        <Field label="Initialer (visas i logotyp)" required>
-          <input
-            type="text"
-            value={form.initials}
-            onChange={(e) => set("initials", e.target.value.toUpperCase().slice(0, 3))}
+        <div>
+          <label className={labelClass}>Kategori *</label>
+          <select
+            value={categoryId}
+            onChange={(e) => setCategoryId(e.target.value)}
             required
-            maxLength={3}
-            placeholder="MF"
             className={inputClass}
+          >
+            <option value="">Välj kategori...</option>
+            {categories.map((cat) => (
+              <option key={cat.id} value={String(cat.id)}>{cat.name}</option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className={labelClass}>Initialer (max 3 tecken) *</label>
+          <div className="flex gap-3 items-center">
+            <input
+              type="text"
+              value={initials}
+              onChange={(e) => handleInitials(e.target.value)}
+              required
+              placeholder="ABC"
+              maxLength={3}
+              className={`${inputClass} flex-1 font-mono tracking-widest`}
+            />
+            <div
+              className="w-12 h-12 rounded-xl bg-[var(--primary)] text-white flex items-center justify-center font-bold text-lg shrink-0"
+              aria-label="Förhandsgranskning av initialer"
+            >
+              {initials || "?"}
+            </div>
+          </div>
+        </div>
+
+        <div className="sm:col-span-2">
+          <label className={labelClass}>
+            Beskrivning * <span className="text-[var(--muted)] font-normal">({description.length}/200)</span>
+          </label>
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value.slice(0, 200))}
+            required
+            rows={3}
+            placeholder="Beskriv verksamheten kortfattat..."
+            className={`${inputClass} resize-none`}
           />
-        </Field>
-      </div>
+        </div>
 
-      <Field label="Kategori" required>
-        <select
-          value={form.category_id}
-          onChange={(e) => set("category_id", e.target.value)}
-          className={inputClass}
-        >
-          {categories.map((c) => (
-            <option key={c.id} value={c.id}>{c.name}</option>
-          ))}
-        </select>
-      </Field>
-
-      <Field label={`Beskrivning (${form.description.length}/200)`} required>
-        <textarea
-          value={form.description}
-          onChange={(e) => set("description", e.target.value.slice(0, 200))}
-          required
-          rows={3}
-          placeholder="Beskriv vad ni erbjuder och vad som gör er unika..."
-          className={`${inputClass} resize-none`}
-        />
-      </Field>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-        <Field label="Telefon" required>
+        <div>
+          <label className={labelClass}>Telefon *</label>
           <input
             type="tel"
-            value={form.phone}
-            onChange={(e) => set("phone", e.target.value)}
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
             required
             placeholder="0525-123 45"
             className={inputClass}
           />
-        </Field>
+        </div>
 
-        <Field label="E-post" required>
+        <div>
+          <label className={labelClass}>E-post *</label>
           <input
             type="email"
-            value={form.email}
-            onChange={(e) => set("email", e.target.value)}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             required
-            placeholder="info@mittforetag.se"
+            placeholder="info@foretag.se"
             className={inputClass}
           />
-        </Field>
-      </div>
+        </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-        <Field label="Webbplats (valfritt)">
+        <div>
+          <label className={labelClass}>Webbplats (valfritt)</label>
           <input
-            type="text"
-            value={form.website}
-            onChange={(e) => set("website", e.target.value)}
-            placeholder="www.mittforetag.se"
+            type="url"
+            value={website}
+            onChange={(e) => setWebsite(e.target.value)}
+            placeholder="https://www.foretag.se"
             className={inputClass}
           />
-        </Field>
+        </div>
 
-        <Field label="Adress" required>
+        <div>
+          <label className={labelClass}>Adress *</label>
           <input
             type="text"
-            value={form.address}
-            onChange={(e) => set("address", e.target.value)}
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
             required
             placeholder="Storgatan 1, Tanumshede"
             className={inputClass}
           />
-        </Field>
+        </div>
       </div>
+
+      {error && (
+        <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg px-4 py-3">{error}</p>
+      )}
 
       <button
         type="submit"
         disabled={loading}
-        className="w-full py-3 bg-[var(--primary)] text-white rounded-xl font-medium hover:bg-[#152E3D] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        className="w-full py-3 px-6 bg-[var(--primary)] text-white rounded-xl font-semibold hover:bg-[var(--primary)]/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
       >
-        {loading ? "Sparar..." : business ? "Spara ändringar" : "Lägg till företag"}
+        {loading ? "Sparar..." : "Spara"}
       </button>
     </form>
   );
 }
-
-function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
-  return (
-    <div>
-      <label className="block text-sm font-medium text-[var(--primary)] mb-1.5">
-        {label}{required && <span className="text-red-500 ml-0.5">*</span>}
-      </label>
-      {children}
-    </div>
-  );
-}
-
-const inputClass =
-  "w-full px-3 py-2.5 border border-[var(--border)] rounded-lg text-sm text-[var(--primary)] placeholder:text-[var(--muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/40 focus:border-[var(--accent)] transition-all bg-white";

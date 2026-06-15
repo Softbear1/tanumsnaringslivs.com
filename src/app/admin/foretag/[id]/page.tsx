@@ -1,39 +1,34 @@
 export const runtime = "edge";
-import { redirect, notFound } from "next/navigation";
 import { createServerClient } from "@/lib/supabase-server";
-import { staticCategories } from "@/lib/data";
-import EditForetagClient from "./EditForetagClient";
+import { redirect } from "next/navigation";
+import EditBusinessClient from "./EditBusinessClient";
 
-export default async function EditForetagPage({ params }: { params: Promise<{ id: string }> }) {
+interface PageProps {
+  params: Promise<{ id: string }>;
+}
+
+export default async function EditForetagPage({ params }: PageProps) {
   const { id } = await params;
   const supabase = await createServerClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/admin/logga-in");
 
-  const { data: business } = await supabase
-    .from("businesses")
-    .select("*")
-    .eq("id", id)
-    .eq("owner_id", user.id)
-    .single();
+  if (!user) {
+    redirect("/admin/logga-in");
+  }
 
-  if (!business) notFound();
+  const [{ data: business }, { data: categories }] = await Promise.all([
+    supabase.from("businesses").select("*").eq("id", id).single(),
+    supabase.from("categories").select("id, name").order("sort_order"),
+  ]);
 
-  const b = {
-    id: business.id,
-    name: business.name,
-    categoryId: business.category_id,
-    description: business.description,
-    phone: business.phone,
-    email: business.email,
-    website: business.website ?? undefined,
-    address: business.address,
-    initials: business.initials,
-    boosted: business.boosted,
-    featured: business.featured,
-    rating: Number(business.rating),
-    reviewCount: business.review_count,
-  };
+  if (!business || business.owner_id !== user.id) {
+    redirect("/admin");
+  }
 
-  return <EditForetagClient business={b} categories={staticCategories} />;
+  return (
+    <EditBusinessClient
+      business={business}
+      categories={categories ?? []}
+    />
+  );
 }
