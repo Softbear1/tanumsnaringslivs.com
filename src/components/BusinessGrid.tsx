@@ -1,12 +1,12 @@
 "use client";
 import { AnimatePresence, motion } from "framer-motion";
-import { businesses, getCategory } from "@/lib/data";
+import { Category, Business, getCategory } from "@/lib/data";
 import BusinessCard from "./BusinessCard";
 import { SlidersHorizontal } from "lucide-react";
 
 const AD_POSITIONS = [5, 12]; // inject mock ad at these indices
 
-const mockAd = {
+const mockAd: Business = {
   id: "ad-1",
   name: "Bohus Fönster & Dörr",
   categoryId: "bygg",
@@ -23,16 +23,18 @@ const mockAd = {
 };
 
 type Props = {
+  categories: Category[];
+  businesses: Business[];
   categoryFilter: string | null;
   search: string;
 };
 
-export default function BusinessGrid({ categoryFilter, search }: Props) {
+export default function BusinessGrid({ categories, businesses, categoryFilter, search }: Props) {
   const filtered = businesses.filter((b) => {
     if (categoryFilter && b.categoryId !== categoryFilter) return false;
     if (search) {
       const q = search.toLowerCase();
-      const cat = getCategory(b.categoryId);
+      const cat = getCategory(categories, b.categoryId);
       return (
         b.name.toLowerCase().includes(q) ||
         (cat?.name.toLowerCase().includes(q) ?? false) ||
@@ -46,13 +48,15 @@ export default function BusinessGrid({ categoryFilter, search }: Props) {
   const sorted = [...filtered].sort((a, b) => (b.boosted ? 1 : 0) - (a.boosted ? 1 : 0));
 
   // Inject ad cards
-  const items: (typeof sorted[0] | { isAd: true })[] = [];
+  const items: (typeof sorted[0] | { isAd: true; id: string })[] = [];
   sorted.forEach((b, i) => {
     items.push(b);
     if (!categoryFilter && !search && AD_POSITIONS.includes(i + 1)) {
-      items.push({ isAd: true });
+      items.push({ isAd: true, id: `ad-slot-${i}` });
     }
   });
+
+  const activeCategoryName = categoryFilter ? getCategory(categories, categoryFilter)?.name : undefined;
 
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
@@ -65,7 +69,7 @@ export default function BusinessGrid({ categoryFilter, search }: Props) {
             </h2>
             {categoryFilter && (
               <span className="text-xs bg-[var(--accent-light)] text-[var(--accent)] font-medium px-2.5 py-1 rounded-full">
-                {getCategory(categoryFilter)?.name}
+                {activeCategoryName}
               </span>
             )}
             {search && (
@@ -96,14 +100,14 @@ export default function BusinessGrid({ categoryFilter, search }: Props) {
               if ("isAd" in item) {
                 return (
                   <motion.div
-                    key={`ad-${idx}`}
+                    key={item.id}
                     layout
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.95 }}
                     transition={{ duration: 0.2 }}
                   >
-                    <BusinessCard business={mockAd} isAd />
+                    <BusinessCard business={mockAd} categories={categories} isAd />
                   </motion.div>
                 );
               }
@@ -116,7 +120,7 @@ export default function BusinessGrid({ categoryFilter, search }: Props) {
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ duration: 0.2, delay: Math.min(idx * 0.03, 0.2) }}
                 >
-                  <BusinessCard business={item} />
+                  <BusinessCard business={item} categories={categories} />
                 </motion.div>
               );
             })}

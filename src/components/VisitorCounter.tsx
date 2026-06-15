@@ -1,10 +1,13 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 
-const TARGET = 2847;
 const DURATION = 1800;
 
-export default function VisitorCounter() {
+type Props = {
+  initialCount: number;
+};
+
+export default function VisitorCounter({ initialCount }: Props) {
   const [count, setCount] = useState(0);
   const [started, setStarted] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -24,11 +27,11 @@ export default function VisitorCounter() {
     const tick = (now: number) => {
       const progress = Math.min((now - start) / DURATION, 1);
       const eased = 1 - Math.pow(1 - progress, 3);
-      setCount(Math.round(eased * TARGET));
+      setCount(Math.round(eased * initialCount));
       if (progress < 1) requestAnimationFrame(tick);
     };
     requestAnimationFrame(tick);
-  }, [started]);
+  }, [started, initialCount]);
 
   return (
     <div ref={ref} className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm border border-[var(--border)] rounded-full px-4 py-2 shadow-sm">

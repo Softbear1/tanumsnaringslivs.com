@@ -3,7 +3,7 @@ import {
   Hammer, UtensilsCrossed, Sparkles, ShoppingBag,
   Truck, Monitor, Home, Map, LayoutGrid,
 } from "lucide-react";
-import { categories, getCategoryCount } from "@/lib/data";
+import { Category, Business } from "@/lib/data";
 import clsx from "clsx";
 
 const iconMap: Record<string, React.ElementType> = {
@@ -11,11 +11,17 @@ const iconMap: Record<string, React.ElementType> = {
 };
 
 type Props = {
+  categories: Category[];
+  businesses: Business[];
   selected: string | null;
   onSelect: (id: string | null) => void;
 };
 
-export default function CategoryGrid({ selected, onSelect }: Props) {
+export default function CategoryGrid({ categories, businesses, selected, onSelect }: Props) {
+  function getCategoryCount(categoryId: string): number {
+    return businesses.filter((b) => b.categoryId === categoryId).length;
+  }
+
   return (
     <section id="kategorier" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
       <div className="mb-6">

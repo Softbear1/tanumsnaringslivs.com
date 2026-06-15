@@ -1,15 +1,16 @@
 "use client";
 import { Phone, Mail, Globe, MapPin, Star, Zap } from "lucide-react";
-import { Business, getCategory } from "@/lib/data";
+import { Business, Category, getCategory } from "@/lib/data";
 import clsx from "clsx";
 
 type Props = {
   business: Business;
+  categories: Category[];
   isAd?: boolean;
 };
 
-export default function BusinessCard({ business, isAd }: Props) {
-  const cat = getCategory(business.categoryId);
+export default function BusinessCard({ business, categories, isAd }: Props) {
+  const cat = getCategory(categories, business.categoryId);
 
   return (
     <div

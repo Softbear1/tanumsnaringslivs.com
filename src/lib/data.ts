@@ -4,6 +4,7 @@ export type Category = {
   icon: string;
   color: string;
   bgColor: string;
+  sortOrder: number;
 };
 
 export type Business = {
@@ -22,18 +23,19 @@ export type Business = {
   reviewCount: number;
 };
 
-export const categories: Category[] = [
-  { id: "bygg", name: "Bygg & Hantverk", icon: "Hammer", color: "#C2410C", bgColor: "#FFF7ED" },
-  { id: "restaurang", name: "Restaurang & Café", icon: "UtensilsCrossed", color: "#0369A1", bgColor: "#F0F9FF" },
-  { id: "skonhet", name: "Skönhet & Hälsa", icon: "Sparkles", color: "#7C3AED", bgColor: "#F5F3FF" },
-  { id: "butiker", name: "Butiker", icon: "ShoppingBag", color: "#0F766E", bgColor: "#F0FDFA" },
-  { id: "transport", name: "Transport", icon: "Truck", color: "#1D4ED8", bgColor: "#EFF6FF" },
-  { id: "it", name: "IT & Teknik", icon: "Monitor", color: "#374151", bgColor: "#F9FAFB" },
-  { id: "fastighet", name: "Fastighet", icon: "Home", color: "#B45309", bgColor: "#FFFBEB" },
-  { id: "turism", name: "Turism & Upplevelser", icon: "Map", color: "#047857", bgColor: "#ECFDF5" },
+// Keep static data for SQL seed generation reference and local fallback
+export const staticCategories: Category[] = [
+  { id: "bygg", name: "Bygg & Hantverk", icon: "Hammer", color: "#C2410C", bgColor: "#FFF7ED", sortOrder: 1 },
+  { id: "restaurang", name: "Restaurang & Café", icon: "UtensilsCrossed", color: "#0369A1", bgColor: "#F0F9FF", sortOrder: 2 },
+  { id: "skonhet", name: "Skönhet & Hälsa", icon: "Sparkles", color: "#7C3AED", bgColor: "#F5F3FF", sortOrder: 3 },
+  { id: "butiker", name: "Butiker", icon: "ShoppingBag", color: "#0F766E", bgColor: "#F0FDFA", sortOrder: 4 },
+  { id: "transport", name: "Transport", icon: "Truck", color: "#1D4ED8", bgColor: "#EFF6FF", sortOrder: 5 },
+  { id: "it", name: "IT & Teknik", icon: "Monitor", color: "#374151", bgColor: "#F9FAFB", sortOrder: 6 },
+  { id: "fastighet", name: "Fastighet", icon: "Home", color: "#B45309", bgColor: "#FFFBEB", sortOrder: 7 },
+  { id: "turism", name: "Turism & Upplevelser", icon: "Map", color: "#047857", bgColor: "#ECFDF5", sortOrder: 8 },
 ];
 
-export const businesses: Business[] = [
+export const staticBusinesses: Business[] = [
   {
     id: "1",
     name: "Tanums Bygg & Snickeri",
@@ -82,7 +84,7 @@ export const businesses: Business[] = [
     id: "4",
     name: "Hamburgsund El AB",
     categoryId: "bygg",
-    description: "Behörig elinstallatör för alla slags elarbeten i bostad, fritidshus och företag. Snabb service i hela Tanum.",
+    description: "Behörig elinstallatör för alla slags elarbeten i bostad, fritidshus och företag.",
     phone: "0525-321 00",
     email: "info@hamburgsel.se",
     address: "Norra Hamnen 7, Hamburgsund",
@@ -96,13 +98,13 @@ export const businesses: Business[] = [
     id: "5",
     name: "Koster Mark & Anläggning",
     categoryId: "bygg",
-    description: "Markarbeten, dränering, sprängning och asfaltering. Vi tar de jobb som kräver stor maskin och liten budget.",
+    description: "Markarbeten, dränering, sprängning och asfaltering.",
     phone: "0525-654 32",
     email: "projekt@kostermark.se",
     address: "Kostervägen 18, Strömstad",
     initials: "KM",
     boosted: false,
-    featured: true,
+    featured: false,
     rating: 4.5,
     reviewCount: 14,
   },
@@ -125,7 +127,7 @@ export const businesses: Business[] = [
     id: "7",
     name: "Fjällbacka Krog",
     categoryId: "restaurang",
-    description: "Klassisk krog i hjärtat av Fjällbacka. Säsongsmenyer med lokalt fångad fisk och råvaror från trakten.",
+    description: "Klassisk krog i hjärtat av Fjällbacka. Säsongsmenyer med lokalt fångad fisk.",
     phone: "0525-334 55",
     email: "boka@fjallbackakrog.se",
     website: "www.fjallbackakrog.se",
@@ -140,7 +142,7 @@ export const businesses: Business[] = [
     id: "8",
     name: "Tanums Pizzeria",
     categoryId: "restaurang",
-    description: "Hemgjord pizza, pasta och sallader. Takeaway och leverans i Tanumshede och omgivningar.",
+    description: "Hemgjord pizza, pasta och sallader. Takeaway och leverans i Tanumshede.",
     phone: "0525-445 67",
     email: "order@tanumspizzeria.se",
     address: "Affärsvägen 5, Tanumshede",
@@ -154,7 +156,7 @@ export const businesses: Business[] = [
     id: "9",
     name: "Smak av Bohuslän",
     categoryId: "restaurang",
-    description: "Delikatessbutik och bistro med fokus på lokala producenter. Räksmörgåsar, ostbrickor och säsongsrätter.",
+    description: "Delikatessbutik och bistro med fokus på lokala producenter.",
     phone: "0525-556 78",
     email: "info@smakavbohuslan.se",
     address: "Storgatan 2, Tanumshede",
@@ -168,9 +170,9 @@ export const businesses: Business[] = [
     id: "10",
     name: "Hälsostudio Tanum",
     categoryId: "skonhet",
-    description: "Gym, yoga och personlig träning. Vi hjälper dig hitta en träningsform du verkligen håller i längden.",
+    description: "Gym, yoga och personlig träning.",
     phone: "0525-667 89",
-    email: "traning@halsotudiutanum.se",
+    email: "traning@halsosdiotanum.se",
     website: "www.halsosdiotanum.se",
     address: "Södervägen 9, Tanumshede",
     initials: "HT",
@@ -183,7 +185,7 @@ export const businesses: Business[] = [
     id: "11",
     name: "Salong Ingela",
     categoryId: "skonhet",
-    description: "Välkommen till en klassisk damfrisör med moderna tekniker. Klipp, färg, slingor och behandlingar.",
+    description: "Välkommen till en klassisk damfrisör med moderna tekniker.",
     phone: "0525-778 90",
     email: "boka@salongingela.se",
     address: "Storgatan 14, Tanumshede",
@@ -197,7 +199,7 @@ export const businesses: Business[] = [
     id: "12",
     name: "Kusthälsan Massage",
     categoryId: "skonhet",
-    description: "Medicinsk massage, zonterapi och akupunktur. Boka tid online — vi verkar i Grebbestad och Fjällbacka.",
+    description: "Medicinsk massage, zonterapi och akupunktur.",
     phone: "0525-889 01",
     email: "tid@kusthalsam.se",
     website: "www.kusthalsam.se",
@@ -212,7 +214,7 @@ export const businesses: Business[] = [
     id: "13",
     name: "Bohushandel",
     categoryId: "butiker",
-    description: "Välsorterad järnhandel och byggvarubutik. Allt du behöver för bygge, trädgård och hem — på ett ställe.",
+    description: "Välsorterad järnhandel och byggvarubutik.",
     phone: "0525-990 12",
     email: "info@bohushandel.se",
     address: "Industrivägen 1, Tanumshede",
@@ -226,7 +228,7 @@ export const businesses: Business[] = [
     id: "14",
     name: "Kustboden",
     categoryId: "butiker",
-    description: "Inredning, presenter och lokala hantverk. En butik som luktar gott och ser ännu bättre ut.",
+    description: "Inredning, presenter och lokala hantverk.",
     phone: "0525-101 23",
     email: "hej@kustboden.se",
     website: "www.kustboden.se",
@@ -241,7 +243,7 @@ export const businesses: Business[] = [
     id: "15",
     name: "Tanum Sport & Fritid",
     categoryId: "butiker",
-    description: "Sportbutik med allt för friluftsliv, havet och vintern. Hyra av kajaker och cyklar sommarsäsong.",
+    description: "Sportbutik med allt för friluftsliv, havet och vintern.",
     phone: "0525-213 45",
     email: "sport@tanumsport.se",
     address: "Storgatan 8, Tanumshede",
@@ -255,7 +257,7 @@ export const businesses: Business[] = [
     id: "16",
     name: "Bohus Transport",
     categoryId: "transport",
-    description: "Lokal åkeri med containertransport, maskinförflyttning och budservice längs Bohuskusten.",
+    description: "Lokal åkeri med containertransport och budservice.",
     phone: "0525-324 56",
     email: "jobb@bohustransport.se",
     address: "Hamnvägen 11, Hamburgsund",
@@ -269,7 +271,7 @@ export const businesses: Business[] = [
     id: "17",
     name: "Kusttaxi Tanum",
     categoryId: "transport",
-    description: "Taxi och skärgårdsresor dygnet runt. Fast pris till Göteborg, Landvetter och Säve.",
+    description: "Taxi och skärgårdsresor dygnet runt.",
     phone: "0525-435 67",
     email: "boka@kusttaxi.se",
     website: "www.kusttaxi.se",
@@ -284,7 +286,7 @@ export const businesses: Business[] = [
     id: "18",
     name: "Västkusten Web",
     categoryId: "it",
-    description: "Webbyrå specialiserad på lokala företag. Vi bygger moderna hemsidor, webbutiker och bokningssystem.",
+    description: "Webbyrå specialiserad på lokala företag.",
     phone: "0525-546 78",
     email: "projekt@vastkustenweb.se",
     website: "www.vastkustenweb.se",
@@ -299,7 +301,7 @@ export const businesses: Business[] = [
     id: "19",
     name: "Tanum IT-Support",
     categoryId: "it",
-    description: "PC-support, nätverkslösningar och IT-säkerhet för privatpersoner och småföretag. Hembesök ingår.",
+    description: "PC-support, nätverkslösningar och IT-säkerhet.",
     phone: "0525-657 89",
     email: "support@tanumit.se",
     address: "Storgatan 22, Tanumshede",
@@ -313,7 +315,7 @@ export const businesses: Business[] = [
     id: "20",
     name: "Kustmäklaren",
     categoryId: "fastighet",
-    description: "Fastighetsmäklare med djup lokalkännedom om Bohuskusten. Sommarstugor, tomter och permanentboenden.",
+    description: "Fastighetsmäklare med djup lokalkännedom om Bohuskusten.",
     phone: "0525-768 90",
     email: "info@kustmaklaren.se",
     website: "www.kustmaklaren.se",
@@ -328,7 +330,7 @@ export const businesses: Business[] = [
     id: "21",
     name: "Tanum Förvaltning",
     categoryId: "fastighet",
-    description: "Fastighetsförvaltning, hyresavtal och teknisk förvaltning för bostadsrätter och kommersiella lokaler.",
+    description: "Fastighetsförvaltning och teknisk förvaltning.",
     phone: "0525-879 01",
     email: "kontakt@tanumforvaltning.se",
     address: "Centralgatan 7, Tanumshede",
@@ -342,7 +344,7 @@ export const businesses: Business[] = [
     id: "22",
     name: "Bohusleden Äventyr",
     categoryId: "turism",
-    description: "Guidade kajakturerna, klättring och vandring längs Bohusleden. Vi skräddarsyr upplevelser för grupper och företag.",
+    description: "Guidade kajakturerna, klättring och vandring längs Bohusleden.",
     phone: "0525-980 23",
     email: "boka@bohusledenventyr.se",
     website: "www.bohusledeventyr.se",
@@ -357,7 +359,7 @@ export const businesses: Business[] = [
     id: "23",
     name: "Kosterfjordens Båtcharter",
     categoryId: "turism",
-    description: "Hyr vår 32-fots segelbåt med eller utan skipper. Perfekt för dags- och veckochartern i Kosterfjorden.",
+    description: "Hyr vår 32-fots segelbåt med eller utan skipper.",
     phone: "0525-091 34",
     email: "charter@kosterfjorden.se",
     address: "Gästhamnen, Hamburgsund",
@@ -371,7 +373,7 @@ export const businesses: Business[] = [
     id: "24",
     name: "Tanums Vandrarhem",
     categoryId: "turism",
-    description: "Välkomnande vandrarhem mitt i Tanumshede. Nära hällristningarna, cykelleder och havet.",
+    description: "Välkomnande vandrarhem mitt i Tanumshede. Nära hällristningarna.",
     phone: "0525-102 45",
     email: "bokning@tanumsvandrarhem.se",
     website: "www.tanumsvandrarhem.se",
@@ -384,10 +386,7 @@ export const businesses: Business[] = [
   },
 ];
 
-export function getCategory(id: string): Category | undefined {
+// Helper used by components when data is passed as props
+export function getCategory(categories: Category[], id: string): Category | undefined {
   return categories.find((c) => c.id === id);
-}
-
-export function getCategoryCount(categoryId: string): number {
-  return businesses.filter((b) => b.categoryId === categoryId).length;
 }

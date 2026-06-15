@@ -5,9 +5,10 @@ import VisitorCounter from "./VisitorCounter";
 type Props = {
   search: string;
   onSearch: (v: string) => void;
+  visitorCount: number;
 };
 
-export default function Hero({ search, onSearch }: Props) {
+export default function Hero({ search, onSearch, visitorCount }: Props) {
   return (
     <section className="relative overflow-hidden bg-[var(--primary)] text-white">
       {/* Subtle pattern overlay */}
@@ -25,7 +26,7 @@ export default function Hero({ search, onSearch }: Props) {
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28">
         <div className="max-w-2xl">
           <div className="mb-4">
-            <VisitorCounter />
+            <VisitorCounter initialCount={visitorCount} />
           </div>
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.1] mb-4">
             Hitta rätt företag{" "}
