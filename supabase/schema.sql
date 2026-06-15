@@ -53,3 +53,16 @@ create policy "public insert page_views" on public.page_views for insert with ch
 
 -- Only service role can read page_views (for the server-side counter)
 create policy "service read page_views" on public.page_views for select using (true);
+
+-- Add owner_id to businesses (run after initial schema)
+alter table public.businesses add column if not exists owner_id uuid references auth.users(id);
+
+-- RLS: owners can manage their own businesses
+create policy "owners can insert businesses" on public.businesses
+  for insert with check (auth.uid() = owner_id);
+
+create policy "owners can update their businesses" on public.businesses
+  for update using (auth.uid() = owner_id);
+
+create policy "owners can delete their businesses" on public.businesses
+  for delete using (auth.uid() = owner_id);
