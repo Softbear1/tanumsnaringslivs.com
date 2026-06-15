@@ -1,8 +1,9 @@
+export const runtime = "edge";
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-export async function proxy(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(
@@ -23,21 +24,17 @@ export async function proxy(request: NextRequest) {
   );
 
   const { data: { user } } = await supabase.auth.getUser();
+  const path = request.nextUrl.pathname;
+  const isLoginPage = path === "/admin/logga-in";
 
-  const isAdminRoute = request.nextUrl.pathname.startsWith("/admin");
-  const isLoginRoute = request.nextUrl.pathname === "/admin/logga-in";
-
-  if (isAdminRoute && !isLoginRoute && !user) {
+  if (path.startsWith("/admin") && !isLoginPage && !user) {
     return NextResponse.redirect(new URL("/admin/logga-in", request.url));
   }
-
-  if (isLoginRoute && user) {
+  if (isLoginPage && user) {
     return NextResponse.redirect(new URL("/admin", request.url));
   }
 
   return supabaseResponse;
 }
 
-export const config = {
-  matcher: ["/admin/:path*"],
-};
+export const config = { matcher: ["/admin/:path*"] };
