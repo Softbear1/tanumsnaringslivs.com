@@ -1,7 +1,7 @@
 "use client";
 export const runtime = "edge";
 import { useState } from "react";
-import { createBrowserClient } from "@/lib/supabase";
+import { createBrowserClient } from "@/lib/supabase-browser";
 import BusinessForm from "@/components/admin/BusinessForm";
 import Link from "next/link";
 

@@ -1,7 +1,7 @@
 "use client";
 export const runtime = "edge";
 import { useState } from "react";
-import { createBrowserClient } from "@/lib/supabase";
+import { createBrowserClient } from "@/lib/supabase-browser";
 
 export default function LoggaIn() {
   const [email, setEmail] = useState("");
