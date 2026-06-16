@@ -19,6 +19,23 @@ export default async function AdminPage() {
     .eq("owner_id", user.id)
     .order("created_at", { ascending: false });
 
+  // Fetch view counts per business for the last 30 days
+  const businessIds = (businesses ?? []).map((b) => b.id);
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+  const { data: viewRows } = businessIds.length
+    ? await supabase
+        .from("page_views")
+        .select("business_id")
+        .in("business_id", businessIds)
+        .gte("viewed_at", thirtyDaysAgo)
+    : { data: [] };
+
+  const viewCounts: Record<string, number> = {};
+  for (const row of viewRows ?? []) {
+    const bid = row.business_id as string;
+    viewCounts[bid] = (viewCounts[bid] ?? 0) + 1;
+  }
+
   return (
     <div className="min-h-screen bg-[var(--bg)]">
       <header className="bg-[var(--primary)] text-white shadow">
@@ -127,9 +144,11 @@ export default async function AdminPage() {
                     <div className="bg-[var(--bg)] rounded-xl p-3">
                       <div className="flex items-center gap-1.5 mb-0.5">
                         <Eye className="w-3.5 h-3.5 text-[var(--accent)]" />
-                        <span className="text-xs font-semibold text-[var(--primary)]">–</span>
+                        <span className="text-xs font-semibold text-[var(--primary)]">
+                          {viewCounts[biz.id] ?? 0}
+                        </span>
                       </div>
-                      <div className="text-[10px] text-[var(--muted)]">Visningar (snart)</div>
+                      <div className="text-[10px] text-[var(--muted)]">Visningar (30 dagar)</div>
                     </div>
                   </div>
 

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Phone, Mail, Globe, MapPin, Star, Zap, ArrowLeft } from "lucide-react";
 import { getBusiness } from "@/lib/fetch";
 import { getCategory } from "@/lib/data";
+import { createServerClient } from "@/lib/supabase-server";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
@@ -46,6 +47,12 @@ export default async function ForetagPage({ params }: PageProps) {
   if (!business) {
     notFound();
   }
+
+  // Track page view — fire and forget, never block rendering
+  try {
+    const supabase = await createServerClient();
+    supabase.from("page_views").insert({ business_id: id }).then(() => {});
+  } catch { /* ignore */ }
 
   const cat = getCategory(categories, business.categoryId);
 

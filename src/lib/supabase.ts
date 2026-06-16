@@ -91,14 +91,17 @@ export type Database = {
         Row: {
           id: number;
           viewed_at: string;
+          business_id: string | null;
         };
         Insert: {
           id?: number;
           viewed_at?: string;
+          business_id?: string | null;
         };
         Update: {
           id?: number;
           viewed_at?: string;
+          business_id?: string | null;
         };
         Relationships: [];
       };
