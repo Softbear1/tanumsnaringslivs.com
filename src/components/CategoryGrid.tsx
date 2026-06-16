@@ -4,6 +4,7 @@ import {
   Truck, Monitor, Home, Map, LayoutGrid,
 } from "lucide-react";
 import { Category, Business } from "@/lib/data";
+import { getCategoryCount } from "@/lib/directory";
 import clsx from "clsx";
 
 const iconMap: Record<string, React.ElementType> = {
@@ -18,9 +19,6 @@ type Props = {
 };
 
 export default function CategoryGrid({ categories, businesses, selected, onSelect }: Props) {
-  function getCategoryCount(categoryId: string): number {
-    return businesses.filter((b) => b.categoryId === categoryId).length;
-  }
 
   return (
     <section id="kategorier" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
@@ -82,7 +80,7 @@ export default function CategoryGrid({ categories, businesses, selected, onSelec
                 "text-[10px]",
                 isActive ? "text-white/70" : "text-[var(--muted)]"
               )}>
-                {getCategoryCount(cat.id)} st
+                {getCategoryCount(businesses, cat.id)} st
               </span>
             </button>
           );

@@ -1,6 +1,7 @@
 "use client";
 import { AnimatePresence, motion } from "framer-motion";
 import { Category, Business, getCategory } from "@/lib/data";
+import { filterBusinesses, sortBoostedFirst } from "@/lib/directory";
 import BusinessCard from "./BusinessCard";
 import { SlidersHorizontal } from "lucide-react";
 
@@ -30,22 +31,10 @@ type Props = {
 };
 
 export default function BusinessGrid({ categories, businesses, categoryFilter, search }: Props) {
-  const filtered = businesses.filter((b) => {
-    if (categoryFilter && b.categoryId !== categoryFilter) return false;
-    if (search) {
-      const q = search.toLowerCase();
-      const cat = getCategory(categories, b.categoryId);
-      return (
-        b.name.toLowerCase().includes(q) ||
-        (cat?.name.toLowerCase().includes(q) ?? false) ||
-        b.description.toLowerCase().includes(q)
-      );
-    }
-    return true;
-  });
+  const filtered = filterBusinesses(businesses, categories, categoryFilter, search);
 
   // Sort: boosted first
-  const sorted = [...filtered].sort((a, b) => (b.boosted ? 1 : 0) - (a.boosted ? 1 : 0));
+  const sorted = sortBoostedFirst(filtered);
 
   // Inject ad cards
   const items: (typeof sorted[0] | { isAd: true; id: string })[] = [];
