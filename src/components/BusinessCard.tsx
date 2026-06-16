@@ -76,8 +76,8 @@ export default function BusinessCard({ business, categories, isAd }: Props) {
             <Star
               key={s}
               className="w-3.5 h-3.5"
-              fill={s <= Math.round(business.rating) ? "#FBBF24" : "none"}
-              stroke={s <= Math.round(business.rating) ? "#FBBF24" : "#D1D5DB"}
+              fill={s <= Math.round(business.rating) ? "var(--star)" : "none"}
+              stroke={s <= Math.round(business.rating) ? "var(--star)" : "var(--star-empty)"}
             />
           ))}
           <span className="text-xs text-[var(--muted)] ml-1">

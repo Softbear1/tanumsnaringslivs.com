@@ -63,7 +63,7 @@ export default function Header() {
                 <a href="/admin/logga-in" className="text-sm text-[var(--muted)] hover:text-[var(--primary)] transition-colors">Logga in</a>
                 <a
                   href="/admin/logga-in"
-                  className="text-sm px-4 py-2 rounded-lg bg-[var(--primary)] text-white font-medium hover:bg-[#152E3D] transition-colors"
+                  className="text-sm px-4 py-2 rounded-lg bg-[var(--primary)] text-white font-medium hover:bg-[var(--primary-dark)] transition-colors"
                 >
                   Lägg till företag – gratis
                 </a>

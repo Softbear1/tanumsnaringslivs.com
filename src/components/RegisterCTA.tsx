@@ -81,7 +81,7 @@ export default function RegisterCTA() {
             </ul>
             <a
               href="/admin/logga-in"
-              className="block text-center w-full py-2.5 rounded-xl font-medium text-sm bg-[var(--accent)] text-white hover:bg-[#266B50] transition-colors"
+              className="block text-center w-full py-2.5 rounded-xl font-medium text-sm bg-[var(--accent)] text-white hover:bg-[var(--accent-dark)] transition-colors"
             >
               Skapa gratis profil
             </a>

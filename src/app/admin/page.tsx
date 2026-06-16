@@ -150,7 +150,7 @@ export default async function AdminPage() {
                   <div className="grid grid-cols-2 gap-2 mb-4">
                     <div className="bg-[var(--bg)] rounded-xl p-3">
                       <div className="flex items-center gap-1.5 mb-0.5">
-                        <Star className="w-3.5 h-3.5 text-yellow-400" fill="#FBBF24" />
+                        <Star className="w-3.5 h-3.5 text-yellow-400" fill="var(--star)" />
                         <span className="text-xs font-semibold text-[var(--primary)]">
                           {biz.rating ? Number(biz.rating).toFixed(1) : "–"}
                         </span>

@@ -119,7 +119,7 @@ export default async function OffertPage({ params }: PageProps) {
           {quote.status === "handled" && reviewableBusinesses.length > 0 && (
             <div className="bg-white rounded-2xl border border-[var(--border)] card-shadow p-6 mb-4">
               <h2 className="font-semibold text-[var(--primary)] mb-1 flex items-center gap-2">
-                <Star className="w-4 h-4 text-yellow-400" fill="#FBBF24" />
+                <Star className="w-4 h-4 text-yellow-400" fill="var(--star)" />
                 Lämna ett omdöme
               </h2>
               <p className="text-sm text-[var(--muted)] mb-4">

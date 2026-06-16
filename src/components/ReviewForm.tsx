@@ -72,8 +72,8 @@ export default function ReviewForm({ quoteRequestId, businessId, businessName, b
           >
             <Star
               className="w-7 h-7 transition-colors"
-              style={{ color: (hover || rating) >= n ? "#FBBF24" : "#D1D5DB" }}
-              fill={(hover || rating) >= n ? "#FBBF24" : "none"}
+              style={{ color: (hover || rating) >= n ? "var(--star)" : "var(--star-empty)" }}
+              fill={(hover || rating) >= n ? "var(--star)" : "none"}
             />
           </button>
         ))}

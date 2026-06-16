@@ -141,8 +141,8 @@ export default async function ForetagPage({ params }: PageProps) {
                   <Star
                     key={s}
                     className="w-4 h-4"
-                    fill={s <= Math.round(business.rating) ? "#FBBF24" : "none"}
-                    stroke={s <= Math.round(business.rating) ? "#FBBF24" : "#D1D5DB"}
+                    fill={s <= Math.round(business.rating) ? "var(--star)" : "none"}
+                    stroke={s <= Math.round(business.rating) ? "var(--star)" : "var(--star-empty)"}
                   />
                 ))}
                 <span className="text-sm text-[var(--muted)] ml-1">
@@ -220,8 +220,8 @@ export default async function ForetagPage({ params }: PageProps) {
                         <Star
                           key={s}
                           className="w-3.5 h-3.5"
-                          fill={s <= r.rating ? "#FBBF24" : "none"}
-                          stroke={s <= r.rating ? "#FBBF24" : "#D1D5DB"}
+                          fill={s <= r.rating ? "var(--star)" : "none"}
+                          stroke={s <= r.rating ? "var(--star)" : "var(--star-empty)"}
                         />
                       ))}
                     </div>
