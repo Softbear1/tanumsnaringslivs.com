@@ -59,7 +59,10 @@ export default function ChatWidget({ businesses, categories }: Props) {
       setTimeout(() => inputRef.current?.focus(), 100);
       if (!initialized.current) {
         initialized.current = true;
-        sendToAI([]);
+        // Seed a hardcoded greeting client-side. We must NOT call the AI with an
+        // empty messages array — the Anthropic API requires at least one user
+        // message and returns 400 otherwise.
+        setMessages([{ role: "assistant", content: "Hej! Vad behöver du hjälp med?" }]);
       }
     }
   }, [open]);
