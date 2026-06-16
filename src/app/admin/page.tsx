@@ -2,7 +2,8 @@ export const runtime = "edge";
 import { createServerClient } from "@/lib/supabase-server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { logout } from "./actions";
+import { Star, ExternalLink, Eye, Pause, Play, Plus } from "lucide-react";
+import { logout, toggleActive } from "./actions";
 
 export default async function AdminPage() {
   const supabase = await createServerClient();
@@ -14,21 +15,32 @@ export default async function AdminPage() {
 
   const { data: businesses } = await supabase
     .from("businesses")
-    .select("*")
+    .select("id, name, description, initials, active, boosted, rating, review_count, created_at, category_id")
     .eq("owner_id", user.id)
     .order("created_at", { ascending: false });
 
   return (
-    <div className="min-h-screen bg-[var(--background)]">
-      {/* Header */}
+    <div className="min-h-screen bg-[var(--bg)]">
       <header className="bg-[var(--primary)] text-white shadow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center text-sm font-bold">T</div>
-            <span className="font-semibold">Admin-portal</span>
+          <div className="flex items-center gap-4">
+            <Link
+              href="/"
+              className="flex items-center gap-1.5 text-white/60 hover:text-white transition-colors text-sm"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              Till katalogen
+            </Link>
+            <div className="w-px h-4 bg-white/20" />
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center text-xs font-bold">T</div>
+              <span className="font-semibold text-sm">Admin-portal</span>
+            </div>
           </div>
           <div className="flex items-center gap-4">
-            <span className="text-white/70 text-sm hidden sm:block">{user.email}</span>
+            <span className="text-white/60 text-sm hidden sm:block">{user.email}</span>
             <form action={logout}>
               <button
                 type="submit"
@@ -45,15 +57,17 @@ export default async function AdminPage() {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-2xl font-bold text-[var(--primary)]">Mina företag</h1>
-            <p className="text-[var(--muted)] mt-1">Hantera dina företagslistningar</p>
+            <p className="text-[var(--muted)] mt-1 text-sm">
+              {businesses?.length
+                ? `${businesses.length} ${businesses.length === 1 ? "listning" : "listningar"}`
+                : "Inga listningar ännu"}
+            </p>
           </div>
           <Link
             href="/admin/foretag/ny"
-            className="inline-flex items-center gap-2 bg-[var(--primary)] text-white px-4 py-2.5 rounded-xl font-medium hover:bg-[var(--primary)]/90 transition-colors"
+            className="inline-flex items-center gap-2 bg-[var(--primary)] text-white px-4 py-2.5 rounded-xl font-medium hover:bg-[var(--primary)]/90 transition-colors text-sm"
           >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
+            <Plus className="w-4 h-4" />
             Lägg till företag
           </Link>
         </div>
@@ -61,24 +75,91 @@ export default async function AdminPage() {
         {businesses && businesses.length > 0 ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {businesses.map((biz) => (
-              <div key={biz.id} className="bg-white rounded-2xl border border-[var(--border)] shadow-sm p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="w-12 h-12 rounded-xl bg-[var(--primary)] text-white flex items-center justify-center font-bold text-lg">
-                    {biz.initials}
+              <div
+                key={biz.id}
+                className={`bg-white rounded-2xl border shadow-sm overflow-hidden transition-opacity ${
+                  biz.active ? "border-[var(--border)] opacity-100" : "border-dashed border-gray-300 opacity-70"
+                }`}
+              >
+                {/* Status strip */}
+                <div className={`h-1 w-full ${biz.active ? "bg-[var(--accent)]" : "bg-gray-300"}`} />
+
+                <div className="p-5">
+                  {/* Header */}
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-11 h-11 rounded-xl bg-[var(--primary)] text-white flex items-center justify-center font-bold text-sm shrink-0">
+                        {biz.initials}
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-[var(--primary)] leading-tight">{biz.name}</h3>
+                        <span className={`inline-block text-[10px] font-semibold mt-0.5 px-2 py-0.5 rounded-full ${
+                          biz.active ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"
+                        }`}>
+                          {biz.active ? "Aktiv" : "Pausad"}
+                        </span>
+                      </div>
+                    </div>
+                    {biz.boosted && (
+                      <span className="text-[10px] font-bold text-[var(--boost)] bg-[var(--boost-bg)] px-2 py-0.5 rounded-full shrink-0">
+                        BOOST
+                      </span>
+                    )}
                   </div>
-                  <span className={`text-xs px-2 py-1 rounded-full font-medium ${biz.active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
-                    {biz.active ? 'Aktiv' : 'Inaktiv'}
-                  </span>
-                </div>
-                <h3 className="font-semibold text-[var(--primary)] mb-1">{biz.name}</h3>
-                <p className="text-[var(--muted)] text-sm line-clamp-2 mb-4">{biz.description}</p>
-                <div className="flex gap-2">
-                  <Link
-                    href={`/admin/foretag/${biz.id}`}
-                    className="flex-1 text-center text-sm py-2 px-3 bg-[var(--primary)]/10 text-[var(--primary)] rounded-lg hover:bg-[var(--primary)]/20 transition-colors font-medium"
-                  >
-                    Redigera
-                  </Link>
+
+                  <p className="text-sm text-[var(--muted)] line-clamp-2 mb-4 leading-relaxed">
+                    {biz.description}
+                  </p>
+
+                  {/* Insights */}
+                  <div className="grid grid-cols-2 gap-2 mb-4">
+                    <div className="bg-[var(--bg)] rounded-xl p-3">
+                      <div className="flex items-center gap-1.5 mb-0.5">
+                        <Star className="w-3.5 h-3.5 text-yellow-400" fill="#FBBF24" />
+                        <span className="text-xs font-semibold text-[var(--primary)]">
+                          {biz.rating ? Number(biz.rating).toFixed(1) : "–"}
+                        </span>
+                      </div>
+                      <div className="text-[10px] text-[var(--muted)]">
+                        {biz.review_count ? `${biz.review_count} recensioner` : "Inga recensioner"}
+                      </div>
+                    </div>
+                    <div className="bg-[var(--bg)] rounded-xl p-3">
+                      <div className="flex items-center gap-1.5 mb-0.5">
+                        <Eye className="w-3.5 h-3.5 text-[var(--accent)]" />
+                        <span className="text-xs font-semibold text-[var(--primary)]">–</span>
+                      </div>
+                      <div className="text-[10px] text-[var(--muted)]">Visningar (snart)</div>
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex gap-2">
+                    <Link
+                      href={`/admin/foretag/${biz.id}`}
+                      className="flex-1 text-center text-sm py-2 px-3 bg-[var(--primary)]/10 text-[var(--primary)] rounded-lg hover:bg-[var(--primary)]/20 transition-colors font-medium"
+                    >
+                      Redigera
+                    </Link>
+                    <Link
+                      href={`/foretag/${biz.id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-2 text-[var(--muted)] hover:text-[var(--accent)] border border-[var(--border)] rounded-lg transition-colors"
+                      title="Visa publik profil"
+                    >
+                      <ExternalLink className="w-4 h-4" />
+                    </Link>
+                    <form action={toggleActive.bind(null, biz.id, biz.active)}>
+                      <button
+                        type="submit"
+                        className="p-2 text-[var(--muted)] hover:text-[var(--primary)] border border-[var(--border)] rounded-lg transition-colors"
+                        title={biz.active ? "Pausa företaget" : "Aktivera företaget"}
+                      >
+                        {biz.active ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                      </button>
+                    </form>
+                  </div>
                 </div>
               </div>
             ))}
@@ -91,14 +172,12 @@ export default async function AdminPage() {
               </svg>
             </div>
             <h2 className="text-lg font-semibold text-[var(--primary)] mb-2">Inga företag ännu</h2>
-            <p className="text-[var(--muted)] mb-6">Lägg till ditt första företag för att komma igång.</p>
+            <p className="text-[var(--muted)] mb-6 text-sm">Lägg till ditt första företag för att komma igång.</p>
             <Link
               href="/admin/foretag/ny"
               className="inline-flex items-center gap-2 bg-[var(--primary)] text-white px-6 py-2.5 rounded-xl font-medium hover:bg-[var(--primary)]/90 transition-colors"
             >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
+              <Plus className="w-4 h-4" />
               Lägg till företag
             </Link>
           </div>

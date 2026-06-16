@@ -131,6 +131,15 @@ export default function BusinessForm({ categories, business, onSubmit, loading }
             placeholder="Beskriv verksamheten kortfattat..."
             className={`${inputClass} resize-none`}
           />
+          <div className="mt-2 p-3 bg-blue-50 border border-blue-100 rounded-xl text-xs text-blue-800 space-y-1">
+            <p className="font-semibold">Tips för en bra beskrivning:</p>
+            <ul className="list-disc list-inside space-y-0.5 text-blue-700">
+              <li>Nämn vad ni erbjuder och var ni finns (t.ex. "i Fjällbacka")</li>
+              <li>Lyft något unikt — erfarenhet, certifieringar, specialitet</li>
+              <li>Undvik förkortningar och skriv ut hela meningar</li>
+              <li><span className="font-medium">Exempel:</span> "Familjeföretag med 20 års erfarenhet av målning i Tanum. Certifierade hantverkare för invändigt och utvändigt arbete."</li>
+            </ul>
+          </div>
         </div>
 
         <div>
