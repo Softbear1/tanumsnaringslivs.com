@@ -4,7 +4,6 @@ import { createBrowserClient } from "@/lib/supabase-browser";
 import BusinessForm from "@/components/admin/BusinessForm";
 import Link from "next/link";
 import { Plus, Trash2, Pause, Play, Megaphone } from "lucide-react";
-import { createAd, deleteAd, toggleAd } from "./actions";
 
 interface Ad {
   id: string;
@@ -83,10 +82,45 @@ export default function EditBusinessClient({ business, categories, ads }: Props)
   async function handleCreateAd(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setAdSubmitting(true);
-    const formData = new FormData(e.currentTarget);
-    await createAd(business.id, formData);
+    const fd = new FormData(e.currentTarget);
+    const supabase = createBrowserClient();
+    const { error } = await supabase.from("ads").insert({
+      business_id: business.id,
+      headline: fd.get("headline") as string,
+      body: (fd.get("body") as string) || null,
+      cta_label: (fd.get("cta_label") as string) || null,
+      cta_url: (fd.get("cta_url") as string) || null,
+      category_id: (fd.get("category_id") as string) || null,
+      starts_at: (fd.get("starts_at") as string) || null,
+      ends_at: (fd.get("ends_at") as string) || null,
+      active: true,
+    });
     setAdSubmitting(false);
-    setShowAdForm(false);
+    if (error) {
+      alert("Kunde inte skapa annonsen: " + error.message);
+      return;
+    }
+    window.location.reload();
+  }
+
+  async function handleToggleAd(adId: string, currentlyActive: boolean) {
+    const supabase = createBrowserClient();
+    const { error } = await supabase.from("ads").update({ active: !currentlyActive }).eq("id", adId);
+    if (error) {
+      alert("Kunde inte uppdatera annonsen: " + error.message);
+      return;
+    }
+    window.location.reload();
+  }
+
+  async function handleDeleteAd(adId: string) {
+    const supabase = createBrowserClient();
+    const { error } = await supabase.from("ads").delete().eq("id", adId);
+    if (error) {
+      alert("Kunde inte ta bort annonsen: " + error.message);
+      return;
+    }
+    window.location.reload();
   }
 
   return (
@@ -159,16 +193,12 @@ export default function EditBusinessClient({ business, categories, ads }: Props)
                       </div>
                     </div>
                     <div className="flex items-center gap-1.5 shrink-0">
-                      <form action={toggleAd.bind(null, ad.id, ad.active, business.id)}>
-                        <button type="submit" className="p-1.5 text-[var(--muted)] hover:text-[var(--primary)] border border-[var(--border)] rounded-lg transition-colors" title={ad.active ? "Pausa" : "Aktivera"}>
-                          {ad.active ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
-                        </button>
-                      </form>
-                      <form action={deleteAd.bind(null, ad.id, business.id)}>
-                        <button type="submit" className="p-1.5 text-[var(--muted)] hover:text-red-600 border border-[var(--border)] rounded-lg transition-colors" title="Ta bort">
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </form>
+                      <button onClick={() => handleToggleAd(ad.id, ad.active)} className="p-1.5 text-[var(--muted)] hover:text-[var(--primary)] border border-[var(--border)] rounded-lg transition-colors" title={ad.active ? "Pausa" : "Aktivera"}>
+                        {ad.active ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+                      </button>
+                      <button onClick={() => handleDeleteAd(ad.id)} className="p-1.5 text-[var(--muted)] hover:text-red-600 border border-[var(--border)] rounded-lg transition-colors" title="Ta bort">
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
                     </div>
                   </div>
                 </div>
