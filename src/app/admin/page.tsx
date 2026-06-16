@@ -2,7 +2,7 @@ export const runtime = "edge";
 import { createServerClient } from "@/lib/supabase-server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Star, ExternalLink, Eye, Pause, Play, Plus, Inbox, Clock } from "lucide-react";
+import { Star, ExternalLink, Eye, Pause, Play, Plus, Inbox, Clock, Megaphone } from "lucide-react";
 import { logout, toggleActive } from "./actions";
 
 export default async function AdminPage() {
@@ -217,6 +217,33 @@ export default async function AdminPage() {
               <Plus className="w-4 h-4" />
               Lägg till företag
             </Link>
+          </div>
+        )}
+
+        {/* Ads CTA */}
+        {businesses && businesses.length > 0 && (
+          <div className="mt-8 rounded-2xl border-2 border-amber-200 bg-amber-50/60 p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0">
+              <Megaphone className="w-5 h-5 text-amber-700" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-semibold text-[var(--primary)] mb-0.5">Vill du synas extra?</h3>
+              <p className="text-sm text-[var(--muted)]">
+                Skapa en annons som visas i galleriet och i AI-assistentens chattflöde när kunder söker i din kategori — t.ex. <em>"25% på trallvirke"</em> mitt i en altan-konversation.
+              </p>
+            </div>
+            <div className="flex flex-col gap-2 shrink-0">
+              {businesses.map((biz) => (
+                <Link
+                  key={biz.id}
+                  href={`/admin/foretag/${biz.id}#annonser`}
+                  className="inline-flex items-center gap-1.5 text-sm font-medium text-amber-800 border border-amber-300 hover:bg-amber-100 transition-colors px-4 py-2 rounded-xl whitespace-nowrap"
+                >
+                  <Megaphone className="w-3.5 h-3.5" />
+                  {businesses.length > 1 ? `Annonsera för ${biz.name}` : "Skapa annons"}
+                </Link>
+              ))}
+            </div>
           </div>
         )}
 

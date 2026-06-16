@@ -148,7 +148,7 @@ export default function EditBusinessClient({ business, categories, ads }: Props)
         </div>
 
         {/* Ads section */}
-        <div className="bg-white rounded-2xl border border-[var(--border)] shadow-sm p-6">
+        <div id="annonser" className="bg-white rounded-2xl border border-[var(--border)] shadow-sm p-6">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <Megaphone className="w-5 h-5 text-amber-600" />
