@@ -2,3 +2,7 @@ name = "tanumsnaringslivs"
 compatibility_date = "2025-01-01"
 compatibility_flags = ["nodejs_compat"]
 pages_build_output_dir = ".vercel/output/static"
+
+[vars]
+NEXT_PUBLIC_SUPABASE_URL = "https://tflrdlyquvndapjwnccu.supabase.co"
+NEXT_PUBLIC_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmbHJkbHlxdXZuZGFwanduY2N1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1NDY1NDIsImV4cCI6MjA5NzEyMjU0Mn0.Zq37rR1KQmcGkcG-EAFSVTBdCsBIk7_rvBMqKw16OPQ"
