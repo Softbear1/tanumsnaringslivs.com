@@ -110,9 +110,12 @@ export default function RegisterCTA() {
                   </li>
                 ))}
               </ul>
-              <button className={`w-full py-2.5 rounded-xl font-medium text-sm transition-colors ${p.name === "Gratis" ? "bg-[var(--bg)] border border-[var(--border)] text-[var(--primary)] hover:bg-gray-100" : p.name === "Pro" ? "bg-[var(--accent)] text-white hover:bg-[#266B50]" : "bg-[var(--boost)] text-white hover:bg-[#B45309]"}`}>
+              <a
+                href="/admin/logga-in"
+                className={`block text-center w-full py-2.5 rounded-xl font-medium text-sm transition-colors ${p.name === "Gratis" ? "bg-[var(--bg)] border border-[var(--border)] text-[var(--primary)] hover:bg-gray-100" : p.name === "Pro" ? "bg-[var(--accent)] text-white hover:bg-[#266B50]" : "bg-[var(--boost)] text-white hover:bg-[#B45309]"}`}
+              >
                 Välj {p.name}
-              </button>
+              </a>
             </div>
           ))}
         </div>
