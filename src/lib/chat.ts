@@ -39,3 +39,31 @@ export function extractReady(text: string): { clean: string; payload: ReadyPaylo
     return { clean: text, payload: null };
   }
 }
+
+/** A business listing drafted by the admin onboarding assistant. */
+export interface BusinessDraft {
+  name: string;
+  category_id: string;
+  description: string;
+  phone: string;
+  email: string;
+  website: string | null;
+  address: string;
+  initials: string;
+}
+
+/**
+ * Parse a trailing DRAFT:{...} marker holding a business listing the assistant
+ * has gathered. Kept separate from extractReady so the customer and admin chats
+ * use distinct, type-safe markers.
+ */
+export function extractDraft(text: string): { clean: string; draft: BusinessDraft | null } {
+  const idx = text.lastIndexOf("DRAFT:");
+  if (idx === -1) return { clean: text, draft: null };
+  try {
+    const draft = JSON.parse(text.slice(idx + 6).trim()) as BusinessDraft;
+    return { clean: text.slice(0, idx).trim(), draft };
+  } catch {
+    return { clean: text, draft: null };
+  }
+}

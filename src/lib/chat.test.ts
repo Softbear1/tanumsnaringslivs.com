@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { toApiMessages, extractReady, ChatMessage } from "./chat";
+import { toApiMessages, extractReady, extractDraft, ChatMessage } from "./chat";
 
 describe("toApiMessages", () => {
   it("strips a leading assistant greeting so the array starts with a user message", () => {
@@ -61,5 +61,27 @@ describe("extractReady", () => {
     const text = "Text\nREADY:{not valid json";
     const { payload } = extractReady(text);
     expect(payload).toBeNull();
+  });
+});
+
+describe("extractDraft", () => {
+  it("returns null draft when no marker present", () => {
+    const { clean, draft } = extractDraft("Berätta mer om ditt företag");
+    expect(draft).toBeNull();
+    expect(clean).toBe("Berätta mer om ditt företag");
+  });
+
+  it("parses the DRAFT marker into a business draft and strips it", () => {
+    const text =
+      'Klart! Här är ditt förslag.\nDRAFT:{"name":"Fjällbacka Måleri","category_id":"bygg","description":"Målare i Fjällbacka","phone":"0525-1","email":"a@b.se","website":null,"address":"Strandvägen 1, Fjällbacka","initials":"FM"}';
+    const { clean, draft } = extractDraft(text);
+    expect(clean).toBe("Klart! Här är ditt förslag.");
+    expect(draft?.name).toBe("Fjällbacka Måleri");
+    expect(draft?.category_id).toBe("bygg");
+    expect(draft?.website).toBeNull();
+  });
+
+  it("ignores a malformed marker", () => {
+    expect(extractDraft("DRAFT:{broken").draft).toBeNull();
   });
 });
