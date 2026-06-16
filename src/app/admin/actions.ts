@@ -22,3 +22,18 @@ export async function toggleActive(id: string, currentlyActive: boolean) {
 
   revalidatePath("/admin");
 }
+
+// Mark a quote request as handled. RLS ensures only an owner of one of the
+// linked businesses can do this. Once handled, the customer can leave a review.
+export async function markQuoteHandled(quoteId: string) {
+  const supabase = await createServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/admin/logga-in");
+
+  await supabase
+    .from("quote_requests")
+    .update({ status: "handled" })
+    .eq("id", quoteId);
+
+  revalidatePath("/admin");
+}

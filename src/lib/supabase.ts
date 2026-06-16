@@ -183,6 +183,39 @@ export type Database = {
         };
         Relationships: [];
       };
+      reviews: {
+        Row: {
+          id: string;
+          business_id: string;
+          quote_request_id: string;
+          reviewer_email: string;
+          reviewer_name: string;
+          rating: number;
+          comment: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          business_id: string;
+          quote_request_id: string;
+          reviewer_email: string;
+          reviewer_name: string;
+          rating: number;
+          comment?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          business_id?: string;
+          quote_request_id?: string;
+          reviewer_email?: string;
+          reviewer_name?: string;
+          rating?: number;
+          comment?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       seasonal_content: {
         Row: {
           week_key: string;

@@ -49,9 +49,17 @@ export default async function ForetagPage({ params }: PageProps) {
   }
 
   // Track page view — fire and forget, never block rendering
+  let reviews: Array<{ id: string; reviewer_name: string; rating: number; comment: string | null; created_at: string }> = [];
   try {
     const supabase = await createServerClient();
     supabase.from("page_views").insert({ business_id: id }).then(() => {});
+    const { data } = await supabase
+      .from("reviews")
+      .select("id, reviewer_name, rating, comment, created_at")
+      .eq("business_id", id)
+      .order("created_at", { ascending: false })
+      .limit(20);
+    reviews = data ?? [];
   } catch { /* ignore */ }
 
   const cat = getCategory(categories, business.categoryId);
@@ -191,6 +199,38 @@ export default async function ForetagPage({ params }: PageProps) {
               </div>
             </div>
           </div>
+
+          {/* Reviews */}
+          {reviews.length > 0 && (
+            <div className="bg-white rounded-2xl card-shadow mt-6 p-6 sm:p-8">
+              <h2 className="text-lg font-bold text-[var(--primary)] mb-5">
+                Omdömen ({reviews.length})
+              </h2>
+              <div className="space-y-5">
+                {reviews.map((r) => (
+                  <div key={r.id} className="border-b border-[var(--border)] last:border-0 pb-5 last:pb-0">
+                    <div className="flex items-center justify-between gap-3 mb-1.5">
+                      <span className="text-sm font-medium text-[var(--primary)]">{r.reviewer_name}</span>
+                      <span className="text-xs text-[var(--muted)]">
+                        {new Date(r.created_at).toLocaleDateString("sv-SE", { year: "numeric", month: "short", day: "numeric" })}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-0.5 mb-2">
+                      {[1, 2, 3, 4, 5].map((s) => (
+                        <Star
+                          key={s}
+                          className="w-3.5 h-3.5"
+                          fill={s <= r.rating ? "#FBBF24" : "none"}
+                          stroke={s <= r.rating ? "#FBBF24" : "#D1D5DB"}
+                        />
+                      ))}
+                    </div>
+                    {r.comment && <p className="text-sm text-[var(--muted)] leading-relaxed">{r.comment}</p>}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </main>
       <Footer />

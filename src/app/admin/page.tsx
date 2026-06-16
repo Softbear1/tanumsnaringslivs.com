@@ -3,7 +3,7 @@ import { createServerClient } from "@/lib/supabase-server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Star, ExternalLink, Eye, Pause, Play, Plus, Inbox, Clock, Megaphone } from "lucide-react";
-import { logout, toggleActive } from "./actions";
+import { logout, toggleActive, markQuoteHandled } from "./actions";
 
 export default async function AdminPage() {
   const supabase = await createServerClient();
@@ -274,12 +274,23 @@ export default async function AdminPage() {
                         {new Date(q.created_at).toLocaleString("sv-SE", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
                       </p>
                     </div>
-                    <div className="flex items-center gap-2 shrink-0">
+                    <div className="flex flex-col items-end gap-2 shrink-0">
                       {q.status === "pending" ? (
-                        <span className="flex items-center gap-1 text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-full">
-                          <Clock className="w-3 h-3" />
-                          Ny
-                        </span>
+                        <>
+                          <span className="flex items-center gap-1 text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-full">
+                            <Clock className="w-3 h-3" />
+                            Ny
+                          </span>
+                          <form action={markQuoteHandled.bind(null, q.id)}>
+                            <button
+                              type="submit"
+                              className="text-xs font-medium text-[var(--primary)] border border-[var(--border)] hover:border-[var(--accent)] hover:text-[var(--accent)] px-2.5 py-1 rounded-full transition-colors"
+                              title="Markera som hanterad — kunden kan då lämna ett omdöme"
+                            >
+                              Markera som hanterad
+                            </button>
+                          </form>
+                        </>
                       ) : (
                         <span className="text-xs font-medium text-[var(--accent)] bg-green-50 border border-green-200 px-2.5 py-1 rounded-full">
                           Hanterad

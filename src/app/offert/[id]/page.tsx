@@ -2,9 +2,10 @@ export const runtime = "edge";
 import { createServerClient } from "@/lib/supabase-server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { CheckCircle, Clock, Building2 } from "lucide-react";
+import { CheckCircle, Clock, Building2, Star } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import ReviewForm from "@/components/ReviewForm";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -41,6 +42,18 @@ export default async function OffertPage({ params }: PageProps) {
         .select("id, name, initials, email, phone")
         .in("id", businessIds)
     : { data: [] };
+
+  // Once the quote is handled, the customer can review the businesses it went to.
+  // Skip any they've already reviewed.
+  let reviewableBusinesses: typeof businesses = [];
+  if (quote.status === "handled" && businessIds.length) {
+    const { data: existing } = await supabase
+      .from("reviews")
+      .select("business_id")
+      .eq("quote_request_id", id);
+    const reviewed = new Set((existing ?? []).map((r) => r.business_id as string));
+    reviewableBusinesses = (businesses ?? []).filter((b) => !reviewed.has(b.id));
+  }
 
   const createdAt = new Date(quote.created_at).toLocaleString("sv-SE", {
     year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit",
@@ -97,6 +110,30 @@ export default async function OffertPage({ params }: PageProps) {
                       <p className="text-xs text-[var(--muted)]">{biz.email} · {biz.phone}</p>
                     </div>
                   </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Review prompt — only once the quote is handled */}
+          {quote.status === "handled" && reviewableBusinesses.length > 0 && (
+            <div className="bg-white rounded-2xl border border-[var(--border)] card-shadow p-6 mb-4">
+              <h2 className="font-semibold text-[var(--primary)] mb-1 flex items-center gap-2">
+                <Star className="w-4 h-4 text-yellow-400" fill="#FBBF24" />
+                Lämna ett omdöme
+              </h2>
+              <p className="text-sm text-[var(--muted)] mb-4">
+                Hur gick det? Ditt omdöme hjälper andra i Tanum att hitta rätt företag.
+              </p>
+              <div className="space-y-3">
+                {reviewableBusinesses.map((biz) => (
+                  <ReviewForm
+                    key={biz.id}
+                    quoteRequestId={id}
+                    businessId={biz.id}
+                    businessName={biz.name}
+                    businessInitials={biz.initials}
+                  />
                 ))}
               </div>
             </div>
