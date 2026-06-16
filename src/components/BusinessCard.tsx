@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { Phone, Mail, Globe, MapPin, Star, Zap } from "lucide-react";
 import { Business, Category, getCategory } from "@/lib/data";
 import clsx from "clsx";
@@ -35,9 +36,11 @@ export default function BusinessCard({ business, categories, isAd }: Props) {
               {business.initials}
             </div>
             <div>
-              <h3 className="font-semibold text-[var(--primary)] text-base leading-tight">
-                {business.name}
-              </h3>
+              <Link href={`/foretag/${business.id}`} className="group/name">
+                <h3 className="font-semibold text-[var(--primary)] text-base leading-tight group-hover/name:text-[var(--accent)] transition-colors">
+                  {business.name}
+                </h3>
+              </Link>
               <span
                 className="inline-block text-[11px] font-medium mt-1 px-2 py-0.5 rounded-full"
                 style={{ backgroundColor: cat?.bgColor ?? "#F3F4F6", color: cat?.color ?? "#374151" }}
@@ -117,6 +120,13 @@ export default function BusinessCard({ business, categories, isAd }: Props) {
             <span className="truncate">{business.address}</span>
           </div>
         </div>
+
+        <Link
+          href={`/foretag/${business.id}`}
+          className="mt-4 block w-full text-center text-sm font-medium text-[var(--accent)] border border-[var(--accent)]/30 rounded-xl py-2 hover:bg-[var(--accent)] hover:text-white transition-colors"
+        >
+          Visa profil
+        </Link>
       </div>
     </div>
   );
