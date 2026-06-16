@@ -29,10 +29,11 @@ export async function middleware(request: NextRequest) {
   if (path.startsWith("/admin") && !isLoginPage && !user) {
     return NextResponse.redirect(new URL("/admin/logga-in", request.url));
   }
-  if (isLoginPage && user) {
+  // Only redirect to /admin from login page if going directly — not if there's a next param
+  if (isLoginPage && user && !request.nextUrl.searchParams.get("next")) {
     return NextResponse.redirect(new URL("/admin", request.url));
   }
-  if (path.startsWith("/offert") && !user) {
+  if ((path.startsWith("/offert") || path.startsWith("/profil")) && !user) {
     const loginUrl = new URL("/admin/logga-in", request.url);
     loginUrl.searchParams.set("next", path);
     return NextResponse.redirect(loginUrl);
@@ -41,4 +42,4 @@ export async function middleware(request: NextRequest) {
   return supabaseResponse;
 }
 
-export const config = { matcher: ["/admin/:path*", "/offert/:path*"] };
+export const config = { matcher: ["/admin/:path*", "/offert/:path*", "/profil/:path*", "/profil"] };

@@ -1,9 +1,31 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { TreePine, Menu, X } from "lucide-react";
+import { createBrowserClient } from "@/lib/supabase-browser";
 
 export default function Header() {
   const [open, setOpen] = useState(false);
+  const [user, setUser] = useState<{ id: string; email?: string } | null>(null);
+  const [hasBusiness, setHasBusiness] = useState(false);
+
+  useEffect(() => {
+    const supabase = createBrowserClient();
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
+      if (!user) return;
+      setUser(user);
+      const { count } = await supabase
+        .from("businesses")
+        .select("id", { count: "exact", head: true })
+        .eq("owner_id", user.id);
+      setHasBusiness((count ?? 0) > 0);
+    });
+  }, []);
+
+  async function handleLogout() {
+    const supabase = createBrowserClient();
+    await supabase.auth.signOut();
+    window.location.href = "/";
+  }
 
   return (
     <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-[var(--border)]">
@@ -22,13 +44,31 @@ export default function Header() {
           <nav className="hidden md:flex items-center gap-6">
             <a href="#kategorier" className="text-sm text-[var(--muted)] hover:text-[var(--primary)] transition-colors">Kategorier</a>
             <a href="#om-oss" className="text-sm text-[var(--muted)] hover:text-[var(--primary)] transition-colors">Om oss</a>
-            <a href="/admin/logga-in" className="text-sm text-[var(--muted)] hover:text-[var(--primary)] transition-colors">Logga in</a>
-            <a
-              href="/admin/logga-in"
-              className="text-sm px-4 py-2 rounded-lg bg-[var(--primary)] text-white font-medium hover:bg-[#152E3D] transition-colors"
-            >
-              Lägg till företag – gratis
-            </a>
+            {user ? (
+              <>
+                {hasBusiness ? (
+                  <a href="/admin" className="text-sm text-[var(--muted)] hover:text-[var(--primary)] transition-colors">Admin</a>
+                ) : (
+                  <a href="/profil" className="text-sm text-[var(--muted)] hover:text-[var(--primary)] transition-colors">Profil</a>
+                )}
+                <button
+                  onClick={handleLogout}
+                  className="text-sm text-[var(--muted)] hover:text-[var(--primary)] transition-colors"
+                >
+                  Logga ut
+                </button>
+              </>
+            ) : (
+              <>
+                <a href="/admin/logga-in" className="text-sm text-[var(--muted)] hover:text-[var(--primary)] transition-colors">Logga in</a>
+                <a
+                  href="/admin/logga-in"
+                  className="text-sm px-4 py-2 rounded-lg bg-[var(--primary)] text-white font-medium hover:bg-[#152E3D] transition-colors"
+                >
+                  Lägg till företag – gratis
+                </a>
+              </>
+            )}
           </nav>
 
           <button
@@ -44,10 +84,23 @@ export default function Header() {
         <div className="md:hidden border-t border-[var(--border)] bg-white px-4 py-4 flex flex-col gap-3">
           <a href="#kategorier" onClick={() => setOpen(false)} className="text-sm text-[var(--muted)] py-2">Kategorier</a>
           <a href="#om-oss" onClick={() => setOpen(false)} className="text-sm text-[var(--muted)] py-2">Om oss</a>
-          <a href="/admin/logga-in" onClick={() => setOpen(false)} className="text-sm text-[var(--muted)] py-2">Logga in</a>
-          <a href="/admin/logga-in" onClick={() => setOpen(false)} className="text-sm px-4 py-2 rounded-lg bg-[var(--primary)] text-white font-medium text-center">
-            Lägg till företag – gratis
-          </a>
+          {user ? (
+            <>
+              {hasBusiness ? (
+                <a href="/admin" onClick={() => setOpen(false)} className="text-sm text-[var(--muted)] py-2">Admin</a>
+              ) : (
+                <a href="/profil" onClick={() => setOpen(false)} className="text-sm text-[var(--muted)] py-2">Profil</a>
+              )}
+              <button onClick={handleLogout} className="text-sm text-[var(--muted)] py-2 text-left">Logga ut</button>
+            </>
+          ) : (
+            <>
+              <a href="/admin/logga-in" onClick={() => setOpen(false)} className="text-sm text-[var(--muted)] py-2">Logga in</a>
+              <a href="/admin/logga-in" onClick={() => setOpen(false)} className="text-sm px-4 py-2 rounded-lg bg-[var(--primary)] text-white font-medium text-center">
+                Lägg till företag – gratis
+              </a>
+            </>
+          )}
         </div>
       )}
     </header>

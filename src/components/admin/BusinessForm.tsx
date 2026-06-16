@@ -46,6 +46,12 @@ export default function BusinessForm({ categories, business, onSubmit, loading }
     setInitials(v.toUpperCase().slice(0, 3));
   }
 
+  function normalizeWebsite(url: string): string | null {
+    if (!url.trim()) return null;
+    if (/^https?:\/\//i.test(url)) return url.trim();
+    return `https://${url.trim()}`;
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
@@ -56,7 +62,7 @@ export default function BusinessForm({ categories, business, onSubmit, loading }
         description,
         phone,
         email,
-        website: website || null,
+        website: normalizeWebsite(website),
         address,
         initials,
       });
@@ -169,10 +175,10 @@ export default function BusinessForm({ categories, business, onSubmit, loading }
         <div>
           <label className={labelClass}>Webbplats (valfritt)</label>
           <input
-            type="url"
+            type="text"
             value={website}
             onChange={(e) => setWebsite(e.target.value)}
-            placeholder="https://www.foretag.se"
+            placeholder="www.foretag.se"
             className={inputClass}
           />
         </div>
