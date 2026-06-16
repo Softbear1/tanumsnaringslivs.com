@@ -2,8 +2,11 @@
 import { useState } from "react";
 import { createBrowserClient } from "@/lib/supabase-browser";
 import BusinessForm from "@/components/admin/BusinessForm";
+import ListingChat from "@/components/admin/ListingChat";
+import AdChat from "@/components/admin/AdChat";
+import type { BusinessDraft, AdDraft } from "@/lib/chat";
 import Link from "next/link";
-import { Plus, Trash2, Pause, Play, Megaphone } from "lucide-react";
+import { Plus, Trash2, Pause, Play, Megaphone, Sparkles } from "lucide-react";
 
 interface Ad {
   id: string;
@@ -34,12 +37,47 @@ interface Props {
   ads: Ad[];
 }
 
+function toDraft(b: Props["business"]): BusinessDraft {
+  return {
+    name: b.name,
+    category_id: b.category_id,
+    description: b.description,
+    phone: b.phone,
+    email: b.email,
+    website: b.website,
+    address: b.address,
+    initials: b.initials,
+  };
+}
+
 export default function EditBusinessClient({ business, categories, ads }: Props) {
   const [loading, setLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
-  const [showAdForm, setShowAdForm] = useState(false);
   const [adSubmitting, setAdSubmitting] = useState(false);
+
+  // Business edit: chat can prefill the form. We remount the form (via formKey)
+  // when a draft arrives so its defaults pick up the new values.
+  const [editChat, setEditChat] = useState(false);
+  const [formSeed, setFormSeed] = useState<BusinessDraft>(() => toDraft(business));
+  const [formKey, setFormKey] = useState(0);
+
+  // Ad creation: "none" | "chat" | "form". A chat draft prefills the form.
+  const [adMode, setAdMode] = useState<"none" | "chat" | "form">("none");
+  const [adDraft, setAdDraft] = useState<AdDraft | null>(null);
+
+  function handleBusinessDraft(d: BusinessDraft) {
+    const valid = categories.some((c) => c.id === d.category_id);
+    setFormSeed({ ...d, category_id: valid ? d.category_id : "" });
+    setFormKey((k) => k + 1);
+    setEditChat(false);
+  }
+
+  function handleAdDraft(ad: AdDraft) {
+    const valid = ad.category_id && categories.some((c) => c.id === ad.category_id);
+    setAdDraft({ ...ad, category_id: valid ? ad.category_id : null });
+    setAdMode("form");
+  }
 
   async function handleSubmit(data: {
     name: string;
@@ -139,9 +177,31 @@ export default function EditBusinessClient({ business, categories, ads }: Props)
       <main className="max-w-3xl mx-auto px-4 sm:px-6 py-10 space-y-6">
         {/* Business form */}
         <div className="bg-white rounded-2xl border border-[var(--border)] shadow-sm p-6 sm:p-8">
+          <div className="flex justify-end mb-4">
+            <button
+              onClick={() => setEditChat((v) => !v)}
+              className="inline-flex items-center gap-1.5 text-sm text-[var(--accent)] border border-[var(--accent)]/30 px-3 py-1.5 rounded-lg hover:bg-[var(--accent)]/5 transition-colors font-medium"
+            >
+              <Sparkles className="w-4 h-4" />
+              {editChat ? "Stäng chatten" : "Ändra med chatt"}
+            </button>
+          </div>
+
+          {editChat && (
+            <div className="mb-6 border border-[var(--border)] rounded-xl p-4 bg-[var(--bg)]">
+              <ListingChat
+                categories={categories}
+                current={formSeed}
+                greeting="Hej! Vad vill du ändra på listningen?"
+                onDraft={handleBusinessDraft}
+              />
+            </div>
+          )}
+
           <BusinessForm
+            key={formKey}
             categories={categories}
-            business={business}
+            business={formSeed}
             onSubmit={handleSubmit}
             loading={loading}
           />
@@ -154,13 +214,22 @@ export default function EditBusinessClient({ business, categories, ads }: Props)
               <Megaphone className="w-5 h-5 text-amber-600" />
               <h2 className="font-semibold text-[var(--primary)]">Annonser</h2>
             </div>
-            <button
-              onClick={() => setShowAdForm(!showAdForm)}
-              className="flex items-center gap-1.5 text-sm text-[var(--accent)] border border-[var(--accent)]/30 px-3 py-1.5 rounded-lg hover:bg-[var(--accent)]/5 transition-colors font-medium"
-            >
-              <Plus className="w-4 h-4" />
-              Ny annons
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => { setAdDraft(null); setAdMode(adMode === "chat" ? "none" : "chat"); }}
+                className="flex items-center gap-1.5 text-sm text-[var(--accent)] border border-[var(--accent)]/30 px-3 py-1.5 rounded-lg hover:bg-[var(--accent)]/5 transition-colors font-medium"
+              >
+                <Sparkles className="w-4 h-4" />
+                Skapa med chatt
+              </button>
+              <button
+                onClick={() => { setAdDraft(null); setAdMode(adMode === "form" ? "none" : "form"); }}
+                className="flex items-center gap-1.5 text-sm text-[var(--muted)] border border-[var(--border)] px-3 py-1.5 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+              >
+                <Plus className="w-4 h-4" />
+                Formulär
+              </button>
+            </div>
           </div>
 
           <p className="text-sm text-[var(--muted)] mb-4 leading-relaxed">
@@ -206,20 +275,33 @@ export default function EditBusinessClient({ business, categories, ads }: Props)
             </div>
           )}
 
-          {ads.length === 0 && !showAdForm && (
+          {ads.length === 0 && adMode === "none" && (
             <p className="text-sm text-[var(--muted)] italic">Du har inga annonser ännu.</p>
           )}
 
-          {/* New ad form */}
-          {showAdForm && (
-            <form onSubmit={handleCreateAd} className="border border-[var(--border)] rounded-xl p-4 space-y-3 bg-[var(--bg)]">
-              <h3 className="text-sm font-semibold text-[var(--primary)]">Ny annons</h3>
+          {/* Ad creation via chat */}
+          {adMode === "chat" && (
+            <div className="border border-[var(--border)] rounded-xl p-4 bg-[var(--bg)]">
+              <AdChat categories={categories} businessName={business.name} onDraft={handleAdDraft} />
+            </div>
+          )}
+
+          {/* New ad form (remounts via key when a chat draft prefills it) */}
+          {adMode === "form" && (
+            <form key={adDraft ? "draft" : "blank"} onSubmit={handleCreateAd} className="border border-[var(--border)] rounded-xl p-4 space-y-3 bg-[var(--bg)]">
+              <h3 className="text-sm font-semibold text-[var(--primary)]">
+                {adDraft ? "Granska annonsen" : "Ny annons"}
+              </h3>
+              {adDraft && (
+                <p className="text-xs text-[var(--muted)]">Förifyllt från chatten — justera om du vill innan du skapar.</p>
+              )}
 
               <div>
                 <label className="block text-xs font-medium text-[var(--primary)] mb-1">Rubrik *</label>
                 <input
                   name="headline"
                   required
+                  defaultValue={adDraft?.headline ?? ""}
                   placeholder='T.ex. "25% rabatt på trallvirke hela juni"'
                   className="w-full px-3 py-2 rounded-lg border border-[var(--border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
                 />
@@ -230,6 +312,7 @@ export default function EditBusinessClient({ business, categories, ads }: Props)
                 <textarea
                   name="body"
                   rows={2}
+                  defaultValue={adDraft?.body ?? ""}
                   placeholder="Kortare beskrivning av erbjudandet..."
                   className="w-full px-3 py-2 rounded-lg border border-[var(--border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)] resize-none"
                 />
@@ -240,6 +323,7 @@ export default function EditBusinessClient({ business, categories, ads }: Props)
                   <label className="block text-xs font-medium text-[var(--primary)] mb-1">Knapptext (valfri)</label>
                   <input
                     name="cta_label"
+                    defaultValue={adDraft?.cta_label ?? ""}
                     placeholder="Läs mer"
                     className="w-full px-3 py-2 rounded-lg border border-[var(--border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
                   />
@@ -249,6 +333,7 @@ export default function EditBusinessClient({ business, categories, ads }: Props)
                   <input
                     name="cta_url"
                     type="url"
+                    defaultValue={adDraft?.cta_url ?? ""}
                     placeholder="https://..."
                     className="w-full px-3 py-2 rounded-lg border border-[var(--border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
                   />
@@ -259,6 +344,7 @@ export default function EditBusinessClient({ business, categories, ads }: Props)
                 <label className="block text-xs font-medium text-[var(--primary)] mb-1">Kategori (lämna tomt = visas överallt)</label>
                 <select
                   name="category_id"
+                  defaultValue={adDraft?.category_id ?? ""}
                   className="w-full px-3 py-2 rounded-lg border border-[var(--border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)] bg-white"
                 >
                   <option value="">Alla kategorier</option>
@@ -297,7 +383,7 @@ export default function EditBusinessClient({ business, categories, ads }: Props)
                 </button>
                 <button
                   type="button"
-                  onClick={() => setShowAdForm(false)}
+                  onClick={() => { setAdMode("none"); setAdDraft(null); }}
                   className="px-4 py-2 border border-[var(--border)] text-sm text-[var(--muted)] rounded-lg hover:bg-gray-50 transition-colors"
                 >
                   Avbryt

@@ -13,10 +13,15 @@ interface CategoryInfo {
   name: string;
 }
 
-function buildSystemPrompt(categories: CategoryInfo[]): string {
+function buildSystemPrompt(categories: CategoryInfo[], current?: Record<string, unknown> | null): string {
   const catList = categories.map((c) => `- ${c.name} (id: ${c.id})`).join("\n");
 
+  const editBlock = current
+    ? `\n## Redigeringsläge\nFöretaget finns redan. Här är nuvarande uppgifter:\n${JSON.stringify(current)}\nGör BARA de ändringar företagaren ber om och behåll resten oförändrat. Fråga vad de vill ändra. När du är klar, skriv ut HELA den uppdaterade listningen i DRAFT-markören (inte bara de ändrade fälten).\n`
+    : "";
+
   return `Du hjälper en företagare att lägga upp sitt företag i Tanums Näringsliv — en lokal företagskatalog för Tanums kommun i Bohuslän. Företagaren har redan ont om tid, så ditt jobb är att göra det snabbt och smärtfritt.
+${editBlock}
 
 ## Din uppgift
 Samla ihop det som behövs för en listning genom ett kort samtal, och skriv sedan ett färdigt utkast åt dem. De får granska och justera i ett formulär efteråt — så var hellre rapp än petig.
@@ -43,7 +48,7 @@ Samla ihop det som behövs för en listning genom ett kort samtal, och skriv sed
 ## Kategorier
 ${catList}
 
-Börja med att hälsa kort och fråga vad företaget heter och vad de gör.`;
+${current ? "Börja med att kort fråga vad de vill ändra." : "Börja med att hälsa kort och fråga vad företaget heter och vad de gör."}`;
 }
 
 export async function POST(request: NextRequest) {
@@ -55,12 +60,13 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  const { messages, categories } = (await request.json()) as {
+  const { messages, categories, current } = (await request.json()) as {
     messages: ChatMessage[];
     categories: CategoryInfo[];
+    current?: Record<string, unknown> | null;
   };
 
-  const systemPrompt = buildSystemPrompt(categories ?? []);
+  const systemPrompt = buildSystemPrompt(categories ?? [], current);
 
   const response = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",

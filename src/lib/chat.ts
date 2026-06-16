@@ -67,3 +67,27 @@ export function extractDraft(text: string): { clean: string; draft: BusinessDraf
     return { clean: text, draft: null };
   }
 }
+
+/** An ad drafted by the admin ad assistant. */
+export interface AdDraft {
+  headline: string;
+  body: string | null;
+  cta_label: string | null;
+  cta_url: string | null;
+  category_id: string | null;
+}
+
+/**
+ * Parse a trailing ANNONS:{...} marker holding an ad draft. Uses a distinct
+ * marker word (not containing "DRAFT") so it never collides with extractDraft.
+ */
+export function extractAdDraft(text: string): { clean: string; ad: AdDraft | null } {
+  const idx = text.lastIndexOf("ANNONS:");
+  if (idx === -1) return { clean: text, ad: null };
+  try {
+    const ad = JSON.parse(text.slice(idx + 7).trim()) as AdDraft;
+    return { clean: text.slice(0, idx).trim(), ad };
+  } catch {
+    return { clean: text, ad: null };
+  }
+}
