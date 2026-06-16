@@ -11,6 +11,7 @@ export default function LoggaIn() {
   const [error, setError] = useState<string | null>(null);
   const searchParams = useSearchParams();
   const next = searchParams.get("next") ?? "/admin";
+  const isCustomer = next.includes("/offert");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -38,11 +39,16 @@ export default function LoggaIn() {
     <div className="min-h-screen bg-[var(--background)] flex items-center justify-center px-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-[var(--primary)] text-white text-2xl font-bold mb-4">
+          <a
+            href="/"
+            className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-[var(--primary)] text-white text-2xl font-bold mb-4 hover:scale-105 transition-transform"
+          >
             T
-          </div>
-          <h1 className="text-2xl font-bold text-[var(--primary)]">Tanum Näringsliv</h1>
-          <p className="text-[var(--muted)] mt-1">Admin-portal</p>
+          </a>
+          <h1 className="text-2xl font-bold text-[var(--primary)]">Tanums Näringsliv</h1>
+          <p className="text-[var(--muted)] mt-1">
+            {isCustomer ? "Logga in för att se din offertförfrågan" : "Logga in för företag och beställare"}
+          </p>
         </div>
 
         <div className="bg-white rounded-2xl shadow-lg border border-[var(--border)] p-8">
@@ -63,7 +69,9 @@ export default function LoggaIn() {
             <>
               <h2 className="text-xl font-semibold text-[var(--primary)] mb-2">Logga in</h2>
               <p className="text-[var(--muted)] mb-6 text-sm">
-                Ange din e-postadress så skickar vi en magisk länk.
+                {isCustomer
+                  ? "Ange e-postadressen du använde i offertförfrågan så skickar vi en inloggningslänk."
+                  : "Ange din e-postadress så skickar vi en inloggningslänk — inget lösenord behövs."}
               </p>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
@@ -95,6 +103,12 @@ export default function LoggaIn() {
               </form>
             </>
           )}
+        </div>
+
+        <div className="text-center mt-6">
+          <a href="/" className="text-sm text-[var(--muted)] hover:text-[var(--primary)] transition-colors">
+            ← Tillbaka till Tanums Näringsliv
+          </a>
         </div>
       </div>
     </div>

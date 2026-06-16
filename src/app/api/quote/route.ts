@@ -1,6 +1,7 @@
 export const runtime = "edge";
 import type { NextRequest } from "next/server";
 import { createServerClient } from "@/lib/supabase-server";
+import { renderEmail } from "@/lib/email";
 
 interface QuotePayload {
   summary: string;
@@ -12,6 +13,14 @@ interface QuotePayload {
   details: Record<string, unknown>;
 }
 
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
 async function sendBusinessEmail(
   resendKey: string,
   to: string,
@@ -20,24 +29,38 @@ async function sendBusinessEmail(
   quoteId: string,
   origin: string,
 ) {
-  const body = `
-Hej ${businessName},
+  const text = `Hej ${businessName},
 
 Du har fått en ny offertförfrågan via Tanums Näringsliv.
 
-Sammanfattning: ${payload.summary}
+Vad kunden söker:
+${payload.summary}
 
-Kontakt:
-  Namn:     ${payload.contactName}
-  E-post:   ${payload.contactEmail}
-  Telefon:  ${payload.contactPhone || "–"}
+Kontaktuppgifter:
+  Namn:    ${payload.contactName}
+  E-post:  ${payload.contactEmail}
+  Telefon: ${payload.contactPhone || "–"}
 
-Svara kunden direkt eller logga in i admin-portalen för att hantera förfrågan.
+Logga in för att svara: ${origin}/admin
 
-${origin}/admin
+– Tanums Näringsliv`;
 
-– Tanums Näringsliv
-  `.trim();
+  const html = renderEmail({
+    heading: "Ny offertförfrågan 🎉",
+    intro: `Hej ${escapeHtml(businessName)}, du har fått en ny offertförfrågan via Tanums Näringsliv.`,
+    body: `
+      <div style="background:#f1f5f9;border-radius:12px;padding:16px;margin:0 0 20px;">
+        <p style="margin:0 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:#64748b;">Vad kunden söker</p>
+        <p style="margin:0;font-size:15px;color:#0f172a;line-height:1.5;">${escapeHtml(payload.summary)}</p>
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:14px;color:#0f172a;">
+        <tr><td style="padding:6px 0;color:#64748b;width:90px;">Namn</td><td style="padding:6px 0;font-weight:600;">${escapeHtml(payload.contactName)}</td></tr>
+        <tr><td style="padding:6px 0;color:#64748b;">E-post</td><td style="padding:6px 0;font-weight:600;"><a href="mailto:${escapeHtml(payload.contactEmail)}" style="color:#2F8765;text-decoration:none;">${escapeHtml(payload.contactEmail)}</a></td></tr>
+        <tr><td style="padding:6px 0;color:#64748b;">Telefon</td><td style="padding:6px 0;font-weight:600;">${escapeHtml(payload.contactPhone || "–")}</td></tr>
+      </table>`,
+    ctaLabel: "Logga in och svara",
+    ctaUrl: `${origin}/admin`,
+  });
 
   return fetch("https://api.resend.com/emails", {
     method: "POST",
@@ -49,7 +72,8 @@ ${origin}/admin
       from: "Tanums Näringsliv <noreply@tanumsnaringsliv.com>",
       to,
       subject: `Ny offertförfrågan: ${payload.summary.slice(0, 60)}`,
-      text: body,
+      text,
+      html,
     }),
   });
 }

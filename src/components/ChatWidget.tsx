@@ -282,17 +282,35 @@ export default function ChatWidget({ businesses, categories }: Props) {
             )}
 
             {step === "confirm" && ready && (
-              <div className="bg-[var(--bg)] border border-[var(--border)] rounded-2xl p-4 space-y-3">
-                <p className="text-sm font-semibold text-[var(--primary)]">Bekräfta och skicka</p>
-                <div className="text-xs text-[var(--muted)] space-y-1">
-                  <p><span className="font-medium text-[var(--primary)]">Vad:</span> {ready.summary}</p>
-                  <p><span className="font-medium text-[var(--primary)]">Namn:</span> {contact.name}</p>
-                  <p><span className="font-medium text-[var(--primary)]">E-post:</span> {contact.email}</p>
-                  {contact.phone && <p><span className="font-medium text-[var(--primary)]">Tel:</span> {contact.phone}</p>}
+              <div className="bg-white border border-[var(--border)] rounded-2xl p-4 space-y-4 card-shadow">
+                <p className="text-sm font-semibold text-[var(--primary)]">Bekräfta din förfrågan</p>
+
+                <div className="bg-[var(--bg)] rounded-xl p-3">
+                  <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--muted)] mb-1">Vad du söker</p>
+                  <p className="text-sm text-[var(--primary)] leading-relaxed">{ready.summary}</p>
                 </div>
-                <p className="text-xs text-[var(--muted)]">
-                  Förfrågan skickas till: {selectedBusinesses.map((b) => b.name).join(", ")}
-                </p>
+
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--muted)] mb-1.5">Dina uppgifter</p>
+                  <dl className="text-xs space-y-1">
+                    <div className="flex gap-2"><dt className="text-[var(--muted)] w-14 shrink-0">Namn</dt><dd className="text-[var(--primary)] font-medium">{contact.name}</dd></div>
+                    <div className="flex gap-2"><dt className="text-[var(--muted)] w-14 shrink-0">E-post</dt><dd className="text-[var(--primary)] font-medium">{contact.email}</dd></div>
+                    {contact.phone && <div className="flex gap-2"><dt className="text-[var(--muted)] w-14 shrink-0">Telefon</dt><dd className="text-[var(--primary)] font-medium">{contact.phone}</dd></div>}
+                  </dl>
+                </div>
+
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--muted)] mb-1.5">Skickas till</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {selectedBusinesses.map((b) => (
+                      <span key={b.id} className="inline-flex items-center gap-1.5 bg-[var(--primary)]/5 text-[var(--primary)] text-xs font-medium px-2.5 py-1 rounded-full">
+                        <span className="w-4 h-4 rounded bg-[var(--primary)]/10 flex items-center justify-center text-[8px] font-bold">{b.initials}</span>
+                        {b.name}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
                 <button
                   onClick={handleSubmitQuote}
                   disabled={submitting}

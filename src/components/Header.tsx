@@ -22,11 +22,12 @@ export default function Header() {
           <nav className="hidden md:flex items-center gap-6">
             <a href="#kategorier" className="text-sm text-[var(--muted)] hover:text-[var(--primary)] transition-colors">Kategorier</a>
             <a href="#om-oss" className="text-sm text-[var(--muted)] hover:text-[var(--primary)] transition-colors">Om oss</a>
+            <a href="/admin/logga-in" className="text-sm text-[var(--muted)] hover:text-[var(--primary)] transition-colors">Logga in</a>
             <a
               href="/admin/logga-in"
               className="text-sm px-4 py-2 rounded-lg bg-[var(--primary)] text-white font-medium hover:bg-[#152E3D] transition-colors"
             >
-              Lägg till företag
+              Lägg till företag – gratis
             </a>
           </nav>
 
@@ -43,8 +44,9 @@ export default function Header() {
         <div className="md:hidden border-t border-[var(--border)] bg-white px-4 py-4 flex flex-col gap-3">
           <a href="#kategorier" onClick={() => setOpen(false)} className="text-sm text-[var(--muted)] py-2">Kategorier</a>
           <a href="#om-oss" onClick={() => setOpen(false)} className="text-sm text-[var(--muted)] py-2">Om oss</a>
+          <a href="/admin/logga-in" onClick={() => setOpen(false)} className="text-sm text-[var(--muted)] py-2">Logga in</a>
           <a href="/admin/logga-in" onClick={() => setOpen(false)} className="text-sm px-4 py-2 rounded-lg bg-[var(--primary)] text-white font-medium text-center">
-            Lägg till företag
+            Lägg till företag – gratis
           </a>
         </div>
       )}

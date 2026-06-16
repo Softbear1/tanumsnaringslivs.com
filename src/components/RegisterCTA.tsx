@@ -1,20 +1,20 @@
-import { Search, CreditCard, BarChart3, Zap, Check, FileText } from "lucide-react";
+import { Search, Inbox, BarChart3, Check, FileText } from "lucide-react";
 
 const benefits = [
   {
     icon: Search,
-    title: "Bli hittad",
-    desc: "Visas i sökresultat när lokala kunder letar efter dina tjänster.",
+    title: "Bli hittad – gratis",
+    desc: "Visas i katalogen och i sökresultat när lokala kunder letar efter dina tjänster. Det kostar inget att vara med.",
   },
   {
-    icon: CreditCard,
-    title: "Professionellt kontaktkort",
-    desc: "Ditt varumärke presenterat snyggt med logga, beskrivning och kontaktuppgifter.",
+    icon: Inbox,
+    title: "Få offertförfrågningar",
+    desc: "Kunder beskriver vad de behöver via AI-assistenten och förfrågan landar direkt i din portal — utan extra avgift.",
   },
   {
     icon: BarChart3,
     title: "Statistik & insikter",
-    desc: "Se exakt hur många som sett och klickat på ditt kontaktkort varje månad.",
+    desc: "Se hur många som sett din profil varje månad och följ dina offertförfrågningar på ett ställe.",
   },
 ];
 
@@ -22,20 +22,20 @@ const plans = [
   {
     name: "Gratis",
     price: "0 kr",
-    period: "",
-    desc: "Kom igång direkt",
-    color: "border-[var(--border)]",
-    badge: null,
-    features: ["Grundlistning", "Kontaktuppgifter", "Kategorifilter"],
+    period: "/alltid",
+    desc: "Allt du behöver för att synas och få kunder",
+    color: "border-[var(--accent)]",
+    badge: "Rekommenderas",
+    features: ["Företagsprofil i katalogen", "Offertförfrågningar från kunder", "Kontaktuppgifter & karta", "Kategorifilter & sök", "Besöksstatistik"],
   },
   {
     name: "Pro",
     price: "149 kr",
     period: "/mån",
-    desc: "Mest populär",
-    color: "border-[var(--accent)]",
-    badge: "Populär",
-    features: ["Allt i Gratis", "Logga & profilbild", "Statistik & besöksdata", "Prioriterat i listan", "Premium-design på kortet"],
+    desc: "För dig som vill synas mer",
+    color: "border-[var(--border)]",
+    badge: null,
+    features: ["Allt i Gratis", "Logga & profilbild", "Prioriterat i listan", "Premium-design på kortet"],
   },
   {
     name: "Boost",
@@ -44,7 +44,7 @@ const plans = [
     desc: "Maximal synlighet",
     color: "border-[var(--boost)]",
     badge: "Boost",
-    features: ["Allt i Pro", "BOOST-märkning", "Annons i flödet", "Topplacering i kategorin", "Månadsrapport via e-post"],
+    features: ["Allt i Pro", "BOOST-märkning", "Topplacering i kategorin", "Månadsrapport via e-post"],
   },
 ];
 
@@ -57,10 +57,10 @@ export default function RegisterCTA() {
             För företag
           </span>
           <h2 className="text-3xl md:text-4xl font-bold text-[var(--primary)] mb-4">
-            Är ditt företag med?
+            Gratis att vara med
           </h2>
           <p className="text-[var(--muted)] max-w-xl mx-auto text-lg">
-            Tusentals lokala kunder söker just nu efter företag som ditt. Gör dig synlig — det tar två minuter.
+            Lokala kunder söker just nu efter företag som ditt. Skapa din profil och ta emot offertförfrågningar — helt utan kostnad. Det tar två minuter.
           </p>
         </div>
 
@@ -90,7 +90,7 @@ export default function RegisterCTA() {
               className={`relative rounded-2xl border-2 p-6 card-shadow ${p.color}`}
             >
               {p.badge && (
-                <span className={`absolute -top-3 left-6 text-xs font-bold px-3 py-1 rounded-full text-white ${p.name === "Pro" ? "bg-[var(--accent)]" : "bg-[var(--boost)]"}`}>
+                <span className={`absolute -top-3 left-6 text-xs font-bold px-3 py-1 rounded-full text-white ${p.name === "Gratis" ? "bg-[var(--accent)]" : "bg-[var(--boost)]"}`}>
                   {p.badge}
                 </span>
               )}
@@ -112,9 +112,9 @@ export default function RegisterCTA() {
               </ul>
               <a
                 href="/admin/logga-in"
-                className={`block text-center w-full py-2.5 rounded-xl font-medium text-sm transition-colors ${p.name === "Gratis" ? "bg-[var(--bg)] border border-[var(--border)] text-[var(--primary)] hover:bg-gray-100" : p.name === "Pro" ? "bg-[var(--accent)] text-white hover:bg-[#266B50]" : "bg-[var(--boost)] text-white hover:bg-[#B45309]"}`}
+                className={`block text-center w-full py-2.5 rounded-xl font-medium text-sm transition-colors ${p.name === "Gratis" ? "bg-[var(--accent)] text-white hover:bg-[#266B50]" : p.name === "Pro" ? "bg-[var(--bg)] border border-[var(--border)] text-[var(--primary)] hover:bg-gray-100" : "bg-[var(--boost)] text-white hover:bg-[#B45309]"}`}
               >
-                Välj {p.name}
+                {p.name === "Gratis" ? "Skapa gratis profil" : `Välj ${p.name}`}
               </a>
             </div>
           ))}
@@ -124,8 +124,8 @@ export default function RegisterCTA() {
         <div className="flex flex-col sm:flex-row items-center justify-center gap-2 text-sm text-[var(--muted)] bg-[var(--bg)] rounded-xl px-6 py-4 max-w-2xl mx-auto">
           <FileText className="w-4 h-4 flex-shrink-0 text-[var(--accent)]" />
           <span>
-            <strong className="text-[var(--primary)]">Enkelt för bokföringen.</strong>{" "}
-            Faktura skickas automatiskt varje månad. Org.nr och momsregistreringsuppgifter hämtas direkt från Bolagsverket — du fyller i minimalt.
+            <strong className="text-[var(--primary)]">Inga förpliktelser.</strong>{" "}
+            Grundprofilen är gratis för alltid — inget kort, ingen bindningstid. Vill du synas mer kan du när som helst uppgradera till Pro eller Boost.
           </span>
         </div>
       </div>
