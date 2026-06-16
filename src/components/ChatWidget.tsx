@@ -3,15 +3,17 @@ import { useState, useRef, useEffect } from "react";
 import { MessageCircle, X, Send, Loader2, CheckCircle } from "lucide-react";
 import { Business, Category } from "@/lib/data";
 import { ChatMessage, ReadyPayload, extractReady, toApiMessages } from "@/lib/chat";
+import AdCard, { Ad } from "./AdCard";
 
 type Props = {
   businesses: Business[];
   categories: Category[];
+  ads: Ad[];
 };
 
 type Step = "chat" | "contact" | "confirm" | "done";
 
-export default function ChatWidget({ businesses, categories }: Props) {
+export default function ChatWidget({ businesses, categories, ads }: Props) {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
@@ -169,6 +171,11 @@ export default function ChatWidget({ businesses, categories }: Props) {
 
   const selectedBusinesses = businesses.filter((b) => ready?.businessIds.includes(b.id));
 
+  // Pick a relevant ad once READY fires: prefer category match, fall back to any
+  const chatAd = ready
+    ? (ads.find((a) => a.category_id === ready.categoryId) ?? ads.find((a) => !a.category_id) ?? null)
+    : null;
+
   return (
     <>
       {/* Floating button */}
@@ -227,6 +234,11 @@ export default function ChatWidget({ businesses, categories }: Props) {
                 </div>
               </div>
             ))}
+
+            {/* Contextual ad — shown once AI has matched a category */}
+            {chatAd && step === "chat" && (
+              <AdCard ad={chatAd} variant="chat" />
+            )}
 
             {/* Contact form step */}
             {ready && step === "chat" && (

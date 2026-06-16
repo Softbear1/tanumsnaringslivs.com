@@ -3,45 +3,32 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Category, Business, getCategory } from "@/lib/data";
 import { filterBusinesses, sortBoostedFirst } from "@/lib/directory";
 import BusinessCard from "./BusinessCard";
+import AdCard, { Ad } from "./AdCard";
 import { SlidersHorizontal } from "lucide-react";
-
-const AD_POSITIONS = [5, 12]; // inject mock ad at these indices
-
-const mockAd: Business = {
-  id: "ad-1",
-  name: "Bohus Fönster & Dörr",
-  categoryId: "bygg",
-  description: "Sveriges ledande fönsterleverantör nu även i Tanum. Energieffektiva lösningar med 10 års garanti och fritt montage i hela Bohuslän.",
-  phone: "020-123 456",
-  email: "tanum@bohusfonsterdorr.se",
-  website: "www.bohusfonsterdorr.se",
-  address: "Riksvägen 44, Tanumshede",
-  initials: "BF",
-  boosted: true,
-  featured: false,
-  rating: 4.7,
-  reviewCount: 203,
-};
 
 type Props = {
   categories: Category[];
   businesses: Business[];
+  ads: Ad[];
   categoryFilter: string | null;
   search: string;
 };
 
-export default function BusinessGrid({ categories, businesses, categoryFilter, search }: Props) {
+export default function BusinessGrid({ categories, businesses, ads, categoryFilter, search }: Props) {
   const filtered = filterBusinesses(businesses, categories, categoryFilter, search);
-
-  // Sort: boosted first
   const sorted = sortBoostedFirst(filtered);
 
-  // Inject ad cards
-  const items: (typeof sorted[0] | { isAd: true; id: string })[] = [];
-  sorted.forEach((b, i) => {
-    items.push(b);
-    if (!categoryFilter && !search && AD_POSITIONS.includes(i + 1)) {
-      items.push({ isAd: true, id: `ad-slot-${i}` });
+  // Inject one ad every 3rd position (indices 2, 5, 8 …) only when not filtering
+  type GridItem = { type: "business"; item: typeof sorted[0] } | { type: "ad"; item: Ad; key: string };
+  const items: GridItem[] = [];
+  let adIndex = 0;
+
+  sorted.forEach((biz, i) => {
+    items.push({ type: "business", item: biz });
+    if (!categoryFilter && !search && (i + 1) % 3 === 0 && ads.length > 0) {
+      const ad = ads[adIndex % ads.length];
+      items.push({ type: "ad", item: ad, key: `ad-slot-${i}` });
+      adIndex++;
     }
   });
 
@@ -86,30 +73,30 @@ export default function BusinessGrid({ categories, businesses, categoryFilter, s
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           <AnimatePresence mode="popLayout">
             {items.map((item, idx) => {
-              if ("isAd" in item) {
+              if (item.type === "ad") {
                 return (
                   <motion.div
-                    key={item.id}
+                    key={item.key}
                     layout
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.95 }}
                     transition={{ duration: 0.2 }}
                   >
-                    <BusinessCard business={mockAd} categories={categories} isAd />
+                    <AdCard ad={item.item} variant="gallery" />
                   </motion.div>
                 );
               }
               return (
                 <motion.div
-                  key={item.id}
+                  key={item.item.id}
                   layout
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ duration: 0.2, delay: Math.min(idx * 0.03, 0.2) }}
                 >
-                  <BusinessCard business={item} categories={categories} />
+                  <BusinessCard business={item.item} categories={categories} />
                 </motion.div>
               );
             })}

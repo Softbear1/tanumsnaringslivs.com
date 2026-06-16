@@ -4,13 +4,15 @@ import { Category, Business } from "@/lib/data";
 import Hero from "./Hero";
 import CategoryGrid from "./CategoryGrid";
 import BusinessGrid from "./BusinessGrid";
+import type { Ad } from "./AdCard";
 
 type Props = {
   categories: Category[];
   businesses: Business[];
+  ads: Ad[];
 };
 
-export default function DirectoryClient({ categories, businesses }: Props) {
+export default function DirectoryClient({ categories, businesses, ads }: Props) {
   const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
   const [search, setSearch] = useState("");
 
@@ -36,6 +38,7 @@ export default function DirectoryClient({ categories, businesses }: Props) {
       <BusinessGrid
         categories={categories}
         businesses={businesses}
+        ads={ads}
         categoryFilter={categoryFilter}
         search={search}
       />

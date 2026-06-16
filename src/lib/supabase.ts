@@ -141,6 +141,48 @@ export type Database = {
         };
         Relationships: [];
       };
+      ads: {
+        Row: {
+          id: string;
+          business_id: string;
+          headline: string;
+          body: string | null;
+          cta_label: string | null;
+          cta_url: string | null;
+          category_id: string | null;
+          active: boolean;
+          starts_at: string | null;
+          ends_at: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          business_id: string;
+          headline: string;
+          body?: string | null;
+          cta_label?: string | null;
+          cta_url?: string | null;
+          category_id?: string | null;
+          active?: boolean;
+          starts_at?: string | null;
+          ends_at?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          business_id?: string;
+          headline?: string;
+          body?: string | null;
+          cta_label?: string | null;
+          cta_url?: string | null;
+          category_id?: string | null;
+          active?: boolean;
+          starts_at?: string | null;
+          ends_at?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       quote_request_businesses: {
         Row: {
           quote_request_id: string;
