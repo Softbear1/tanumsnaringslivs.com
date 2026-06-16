@@ -2,35 +2,12 @@
 import { useState, useRef, useEffect } from "react";
 import { MessageCircle, X, Send, Loader2, CheckCircle } from "lucide-react";
 import { Business, Category } from "@/lib/data";
-
-interface ChatMessage {
-  role: "user" | "assistant";
-  content: string;
-}
-
-interface ReadyPayload {
-  businessIds: string[];
-  summary: string;
-  categoryId: string | null;
-}
+import { ChatMessage, ReadyPayload, extractReady, toApiMessages } from "@/lib/chat";
 
 type Props = {
   businesses: Business[];
   categories: Category[];
 };
-
-// Parse READY:{...} marker from assistant message
-function extractReady(text: string): { clean: string; payload: ReadyPayload | null } {
-  const idx = text.lastIndexOf("READY:");
-  if (idx === -1) return { clean: text, payload: null };
-  try {
-    const json = text.slice(idx + 6).trim();
-    const payload = JSON.parse(json) as ReadyPayload;
-    return { clean: text.slice(0, idx).trim(), payload };
-  } catch {
-    return { clean: text, payload: null };
-  }
-}
 
 type Step = "chat" | "contact" | "confirm" | "done";
 
@@ -85,20 +62,24 @@ export default function ChatWidget({ businesses, categories }: Props) {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: msgs, businesses: bizForAI, categories: catForAI }),
+        body: JSON.stringify({ messages: toApiMessages(msgs), businesses: bizForAI, categories: catForAI }),
       });
 
       if (!res.ok || !res.body) throw new Error("Fel från AI");
 
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
+      let buffer = "";
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
 
-        const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk.split("\n");
+        buffer += decoder.decode(value, { stream: true });
+        // Keep the trailing partial line in the buffer until the next read so we
+        // never try to JSON.parse a line that was split across chunk boundaries.
+        const lines = buffer.split("\n");
+        buffer = lines.pop() ?? "";
 
         for (const line of lines) {
           if (!line.startsWith("data: ")) continue;
