@@ -65,7 +65,15 @@ export default function ChatWidget({ businesses, categories }: Props) {
         body: JSON.stringify({ messages: toApiMessages(msgs), businesses: bizForAI, categories: catForAI }),
       });
 
-      if (!res.ok || !res.body) throw new Error("Fel från AI");
+      if (!res.ok) {
+        let detail = "";
+        try {
+          const body = (await res.json()) as { error?: unknown };
+          detail = typeof body.error === "string" ? body.error : JSON.stringify(body.error);
+        } catch { /* non-JSON error body */ }
+        throw new Error(detail || `AI-tjänsten svarade med fel (${res.status})`);
+      }
+      if (!res.body) throw new Error("Fel från AI");
 
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
@@ -100,12 +108,15 @@ export default function ChatWidget({ businesses, categories }: Props) {
           } catch { /* skip malformed chunks */ }
         }
       }
-    } catch {
+    } catch (err) {
+      const detail = err instanceof Error ? err.message : "";
       setMessages((prev) => {
         const updated = [...prev];
         updated[updated.length - 1] = {
           role: "assistant",
-          content: "Något gick fel. Försök igen.",
+          content: detail
+            ? `Något gick fel: ${detail}`
+            : "Något gick fel. Försök igen.",
         };
         return updated;
       });
