@@ -77,7 +77,7 @@ export default async function ForetagPage({ params }: PageProps) {
       addressLocality: "Tanum",
       addressCountry: "SE",
     },
-    ...(business.website ? { url: `https://${business.website}` } : {}),
+    ...(business.website ? { url: business.website.startsWith("http") ? business.website : `https://${business.website}` } : {}),
     aggregateRating: {
       "@type": "AggregateRating",
       ratingValue: business.rating,
@@ -177,7 +177,7 @@ export default async function ForetagPage({ params }: PageProps) {
                 </a>
                 {business.website && (
                   <a
-                    href={`https://${business.website}`}
+                    href={business.website.startsWith("http") ? business.website : `https://${business.website}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-3 p-4 rounded-xl bg-[var(--bg)] hover:bg-gray-100 transition-colors"
@@ -185,7 +185,7 @@ export default async function ForetagPage({ params }: PageProps) {
                     <Globe className="w-5 h-5 text-[var(--accent)] flex-shrink-0" />
                     <div className="min-w-0">
                       <div className="text-xs text-[var(--muted)]">Webbplats</div>
-                      <div className="text-sm font-medium text-[var(--primary)] truncate">{business.website}</div>
+                      <div className="text-sm font-medium text-[var(--primary)] truncate">{business.website.replace(/^https?:\/\//, "")}</div>
                     </div>
                   </a>
                 )}

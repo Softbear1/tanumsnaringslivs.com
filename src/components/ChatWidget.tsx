@@ -182,22 +182,22 @@ export default function ChatWidget({ businesses, categories, ads, greeting }: Pr
       {/* Floating button */}
       <button
         onClick={() => setOpen(true)}
-        className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 bg-[var(--primary)] text-white pl-4 pr-5 py-3 rounded-2xl shadow-lg hover:bg-[var(--primary)]/90 hover:scale-[1.02] transition-all duration-200 ${open ? "opacity-0 pointer-events-none" : "opacity-100"}`}
+        className={`fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 flex items-center gap-3 max-w-[calc(100vw-2rem)] bg-[var(--primary)] text-white pl-4 pr-5 py-3 rounded-2xl shadow-lg hover:bg-[var(--primary)]/90 hover:scale-[1.02] transition-all duration-200 ${open ? "opacity-0 pointer-events-none" : "opacity-100"}`}
         aria-label="Få gratis offert – beskriv ditt projekt"
       >
         <div className="relative shrink-0">
           <MessageCircle className="w-6 h-6" />
           <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-[var(--accent)] ring-2 ring-[var(--primary)]" />
         </div>
-        <span className="flex flex-col items-start leading-tight text-left">
+        <span className="flex flex-col items-start leading-tight text-left min-w-0">
           <span className="text-sm font-bold">Få offert – gratis</span>
-          <span className="text-[11px] text-white/75">Beskriv ditt projekt, vi hittar företaget</span>
+          <span className="text-[11px] text-white/75 truncate max-w-full">Beskriv ditt projekt, vi hittar företaget</span>
         </span>
       </button>
 
       {/* Chat panel */}
       {open && (
-        <div className="fixed bottom-6 right-6 z-50 w-[min(420px,calc(100vw-24px))] bg-white rounded-2xl shadow-2xl border border-[var(--border)] flex flex-col overflow-hidden"
+        <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 w-[min(420px,calc(100vw-2rem))] bg-white rounded-2xl shadow-2xl border border-[var(--border)] flex flex-col overflow-hidden"
           style={{ maxHeight: "min(600px, calc(100vh - 48px))" }}>
 
           {/* Header */}
@@ -307,7 +307,7 @@ export default function ChatWidget({ businesses, categories, ads, greeting }: Pr
                   <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--muted)] mb-1.5">Dina uppgifter</p>
                   <dl className="text-xs space-y-1">
                     <div className="flex gap-2"><dt className="text-[var(--muted)] w-14 shrink-0">Namn</dt><dd className="text-[var(--primary)] font-medium">{contact.name}</dd></div>
-                    <div className="flex gap-2"><dt className="text-[var(--muted)] w-14 shrink-0">E-post</dt><dd className="text-[var(--primary)] font-medium">{contact.email}</dd></div>
+                    <div className="flex gap-2"><dt className="text-[var(--muted)] w-14 shrink-0">E-post</dt><dd className="text-[var(--primary)] font-medium break-all min-w-0">{contact.email}</dd></div>
                     {contact.phone && <div className="flex gap-2"><dt className="text-[var(--muted)] w-14 shrink-0">Telefon</dt><dd className="text-[var(--primary)] font-medium">{contact.phone}</dd></div>}
                   </dl>
                 </div>
@@ -343,7 +343,7 @@ export default function ChatWidget({ businesses, categories, ads, greeting }: Pr
                 <CheckCircle className="w-10 h-10 text-green-500 mx-auto mb-3" />
                 <p className="font-semibold text-[var(--primary)] mb-1">Förfrågan skickad!</p>
                 <p className="text-sm text-[var(--muted)]">
-                  Kolla din e-post — vi har skickat en länk till din offert på <strong>{contact.email}</strong>.
+                  Kolla din e-post — vi har skickat en länk till din offert på <strong className="break-all">{contact.email}</strong>.
                 </p>
               </div>
             )}

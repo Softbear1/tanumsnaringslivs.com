@@ -27,7 +27,7 @@ export default function BusinessCard({ business, categories, isAd }: Props) {
       <div className="p-5">
         {/* Header row */}
         <div className="flex items-start justify-between mb-4">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 min-w-0">
             {/* Logo circle */}
             <div
               className="w-12 h-12 rounded-xl flex items-center justify-center font-bold text-sm flex-shrink-0"
@@ -35,9 +35,9 @@ export default function BusinessCard({ business, categories, isAd }: Props) {
             >
               {business.initials}
             </div>
-            <div>
+            <div className="min-w-0">
               <Link href={`/foretag/${business.id}`} className="group/name">
-                <h3 className="font-semibold text-[var(--primary)] text-base leading-tight group-hover/name:text-[var(--accent)] transition-colors">
+                <h3 className="font-semibold text-[var(--primary)] text-base leading-tight group-hover/name:text-[var(--accent)] transition-colors line-clamp-2">
                   {business.name}
                 </h3>
               </Link>
@@ -106,13 +106,13 @@ export default function BusinessCard({ business, categories, isAd }: Props) {
           </a>
           {business.website && (
             <a
-              href={`https://${business.website}`}
+              href={business.website.startsWith("http") ? business.website : `https://${business.website}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2.5 text-sm text-[var(--muted)] hover:text-[var(--accent)] transition-colors group/link"
+              className="flex items-center gap-2.5 text-sm text-[var(--muted)] hover:text-[var(--accent)] transition-colors group/link min-w-0"
             >
               <Globe className="w-4 h-4 flex-shrink-0" />
-              <span className="truncate">{business.website}</span>
+              <span className="truncate">{business.website.replace(/^https?:\/\//, "")}</span>
             </a>
           )}
           <div className="flex items-center gap-2.5 text-sm text-[var(--muted)]">
@@ -123,7 +123,7 @@ export default function BusinessCard({ business, categories, isAd }: Props) {
 
         <Link
           href={`/foretag/${business.id}`}
-          className="mt-4 block w-full text-center text-sm font-medium text-[var(--accent)] border border-[var(--accent)]/30 rounded-xl py-2 hover:bg-[var(--accent)] hover:text-white transition-colors"
+          className="mt-4 block w-full text-center text-sm font-medium text-[var(--accent)] border border-[var(--accent)]/30 rounded-xl py-2.5 hover:bg-[var(--accent)] hover:text-white transition-colors"
         >
           Visa profil
         </Link>

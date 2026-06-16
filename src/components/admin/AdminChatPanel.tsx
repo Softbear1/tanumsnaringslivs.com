@@ -106,7 +106,7 @@ export default function AdminChatPanel<T>({
   }
 
   return (
-    <div className="flex flex-col h-[28rem]">
+    <div className="flex flex-col h-[28rem] max-h-[70vh]">
       <div className="flex items-center gap-2 mb-3 text-sm text-[var(--muted)]">
         <Sparkles className="w-4 h-4 text-[var(--accent)]" />
         {hint}

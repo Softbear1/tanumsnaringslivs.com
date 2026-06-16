@@ -105,9 +105,9 @@ export default async function OffertPage({ params }: PageProps) {
                     <div className="w-9 h-9 rounded-xl bg-[var(--primary)]/10 text-[var(--primary)] flex items-center justify-center text-xs font-bold shrink-0">
                       {biz.initials}
                     </div>
-                    <div>
-                      <p className="text-sm font-medium text-[var(--primary)]">{biz.name}</p>
-                      <p className="text-xs text-[var(--muted)]">{biz.email} · {biz.phone}</p>
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-[var(--primary)] truncate">{biz.name}</p>
+                      <p className="text-xs text-[var(--muted)] break-words">{biz.email} · {biz.phone}</p>
                     </div>
                   </div>
                 ))}
@@ -149,7 +149,7 @@ export default async function OffertPage({ params }: PageProps) {
               </div>
               <div className="flex gap-3">
                 <dt className="text-[var(--muted)] w-20 shrink-0">E-post</dt>
-                <dd className="text-[var(--primary)] font-medium">{quote.contact_email}</dd>
+                <dd className="text-[var(--primary)] font-medium break-all min-w-0">{quote.contact_email}</dd>
               </div>
               {quote.contact_phone && (
                 <div className="flex gap-3">

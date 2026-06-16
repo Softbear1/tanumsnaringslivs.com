@@ -262,10 +262,10 @@ export default function EditBusinessClient({ business, categories, ads }: Props)
                       </div>
                     </div>
                     <div className="flex items-center gap-1.5 shrink-0">
-                      <button onClick={() => handleToggleAd(ad.id, ad.active)} className="p-1.5 text-[var(--muted)] hover:text-[var(--primary)] border border-[var(--border)] rounded-lg transition-colors" title={ad.active ? "Pausa" : "Aktivera"}>
+                      <button onClick={() => handleToggleAd(ad.id, ad.active)} className="p-2.5 text-[var(--muted)] hover:text-[var(--primary)] border border-[var(--border)] rounded-lg transition-colors" title={ad.active ? "Pausa" : "Aktivera"}>
                         {ad.active ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
                       </button>
-                      <button onClick={() => handleDeleteAd(ad.id)} className="p-1.5 text-[var(--muted)] hover:text-red-600 border border-[var(--border)] rounded-lg transition-colors" title="Ta bort">
+                      <button onClick={() => handleDeleteAd(ad.id)} className="p-2.5 text-[var(--muted)] hover:text-red-600 border border-[var(--border)] rounded-lg transition-colors" title="Ta bort">
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </div>

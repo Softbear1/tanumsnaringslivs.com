@@ -182,7 +182,7 @@ export default async function AdminPage() {
                       href={`/foretag/${biz.id}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="p-2 text-[var(--muted)] hover:text-[var(--accent)] border border-[var(--border)] rounded-lg transition-colors"
+                      className="p-2.5 text-[var(--muted)] hover:text-[var(--accent)] border border-[var(--border)] rounded-lg transition-colors"
                       title="Visa publik profil"
                     >
                       <ExternalLink className="w-4 h-4" />
@@ -190,7 +190,7 @@ export default async function AdminPage() {
                     <form action={toggleActive.bind(null, biz.id, biz.active)}>
                       <button
                         type="submit"
-                        className="p-2 text-[var(--muted)] hover:text-[var(--primary)] border border-[var(--border)] rounded-lg transition-colors"
+                        className="p-2.5 text-[var(--muted)] hover:text-[var(--primary)] border border-[var(--border)] rounded-lg transition-colors"
                         title={biz.active ? "Pausa företaget" : "Aktivera företaget"}
                       >
                         {biz.active ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}

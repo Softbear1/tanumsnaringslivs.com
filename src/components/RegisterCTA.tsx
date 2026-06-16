@@ -29,7 +29,7 @@ const included = [
 export default function RegisterCTA() {
   return (
     <section id="registrera" className="bg-white border-t border-[var(--border)]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-20">
         <div className="text-center mb-12">
           <span className="inline-block text-xs font-semibold tracking-widest uppercase text-[var(--accent)] mb-3">
             För företag

@@ -68,7 +68,7 @@ export default function ReviewForm({ quoteRequestId, businessId, businessName, b
             onMouseEnter={() => setHover(n)}
             onMouseLeave={() => setHover(0)}
             aria-label={`${n} av 5`}
-            className="p-0.5"
+            className="p-1.5"
           >
             <Star
               className="w-7 h-7 transition-colors"

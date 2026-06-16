@@ -26,7 +26,7 @@ export default function Hero({ search, onSearch, theme }: Props) {
       />
       <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-[#1B3A4B] opacity-30 rounded-full blur-3xl" />
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-20 md:py-28">
         <div className="max-w-2xl">
           <span
             className="inline-flex items-center gap-1.5 mb-5 px-3 py-1 rounded-full text-xs font-semibold text-white/90 ring-1 ring-white/15"
