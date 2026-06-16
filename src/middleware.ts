@@ -32,8 +32,13 @@ export async function middleware(request: NextRequest) {
   if (isLoginPage && user) {
     return NextResponse.redirect(new URL("/admin", request.url));
   }
+  if (path.startsWith("/offert") && !user) {
+    const loginUrl = new URL("/admin/logga-in", request.url);
+    loginUrl.searchParams.set("next", path);
+    return NextResponse.redirect(loginUrl);
+  }
 
   return supabaseResponse;
 }
 
-export const config = { matcher: ["/admin/:path*"] };
+export const config = { matcher: ["/admin/:path*", "/offert/:path*"] };

@@ -105,6 +105,60 @@ export type Database = {
         };
         Relationships: [];
       };
+      quote_requests: {
+        Row: {
+          id: string;
+          summary: string;
+          category_id: string | null;
+          contact_name: string;
+          contact_email: string;
+          contact_phone: string | null;
+          details: Record<string, unknown> | null;
+          status: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          summary: string;
+          category_id?: string | null;
+          contact_name: string;
+          contact_email: string;
+          contact_phone?: string | null;
+          details?: Record<string, unknown> | null;
+          status?: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          summary?: string;
+          category_id?: string | null;
+          contact_name?: string;
+          contact_email?: string;
+          contact_phone?: string | null;
+          details?: Record<string, unknown> | null;
+          status?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      quote_request_businesses: {
+        Row: {
+          quote_request_id: string;
+          business_id: string;
+          notified_at: string;
+        };
+        Insert: {
+          quote_request_id: string;
+          business_id: string;
+          notified_at?: string;
+        };
+        Update: {
+          quote_request_id?: string;
+          business_id?: string;
+          notified_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
