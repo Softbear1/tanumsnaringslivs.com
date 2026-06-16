@@ -87,13 +87,26 @@ export async function POST(request: NextRequest) {
   // an anonymous visitor has no RLS SELECT access to the new quote.
   const quoteId = crypto.randomUUID();
 
+  // Derive the category from the selected businesses instead of trusting the
+  // AI's categoryId — the model can hallucinate ids that don't exist, which
+  // would violate the quote_requests_category_id_fkey foreign key. A business's
+  // own category_id is guaranteed to exist in the categories table.
+  let categoryId: string | null = null;
+  if (payload.businessIds.length > 0) {
+    const { data: bizCats } = await supabase
+      .from("businesses")
+      .select("category_id")
+      .in("id", payload.businessIds);
+    categoryId = bizCats?.[0]?.category_id ?? null;
+  }
+
   // 1. Save quote request
   const { error: quoteError } = await supabase
     .from("quote_requests")
     .insert({
       id: quoteId,
       summary: payload.summary,
-      category_id: payload.categoryId,
+      category_id: categoryId,
       contact_name: payload.contactName,
       contact_email: payload.contactEmail,
       contact_phone: payload.contactPhone || null,
