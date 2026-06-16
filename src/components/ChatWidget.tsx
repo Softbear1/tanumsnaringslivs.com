@@ -174,11 +174,17 @@ export default function ChatWidget({ businesses, categories }: Props) {
       {/* Floating button */}
       <button
         onClick={() => setOpen(true)}
-        className={`fixed bottom-6 right-6 z-50 flex items-center gap-2.5 bg-[var(--primary)] text-white px-4 py-3 rounded-2xl shadow-lg hover:bg-[var(--primary)]/90 transition-all duration-200 ${open ? "opacity-0 pointer-events-none" : "opacity-100"}`}
-        aria-label="Öppna AI-assistent"
+        className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 bg-[var(--primary)] text-white pl-4 pr-5 py-3 rounded-2xl shadow-lg hover:bg-[var(--primary)]/90 hover:scale-[1.02] transition-all duration-200 ${open ? "opacity-0 pointer-events-none" : "opacity-100"}`}
+        aria-label="Få gratis offert – beskriv ditt projekt"
       >
-        <MessageCircle className="w-5 h-5" />
-        <span className="text-sm font-semibold">Få hjälp av AI</span>
+        <div className="relative shrink-0">
+          <MessageCircle className="w-6 h-6" />
+          <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-[var(--accent)] ring-2 ring-[var(--primary)]" />
+        </div>
+        <span className="flex flex-col items-start leading-tight text-left">
+          <span className="text-sm font-bold">Få offert – gratis</span>
+          <span className="text-[11px] text-white/75">Beskriv ditt projekt, vi hittar företaget</span>
+        </span>
       </button>
 
       {/* Chat panel */}
