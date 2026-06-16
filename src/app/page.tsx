@@ -1,5 +1,5 @@
 export const runtime = "edge";
-import { getDirectoryData } from "@/lib/fetch";
+import { getDirectoryData, getSeasonalTheme } from "@/lib/fetch";
 import { createServerClient } from "@/lib/supabase-server";
 import Header from "@/components/Header";
 import DirectoryClient from "@/components/DirectoryClient";
@@ -10,6 +10,7 @@ import type { Ad } from "@/components/AdCard";
 
 export default async function Home() {
   const { categories, businesses } = await getDirectoryData();
+  const theme = await getSeasonalTheme();
 
   // Fetch active ads, then enrich with business name/initials
   const supabase = await createServerClient();
@@ -45,11 +46,12 @@ export default async function Home() {
           categories={categories}
           businesses={businesses}
           ads={ads}
+          theme={theme}
         />
         <RegisterCTA />
       </main>
       <Footer />
-      <ChatWidget businesses={businesses} categories={categories} ads={ads} />
+      <ChatWidget businesses={businesses} categories={categories} ads={ads} greeting={theme.chatGreeting} />
     </>
   );
 }

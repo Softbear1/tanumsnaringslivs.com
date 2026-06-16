@@ -1,5 +1,12 @@
 import { createServerClient } from "@/lib/supabase-server";
 import { staticCategories, staticBusinesses, Category, Business } from "@/lib/data";
+import {
+  getSeasonTheme,
+  applySeasonalContent,
+  isoWeekKey,
+  type SeasonTheme,
+  type SeasonalContent,
+} from "@/lib/season";
 
 function mapBusiness(b: Record<string, unknown>): Business {
   return {
@@ -52,6 +59,37 @@ export async function getDirectoryData(): Promise<{ categories: Category[]; busi
   }
 
   return { categories, businesses };
+}
+
+// Resolve the current season theme, layering AI-generated copy for this ISO week
+// on top when it's been cached. Always returns a usable theme — the deterministic
+// fallback means the site looks seasonal even with no DB and no AI.
+export async function getSeasonalTheme(now: Date = new Date()): Promise<SeasonTheme> {
+  const base = getSeasonTheme(now);
+
+  try {
+    const supabase = await createServerClient();
+    const { data } = await supabase
+      .from("seasonal_content")
+      .select("*")
+      .eq("week_key", isoWeekKey(now))
+      .maybeSingle();
+
+    if (data) {
+      const content: SeasonalContent = {
+        heroTitle: data.hero_title,
+        heroSubtitle: data.hero_subtitle,
+        spotlightTitle: data.spotlight_title,
+        spotlightBody: data.spotlight_body,
+        chatGreeting: data.chat_greeting,
+      };
+      return applySeasonalContent(base, content);
+    }
+  } catch {
+    // Fall back to the deterministic theme when Supabase isn't reachable.
+  }
+
+  return base;
 }
 
 export async function getBusiness(id: string): Promise<{ business: Business | null; categories: Category[] }> {

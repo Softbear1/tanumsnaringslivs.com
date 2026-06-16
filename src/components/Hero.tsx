@@ -1,12 +1,14 @@
 "use client";
 import { Search } from "lucide-react";
+import type { SeasonTheme } from "@/lib/season";
 
 type Props = {
   search: string;
   onSearch: (v: string) => void;
+  theme: SeasonTheme;
 };
 
-export default function Hero({ search, onSearch }: Props) {
+export default function Hero({ search, onSearch, theme }: Props) {
   return (
     <section className="relative overflow-hidden bg-[var(--primary)] text-white">
       {/* Subtle pattern overlay */}
@@ -17,19 +19,27 @@ export default function Hero({ search, onSearch }: Props) {
           backgroundSize: "32px 32px",
         }}
       />
-      {/* Glow */}
-      <div className="absolute -top-32 -right-32 w-96 h-96 bg-[var(--accent)] opacity-20 rounded-full blur-3xl" />
+      {/* Glow — tinted by the current season */}
+      <div
+        className="absolute -top-32 -right-32 w-96 h-96 opacity-20 rounded-full blur-3xl"
+        style={{ backgroundColor: theme.glow }}
+      />
       <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-[#1B3A4B] opacity-30 rounded-full blur-3xl" />
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28">
         <div className="max-w-2xl">
+          <span
+            className="inline-flex items-center gap-1.5 mb-5 px-3 py-1 rounded-full text-xs font-semibold text-white/90 ring-1 ring-white/15"
+            style={{ backgroundColor: `${theme.glow}22` }}
+          >
+            <span aria-hidden>{theme.emoji}</span> {theme.label} på Bohuskusten
+          </span>
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.1] mb-4">
-            Hitta rätt företag{" "}
-            <span className="text-[#6ECFA8]">i Tanum</span>
+            {theme.heroTitle}{" "}
+            <span style={{ color: theme.glow }}>{theme.heroAccentWord}</span>
           </h1>
           <p className="text-lg md:text-xl text-white/70 mb-8 leading-relaxed">
-            Bohusländsk kust, lokalt hjärta. Bläddra bland hundratals lokala företag —
-            från hantverkare till restauranger och upplevelser.
+            {theme.heroSubtitle}
           </p>
 
           <div className="relative">

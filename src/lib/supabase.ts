@@ -183,6 +183,39 @@ export type Database = {
         };
         Relationships: [];
       };
+      seasonal_content: {
+        Row: {
+          week_key: string;
+          season: string;
+          hero_title: string;
+          hero_subtitle: string;
+          spotlight_title: string;
+          spotlight_body: string;
+          chat_greeting: string;
+          generated_at: string;
+        };
+        Insert: {
+          week_key: string;
+          season: string;
+          hero_title: string;
+          hero_subtitle: string;
+          spotlight_title: string;
+          spotlight_body: string;
+          chat_greeting: string;
+          generated_at?: string;
+        };
+        Update: {
+          week_key?: string;
+          season?: string;
+          hero_title?: string;
+          hero_subtitle?: string;
+          spotlight_title?: string;
+          spotlight_body?: string;
+          chat_greeting?: string;
+          generated_at?: string;
+        };
+        Relationships: [];
+      };
       quote_request_businesses: {
         Row: {
           quote_request_id: string;

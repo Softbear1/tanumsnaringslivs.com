@@ -1,7 +1,9 @@
 "use client";
 import { useState } from "react";
 import { Category, Business } from "@/lib/data";
+import type { SeasonTheme } from "@/lib/season";
 import Hero from "./Hero";
+import SeasonSpotlight from "./SeasonSpotlight";
 import CategoryGrid from "./CategoryGrid";
 import BusinessGrid from "./BusinessGrid";
 import type { Ad } from "./AdCard";
@@ -10,9 +12,10 @@ type Props = {
   categories: Category[];
   businesses: Business[];
   ads: Ad[];
+  theme: SeasonTheme;
 };
 
-export default function DirectoryClient({ categories, businesses, ads }: Props) {
+export default function DirectoryClient({ categories, businesses, ads, theme }: Props) {
   const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
   const [search, setSearch] = useState("");
 
@@ -28,7 +31,8 @@ export default function DirectoryClient({ categories, businesses, ads }: Props) 
 
   return (
     <>
-      <Hero search={search} onSearch={handleSearch} />
+      <Hero search={search} onSearch={handleSearch} theme={theme} />
+      <SeasonSpotlight theme={theme} categories={categories} onSelect={handleCategory} />
       <CategoryGrid
         categories={categories}
         businesses={businesses}

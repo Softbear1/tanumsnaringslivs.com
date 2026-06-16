@@ -9,11 +9,12 @@ type Props = {
   businesses: Business[];
   categories: Category[];
   ads: Ad[];
+  greeting?: string;
 };
 
 type Step = "chat" | "contact" | "confirm" | "done";
 
-export default function ChatWidget({ businesses, categories, ads }: Props) {
+export default function ChatWidget({ businesses, categories, ads, greeting }: Props) {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
@@ -41,10 +42,10 @@ export default function ChatWidget({ businesses, categories, ads }: Props) {
         // Seed a hardcoded greeting client-side. We must NOT call the AI with an
         // empty messages array — the Anthropic API requires at least one user
         // message and returns 400 otherwise.
-        setMessages([{ role: "assistant", content: "Hej! Vad behöver du hjälp med?" }]);
+        setMessages([{ role: "assistant", content: greeting || "Hej! Vad behöver du hjälp med?" }]);
       }
     }
-  }, [open]);
+  }, [open, greeting]);
 
   async function sendToAI(msgs: ChatMessage[]) {
     setStreaming(true);
