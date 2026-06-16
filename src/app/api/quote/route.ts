@@ -83,10 +83,15 @@ export async function POST(request: NextRequest) {
 
   const supabase = await createServerClient();
 
+  // Generate the id here so we don't need to read the row back —
+  // an anonymous visitor has no RLS SELECT access to the new quote.
+  const quoteId = crypto.randomUUID();
+
   // 1. Save quote request
-  const { data: quote, error: quoteError } = await supabase
+  const { error: quoteError } = await supabase
     .from("quote_requests")
     .insert({
+      id: quoteId,
       summary: payload.summary,
       category_id: payload.categoryId,
       contact_name: payload.contactName,
@@ -94,12 +99,10 @@ export async function POST(request: NextRequest) {
       contact_phone: payload.contactPhone || null,
       details: payload.details,
       status: "pending",
-    })
-    .select("id")
-    .single();
+    });
 
-  if (quoteError || !quote) {
-    return new Response(JSON.stringify({ error: quoteError?.message ?? "Kunde inte spara förfrågan" }), {
+  if (quoteError) {
+    return new Response(JSON.stringify({ error: quoteError.message ?? "Kunde inte spara förfrågan" }), {
       status: 500,
       headers: { "Content-Type": "application/json" },
     });
@@ -109,7 +112,7 @@ export async function POST(request: NextRequest) {
   if (payload.businessIds.length > 0) {
     await supabase.from("quote_request_businesses").insert(
       payload.businessIds.map((bid) => ({
-        quote_request_id: quote.id,
+        quote_request_id: quoteId,
         business_id: bid,
       }))
     );
@@ -120,7 +123,7 @@ export async function POST(request: NextRequest) {
   const resendKey = process.env.RESEND_API_KEY;
 
   // 3. Send magic link to customer
-  await sendCustomerMagicLink(supabaseUrl, anonKey, payload.contactEmail, quote.id, origin);
+  await sendCustomerMagicLink(supabaseUrl, anonKey, payload.contactEmail, quoteId, origin);
 
   // 4. Notify businesses via email (if Resend is configured)
   if (resendKey && payload.businessIds.length > 0) {
@@ -132,13 +135,13 @@ export async function POST(request: NextRequest) {
     if (businesses) {
       await Promise.allSettled(
         businesses.map((biz) =>
-          sendBusinessEmail(resendKey, biz.email, biz.name, payload, quote.id, origin)
+          sendBusinessEmail(resendKey, biz.email, biz.name, payload, quoteId, origin)
         )
       );
     }
   }
 
-  return new Response(JSON.stringify({ quoteId: quote.id }), {
+  return new Response(JSON.stringify({ quoteId }), {
     status: 200,
     headers: { "Content-Type": "application/json" },
   });
