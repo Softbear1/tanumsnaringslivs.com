@@ -7,6 +7,8 @@ import RegisterCTA from "@/components/RegisterCTA";
 import Footer from "@/components/Footer";
 import ChatWidget from "@/components/ChatWidget";
 import type { Ad } from "@/components/AdCard";
+import type { FlashDeal, FlashTeaser } from "@/components/FlashDeals";
+import { stockholmToday, endOfStockholmDayISO, relativeDayLabel } from "@/lib/time";
 
 export default async function Home() {
   const { categories, businesses } = await getDirectoryData();
@@ -46,6 +48,50 @@ export default async function Home() {
     [ads[i], ads[j]] = [ads[j], ads[i]];
   }
 
+  // Flash deals (blixterbjudanden). Today's deals are read in full (RLS only
+  // exposes today's active rows; we also pin deal_date so a logged-in owner
+  // never sees their own future deal here). Upcoming deals come from the
+  // teaser view, which exposes business + date but never the offer itself.
+  const today = stockholmToday();
+  const [{ data: dealRows }, { data: teaserRows }] = await Promise.all([
+    supabase
+      .from("flash_deals")
+      .select("id, headline, description, business_id")
+      .eq("active", true)
+      .eq("deal_date", today),
+    supabase
+      .from("flash_deal_upcoming")
+      .select("id, business_id, deal_date")
+      .order("deal_date", { ascending: true })
+      .limit(12),
+  ]);
+
+  const dealBizIds = [
+    ...new Set([...(dealRows ?? []), ...(teaserRows ?? [])].map((r) => r.business_id as string)),
+  ];
+  const { data: dealBizRows } = dealBizIds.length
+    ? await supabase.from("businesses").select("id, name, initials").in("id", dealBizIds)
+    : { data: [] };
+  const dealBizById = Object.fromEntries((dealBizRows ?? []).map((b) => [b.id, b]));
+
+  const flashDeals: FlashDeal[] = (dealRows ?? []).map((r) => ({
+    id: r.id,
+    headline: r.headline,
+    description: r.description,
+    business_id: r.business_id,
+    business_name: dealBizById[r.business_id]?.name ?? "",
+    business_initials: dealBizById[r.business_id]?.initials ?? "?",
+  }));
+
+  const flashTeasers: FlashTeaser[] = (teaserRows ?? []).map((r) => ({
+    id: r.id as string,
+    business_name: dealBizById[r.business_id as string]?.name ?? "",
+    business_initials: dealBizById[r.business_id as string]?.initials ?? "?",
+    dayLabel: relativeDayLabel(r.deal_date as string),
+  }));
+
+  const dealsEndAt = endOfStockholmDayISO();
+
   return (
     <>
       <Header />
@@ -55,6 +101,9 @@ export default async function Home() {
           businesses={businesses}
           ads={ads}
           theme={theme}
+          flashDeals={flashDeals}
+          flashTeasers={flashTeasers}
+          dealsEndAt={dealsEndAt}
         />
         <RegisterCTA />
       </main>

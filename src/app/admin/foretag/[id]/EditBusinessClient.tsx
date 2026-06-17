@@ -6,7 +6,7 @@ import ListingChat from "@/components/admin/ListingChat";
 import AdChat from "@/components/admin/AdChat";
 import type { BusinessDraft, AdDraft } from "@/lib/chat";
 import Link from "next/link";
-import { Plus, Trash2, Pause, Play, Megaphone, Sparkles } from "lucide-react";
+import { Plus, Trash2, Pause, Play, Megaphone, Sparkles, Zap } from "lucide-react";
 
 interface Ad {
   id: string;
@@ -18,6 +18,15 @@ interface Ad {
   active: boolean;
   starts_at: string | null;
   ends_at: string | null;
+}
+
+interface FlashDeal {
+  id: string;
+  headline: string;
+  description: string | null;
+  category_id: string | null;
+  deal_date: string;
+  active: boolean;
 }
 
 interface Props {
@@ -35,6 +44,7 @@ interface Props {
   };
   categories: Array<{ id: string; name: string }>;
   ads: Ad[];
+  flashDeals: FlashDeal[];
 }
 
 function toDraft(b: Props["business"]): BusinessDraft {
@@ -50,11 +60,13 @@ function toDraft(b: Props["business"]): BusinessDraft {
   };
 }
 
-export default function EditBusinessClient({ business, categories, ads }: Props) {
+export default function EditBusinessClient({ business, categories, ads, flashDeals }: Props) {
   const [loading, setLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [adSubmitting, setAdSubmitting] = useState(false);
+  const [dealSubmitting, setDealSubmitting] = useState(false);
+  const [dealFormOpen, setDealFormOpen] = useState(false);
 
   // Business edit: chat can prefill the form. We remount the form (via formKey)
   // when a draft arrives so its defaults pick up the new values.
@@ -160,6 +172,63 @@ export default function EditBusinessClient({ business, categories, ads }: Props)
     }
     window.location.reload();
   }
+
+  async function handleCreateDeal(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setDealSubmitting(true);
+    const fd = new FormData(e.currentTarget);
+    const supabase = createBrowserClient();
+    const { error } = await supabase.from("flash_deals").insert({
+      business_id: business.id,
+      headline: fd.get("headline") as string,
+      description: (fd.get("description") as string) || null,
+      category_id: (fd.get("category_id") as string) || null,
+      deal_date: fd.get("deal_date") as string,
+      active: true,
+    });
+    setDealSubmitting(false);
+    if (error) {
+      alert("Kunde inte skapa blixterbjudandet: " + error.message);
+      return;
+    }
+    window.location.reload();
+  }
+
+  async function handleToggleDeal(dealId: string, currentlyActive: boolean) {
+    const supabase = createBrowserClient();
+    const { error } = await supabase.from("flash_deals").update({ active: !currentlyActive }).eq("id", dealId);
+    if (error) {
+      alert("Kunde inte uppdatera blixterbjudandet: " + error.message);
+      return;
+    }
+    window.location.reload();
+  }
+
+  async function handleDeleteDeal(dealId: string) {
+    const supabase = createBrowserClient();
+    const { error } = await supabase.from("flash_deals").delete().eq("id", dealId);
+    if (error) {
+      alert("Kunde inte ta bort blixterbjudandet: " + error.message);
+      return;
+    }
+    window.location.reload();
+  }
+
+  // Imorgon som default-datum i formuläret (svensk tid ~räcker med lokal här).
+  const tomorrowISO = (() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 1);
+    return d.toISOString().slice(0, 10);
+  })();
+
+  function formatDealDate(dateStr: string): string {
+    const [y, m, d] = dateStr.split("-").map(Number);
+    return new Intl.DateTimeFormat("sv-SE", { weekday: "short", day: "numeric", month: "short" }).format(
+      new Date(Date.UTC(y, m - 1, d, 12)),
+    );
+  }
+
+  const todayISO = new Date().toISOString().slice(0, 10);
 
   return (
     <div className="min-h-screen bg-[var(--background)]">
@@ -384,6 +453,140 @@ export default function EditBusinessClient({ business, categories, ads }: Props)
                 <button
                   type="button"
                   onClick={() => { setAdMode("none"); setAdDraft(null); }}
+                  className="px-4 py-2 border border-[var(--border)] text-sm text-[var(--muted)] rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Avbryt
+                </button>
+              </div>
+            </form>
+          )}
+        </div>
+
+        {/* Flash deals section */}
+        <div id="blixterbjudanden" className="bg-white rounded-2xl border border-[var(--border)] shadow-sm p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Zap className="w-5 h-5 text-amber-500 fill-amber-500" />
+              <h2 className="font-semibold text-[var(--primary)]">Blixterbjudanden</h2>
+            </div>
+            <button
+              onClick={() => setDealFormOpen((v) => !v)}
+              className="flex items-center gap-1.5 text-sm text-amber-600 border border-amber-300 px-3 py-1.5 rounded-lg hover:bg-amber-50 transition-colors font-medium"
+            >
+              <Plus className="w-4 h-4" />
+              Nytt erbjudande
+            </button>
+          </div>
+
+          <p className="text-sm text-[var(--muted)] mb-4 leading-relaxed">
+            Ett blixterbjudande är live en hel dag och visas högst upp på startsidan med en nedräkning.
+            Dagen innan ser besökarna att <em>ni</em> har ett erbjudande på gång — men inte vad det är. Det
+            lockar tillbaka folk för att inte missa det. 👀
+          </p>
+
+          {/* Existing deals */}
+          {flashDeals.length > 0 && (
+            <div className="space-y-3 mb-4">
+              {flashDeals.map((deal) => {
+                const isPast = deal.deal_date < todayISO;
+                const isToday = deal.deal_date === todayISO;
+                return (
+                  <div key={deal.id} className={`rounded-xl border p-4 ${deal.active && !isPast ? "border-amber-200 bg-amber-50/50" : "border-gray-200 bg-gray-50 opacity-60"}`}>
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm text-[var(--primary)] leading-snug">{deal.headline}</p>
+                        {deal.description && <p className="text-xs text-[var(--muted)] mt-0.5 line-clamp-1">{deal.description}</p>}
+                        <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                          <span className="text-[10px] font-semibold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">
+                            {formatDealDate(deal.deal_date)}
+                          </span>
+                          {isToday && <span className="text-[10px] font-semibold bg-red-100 text-red-700 px-2 py-0.5 rounded-full">Live idag</span>}
+                          {isPast && <span className="text-[10px] font-semibold bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">Avslutat</span>}
+                          {!deal.active && <span className="text-[10px] font-semibold bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">Pausat</span>}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <button onClick={() => handleToggleDeal(deal.id, deal.active)} className="p-2.5 text-[var(--muted)] hover:text-[var(--primary)] border border-[var(--border)] rounded-lg transition-colors" title={deal.active ? "Pausa" : "Aktivera"}>
+                          {deal.active ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+                        </button>
+                        <button onClick={() => handleDeleteDeal(deal.id)} className="p-2.5 text-[var(--muted)] hover:text-red-600 border border-[var(--border)] rounded-lg transition-colors" title="Ta bort">
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {flashDeals.length === 0 && !dealFormOpen && (
+            <p className="text-sm text-[var(--muted)] italic">Du har inga blixterbjudanden ännu.</p>
+          )}
+
+          {/* New deal form */}
+          {dealFormOpen && (
+            <form onSubmit={handleCreateDeal} className="border border-amber-200 rounded-xl p-4 space-y-3 bg-amber-50/40">
+              <h3 className="text-sm font-semibold text-[var(--primary)]">Nytt blixterbjudande</h3>
+
+              <div>
+                <label className="block text-xs font-medium text-[var(--primary)] mb-1">Erbjudande *</label>
+                <input
+                  name="headline"
+                  required
+                  placeholder='T.ex. "20% på all pizza idag"'
+                  className="w-full px-3 py-2 rounded-lg border border-[var(--border)] text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-[var(--primary)] mb-1">Beskrivning (valfri)</label>
+                <textarea
+                  name="description"
+                  rows={2}
+                  placeholder="Villkor eller detaljer..."
+                  className="w-full px-3 py-2 rounded-lg border border-[var(--border)] text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 resize-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-[var(--primary)] mb-1">Datum *</label>
+                  <input
+                    name="deal_date"
+                    type="date"
+                    required
+                    min={todayISO}
+                    defaultValue={tomorrowISO}
+                    className="w-full px-3 py-2 rounded-lg border border-[var(--border)] text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-[var(--primary)] mb-1">Kategori (valfri)</label>
+                  <select
+                    name="category_id"
+                    defaultValue=""
+                    className="w-full px-3 py-2 rounded-lg border border-[var(--border)] text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white"
+                  >
+                    <option value="">Ingen</option>
+                    {categories.map((c) => (
+                      <option key={c.id} value={c.id}>{c.name}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex gap-2 pt-1">
+                <button
+                  type="submit"
+                  disabled={dealSubmitting}
+                  className="flex-1 py-2 bg-amber-500 text-white rounded-lg text-sm font-medium hover:bg-amber-600 transition-colors disabled:opacity-60"
+                >
+                  {dealSubmitting ? "Sparar..." : "Skapa blixterbjudande"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDealFormOpen(false)}
                   className="px-4 py-2 border border-[var(--border)] text-sm text-[var(--muted)] rounded-lg hover:bg-gray-50 transition-colors"
                 >
                   Avbryt

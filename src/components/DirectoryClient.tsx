@@ -6,6 +6,7 @@ import Hero from "./Hero";
 import CategoryChips from "./CategoryChips";
 import BusinessGrid from "./BusinessGrid";
 import ChatPanel from "./ChatPanel";
+import FlashDeals, { type FlashDeal, type FlashTeaser } from "./FlashDeals";
 import type { Ad } from "./AdCard";
 
 type Props = {
@@ -13,9 +14,12 @@ type Props = {
   businesses: Business[];
   ads: Ad[];
   theme: SeasonTheme;
+  flashDeals: FlashDeal[];
+  flashTeasers: FlashTeaser[];
+  dealsEndAt: string;
 };
 
-export default function DirectoryClient({ categories, businesses, ads, theme }: Props) {
+export default function DirectoryClient({ categories, businesses, ads, theme, flashDeals, flashTeasers, dealsEndAt }: Props) {
   const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [chatPending, setChatPending] = useState<string | null>(null);
@@ -41,6 +45,7 @@ export default function DirectoryClient({ categories, businesses, ads, theme }: 
         categories={categories}
         ads={ads}
       />
+      <FlashDeals deals={flashDeals} teasers={flashTeasers} endsAt={dealsEndAt} />
       <CategoryChips
         categories={categories}
         selected={categoryFilter}

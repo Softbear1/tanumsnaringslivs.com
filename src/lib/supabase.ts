@@ -183,6 +183,50 @@ export type Database = {
         };
         Relationships: [];
       };
+      flash_deals: {
+        Row: {
+          id: string;
+          business_id: string;
+          headline: string;
+          description: string | null;
+          category_id: string | null;
+          deal_date: string;
+          active: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          business_id: string;
+          headline: string;
+          description?: string | null;
+          category_id?: string | null;
+          deal_date: string;
+          active?: boolean;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          business_id?: string;
+          headline?: string;
+          description?: string | null;
+          category_id?: string | null;
+          deal_date?: string;
+          active?: boolean;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      flash_deal_upcoming: {
+        // Vy (read-only) — exponerar bara företag + datum för kommande deals.
+        Row: {
+          id: string;
+          business_id: string;
+          deal_date: string;
+        };
+        Insert: { id?: string; business_id?: string; deal_date?: string };
+        Update: { id?: string; business_id?: string; deal_date?: string };
+        Relationships: [];
+      };
       reviews: {
         Row: {
           id: string;

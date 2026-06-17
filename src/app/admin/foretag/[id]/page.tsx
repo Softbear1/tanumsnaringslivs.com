@@ -16,10 +16,11 @@ export default async function EditForetagPage({ params }: PageProps) {
     redirect("/admin/logga-in");
   }
 
-  const [{ data: business }, { data: categories }, { data: ads }] = await Promise.all([
+  const [{ data: business }, { data: categories }, { data: ads }, { data: flashDeals }] = await Promise.all([
     supabase.from("businesses").select("*").eq("id", id).single(),
     supabase.from("categories").select("id, name").order("sort_order"),
     supabase.from("ads").select("*").eq("business_id", id).order("created_at", { ascending: false }),
+    supabase.from("flash_deals").select("*").eq("business_id", id).order("deal_date", { ascending: true }),
   ]);
 
   if (!business || business.owner_id !== user.id) {
@@ -31,6 +32,7 @@ export default async function EditForetagPage({ params }: PageProps) {
       business={business}
       categories={categories ?? []}
       ads={ads ?? []}
+      flashDeals={flashDeals ?? []}
     />
   );
 }
