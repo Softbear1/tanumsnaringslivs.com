@@ -1,7 +1,7 @@
 "use client";
 import { AnimatePresence, motion } from "framer-motion";
 import { Category, Business, getCategory } from "@/lib/data";
-import { filterBusinesses, sortBoostedFirst } from "@/lib/directory";
+import { filterBusinesses, sortBoostedFirst, selectRelevantAds } from "@/lib/directory";
 import BusinessCard from "./BusinessCard";
 import AdCard, { Ad } from "./AdCard";
 import { SlidersHorizontal } from "lucide-react";
@@ -18,19 +18,28 @@ export default function BusinessGrid({ categories, businesses, ads, categoryFilt
   const filtered = filterBusinesses(businesses, categories, categoryFilter, search);
   const sorted = sortBoostedFirst(filtered);
 
-  // Inject one ad every 3rd position (indices 2, 5, 8 …) only when not filtering
+  // Category-aware ad pool: keeps category-targeted and general ads relevant even
+  // while filtering. Each ad is shown at most once per view (cursor never wraps).
+  const pool = selectRelevantAds(ads, categoryFilter, search, filtered);
+
+  // Inject one ad every 3rd position (after the 3rd, 6th … business).
   type GridItem = { type: "business"; item: typeof sorted[0] } | { type: "ad"; item: Ad; key: string };
   const items: GridItem[] = [];
-  let adIndex = 0;
+  let cursor = 0;
 
   sorted.forEach((biz, i) => {
     items.push({ type: "business", item: biz });
-    if (!categoryFilter && !search && (i + 1) % 3 === 0 && ads.length > 0) {
-      const ad = ads[adIndex % ads.length];
-      items.push({ type: "ad", item: ad, key: `ad-slot-${i}` });
-      adIndex++;
+    if ((i + 1) % 3 === 0 && cursor < pool.length) {
+      items.push({ type: "ad", item: pool[cursor], key: `ad-${pool[cursor].id}` });
+      cursor++;
     }
   });
+
+  // Small result sets (1–2 businesses) never hit a 3rd slot — still surface one
+  // relevant ad so advertisers aren't invisible when a category is filtered.
+  if (cursor === 0 && pool.length > 0 && sorted.length > 0) {
+    items.push({ type: "ad", item: pool[0], key: `ad-${pool[0].id}` });
+  }
 
   const activeCategoryName = categoryFilter ? getCategory(categories, categoryFilter)?.name : undefined;
 

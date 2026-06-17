@@ -38,6 +38,14 @@ export default async function Home() {
     business_initials: bizById[row.business_id]?.initials ?? "?",
   }));
 
+  // Shuffle ad order server-side so different advertisers lead on different loads
+  // when there are more relevant ads than display slots. Done here (not in the
+  // client grid) to keep the SSR and hydrated order identical.
+  for (let i = ads.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [ads[i], ads[j]] = [ads[j], ads[i]];
+  }
+
   return (
     <>
       <Header />

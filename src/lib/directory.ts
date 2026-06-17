@@ -35,3 +35,29 @@ export function sortBoostedFirst(businesses: Business[]): Business[] {
 export function getCategoryCount(businesses: Business[], categoryId: string): number {
   return businesses.filter((b) => b.categoryId === categoryId).length;
 }
+
+/** Minsta annonsform som behövs för urval (matchar Ad i AdCard). */
+type AdLike = { id: string; category_id: string | null };
+
+/**
+ * Väljer vilka annonser som är relevanta för den aktuella vyn.
+ * - Kategorifilter aktivt → annonser för den kategorin + generella (null).
+ * - Sökning aktiv → generella (null) + annonser vars kategori finns bland träffarna.
+ * - Ingen filtrering → alla annonser.
+ * Generella annonser (category_id === null) är alltid relevanta, precis som i chatten.
+ */
+export function selectRelevantAds<T extends AdLike>(
+  ads: T[],
+  categoryFilter: string | null,
+  search: string,
+  filteredBusinesses: Business[]
+): T[] {
+  if (categoryFilter) {
+    return ads.filter((a) => a.category_id === categoryFilter || a.category_id === null);
+  }
+  if (search.trim()) {
+    const cats = new Set(filteredBusinesses.map((b) => b.categoryId));
+    return ads.filter((a) => a.category_id === null || (a.category_id !== null && cats.has(a.category_id)));
+  }
+  return ads;
+}

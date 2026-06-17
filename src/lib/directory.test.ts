@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { filterBusinesses, sortBoostedFirst, getCategoryCount } from "./directory";
+import { filterBusinesses, sortBoostedFirst, getCategoryCount, selectRelevantAds } from "./directory";
 import { Business, Category } from "./data";
 
 const categories: Category[] = [
@@ -94,5 +94,40 @@ describe("getCategoryCount", () => {
 
   it("returnerar 0 för kategori utan företag", () => {
     expect(getCategoryCount(data, "transport")).toBe(0);
+  });
+});
+
+describe("selectRelevantAds", () => {
+  const ads = [
+    { id: "a-bygg", category_id: "bygg" },
+    { id: "a-rest", category_id: "restaurang" },
+    { id: "a-general", category_id: null },
+  ];
+
+  it("returnerar alla annonser när inget filter eller sökning anges", () => {
+    expect(selectRelevantAds(ads, null, "", data)).toHaveLength(3);
+  });
+
+  it("visar kategoririktade + generella annonser vid kategorifilter", () => {
+    const result = selectRelevantAds(ads, "bygg", "", data);
+    expect(result.map((a) => a.id).sort()).toEqual(["a-bygg", "a-general"]);
+  });
+
+  it("visar bara generella annonser för kategori utan riktade annonser", () => {
+    const result = selectRelevantAds(ads, "transport", "", data);
+    expect(result.map((a) => a.id)).toEqual(["a-general"]);
+  });
+
+  it("visar generella + annonser vars kategori finns bland sökträffarna", () => {
+    // söker "café" → bara restaurang-företag i träfflistan
+    const hits = filterBusinesses(data, categories, null, "café");
+    const result = selectRelevantAds(ads, null, "café", hits);
+    expect(result.map((a) => a.id).sort()).toEqual(["a-general", "a-rest"]);
+  });
+
+  it("innehåller aldrig dubletter (varje annons-id en gång)", () => {
+    const result = selectRelevantAds(ads, "bygg", "", data);
+    const ids = result.map((a) => a.id);
+    expect(new Set(ids).size).toBe(ids.length);
   });
 });
