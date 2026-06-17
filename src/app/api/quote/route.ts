@@ -6,6 +6,7 @@ import { renderEmail } from "@/lib/email";
 interface QuotePayload {
   summary: string;
   categoryId: string | null;
+  flowType: string | null;
   contactName: string;
   contactEmail: string;
   contactPhone: string;
@@ -13,12 +14,31 @@ interface QuotePayload {
   details: Record<string, unknown>;
 }
 
+/** Substantiv per flödestyp för rubriker och ämnesrader i mailet. */
+const FLOW_NOUN: Record<string, { subject: string; heading: string; whatLabel: string }> = {
+  projekt: { subject: "projektförfrågan", heading: "Ny projektförfrågan 🔨", whatLabel: "Vad kunden vill göra" },
+  bokning: { subject: "bokningsförfrågan", heading: "Ny bokningsförfrågan 📅", whatLabel: "Vad kunden vill boka" },
+  tidsbokning: { subject: "tidsbokning", heading: "Ny tidsbokning 📅", whatLabel: "Vad kunden vill boka" },
+  förfrågan: { subject: "förfrågan", heading: "Ny förfrågan 🎉", whatLabel: "Vad kunden söker" },
+  ärende: { subject: "ärende", heading: "Nytt ärende 🛠️", whatLabel: "Vad det gäller" },
+  fråga: { subject: "fråga", heading: "Ny fråga 💬", whatLabel: "Vad kunden undrar" },
+};
+
+const DEFAULT_NOUN = FLOW_NOUN["förfrågan"];
+
 function escapeHtml(s: string): string {
   return s
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
+}
+
+/** Plocka ut de strukturerade detaljerna som rad-par (label, värde). */
+function detailPairs(details: Record<string, unknown>): [string, string][] {
+  return Object.entries(details ?? {})
+    .filter(([, v]) => typeof v === "string" && v.trim())
+    .map(([k, v]) => [k.charAt(0).toUpperCase() + k.slice(1), String(v)] as [string, string]);
 }
 
 async function sendBusinessEmail(
@@ -29,13 +49,20 @@ async function sendBusinessEmail(
   quoteId: string,
   origin: string,
 ) {
+  const noun = (payload.flowType && FLOW_NOUN[payload.flowType]) || DEFAULT_NOUN;
+  const pairs = detailPairs(payload.details);
+
+  const detailsText = pairs.length
+    ? `\nDetaljer:\n${pairs.map(([k, v]) => `  ${k}: ${v}`).join("\n")}\n`
+    : "";
+
   const text = `Hej ${businessName},
 
-Du har fått en ny offertförfrågan via Tanums Näringsliv.
+Du har fått en ny ${noun.subject} via Tanums Näringsliv.
 
-Vad kunden söker:
+${noun.whatLabel}:
 ${payload.summary}
-
+${detailsText}
 Kontaktuppgifter:
   Namn:    ${payload.contactName}
   E-post:  ${payload.contactEmail}
@@ -45,14 +72,24 @@ Logga in för att svara: ${origin}/admin
 
 – Tanums Näringsliv`;
 
+  const detailsHtml = pairs.length
+    ? `<div style="background:#f1f5f9;border-radius:12px;padding:16px;margin:0 0 20px;">
+        <p style="margin:0 0 8px;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:#64748b;">Detaljer</p>
+        <table style="width:100%;border-collapse:collapse;font-size:14px;color:#0f172a;">
+          ${pairs.map(([k, v]) => `<tr><td style="padding:4px 0;color:#64748b;width:120px;vertical-align:top;">${escapeHtml(k)}</td><td style="padding:4px 0;font-weight:600;">${escapeHtml(v)}</td></tr>`).join("")}
+        </table>
+      </div>`
+    : "";
+
   const html = renderEmail({
-    heading: "Ny offertförfrågan 🎉",
-    intro: `Hej ${escapeHtml(businessName)}, du har fått en ny offertförfrågan via Tanums Näringsliv.`,
+    heading: noun.heading,
+    intro: `Hej ${escapeHtml(businessName)}, du har fått en ny ${escapeHtml(noun.subject)} via Tanums Näringsliv.`,
     body: `
       <div style="background:#f1f5f9;border-radius:12px;padding:16px;margin:0 0 20px;">
-        <p style="margin:0 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:#64748b;">Vad kunden söker</p>
+        <p style="margin:0 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:#64748b;">${escapeHtml(noun.whatLabel)}</p>
         <p style="margin:0;font-size:15px;color:#0f172a;line-height:1.5;">${escapeHtml(payload.summary)}</p>
       </div>
+      ${detailsHtml}
       <table style="width:100%;border-collapse:collapse;font-size:14px;color:#0f172a;">
         <tr><td style="padding:6px 0;color:#64748b;width:90px;">Namn</td><td style="padding:6px 0;font-weight:600;">${escapeHtml(payload.contactName)}</td></tr>
         <tr><td style="padding:6px 0;color:#64748b;">E-post</td><td style="padding:6px 0;font-weight:600;"><a href="mailto:${escapeHtml(payload.contactEmail)}" style="color:#2F8765;text-decoration:none;">${escapeHtml(payload.contactEmail)}</a></td></tr>
@@ -61,6 +98,12 @@ Logga in för att svara: ${origin}/admin
     ctaLabel: "Logga in och svara",
     ctaUrl: `${origin}/admin`,
   });
+
+  // Ämnesrad: väv in nyckeldetaljer (ex. "4 pers · 21 juni") när de finns.
+  const detailSnippet = pairs.slice(0, 2).map(([, v]) => v).join(" · ");
+  const subject = detailSnippet
+    ? `Ny ${noun.subject}: ${detailSnippet}`.slice(0, 70)
+    : `Ny ${noun.subject}: ${payload.summary.slice(0, 50)}`;
 
   return fetch("https://api.resend.com/emails", {
     method: "POST",
@@ -71,7 +114,7 @@ Logga in för att svara: ${origin}/admin
     body: JSON.stringify({
       from: "Tanums Näringsliv <noreply@tanumsnaringsliv.com>",
       to,
-      subject: `Ny offertförfrågan: ${payload.summary.slice(0, 60)}`,
+      subject,
       text,
       html,
     }),

@@ -48,7 +48,7 @@ export default async function AdminPage() {
   const { data: quoteRequests } = quoteRequestIds.length
     ? await supabase
         .from("quote_requests")
-        .select("id, summary, contact_name, contact_email, contact_phone, status, created_at")
+        .select("id, summary, details, contact_name, contact_email, contact_phone, status, created_at")
         .in("id", quoteRequestIds)
         .order("created_at", { ascending: false })
         .limit(20)
@@ -266,6 +266,20 @@ export default async function AdminPage() {
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-[var(--primary)] leading-snug mb-1">{q.summary}</p>
+                      {(() => {
+                        const pairs = Object.entries((q.details ?? {}) as Record<string, unknown>)
+                          .filter(([, v]) => typeof v === "string" && v.trim());
+                        return pairs.length > 0 ? (
+                          <dl className="flex flex-wrap gap-x-4 gap-y-0.5 text-xs text-[var(--primary)] mb-1.5">
+                            {pairs.map(([k, v]) => (
+                              <div key={k} className="flex gap-1">
+                                <dt className="text-[var(--muted)] capitalize">{k}:</dt>
+                                <dd className="font-medium">{String(v)}</dd>
+                              </div>
+                            ))}
+                          </dl>
+                        ) : null;
+                      })()}
                       <p className="text-sm text-[var(--muted)]">
                         {q.contact_name} · {q.contact_email}
                         {q.contact_phone ? ` · ${q.contact_phone}` : ""}

@@ -2,8 +2,26 @@
 import { useState, useRef, useEffect } from "react";
 import { X, Send, Loader2, CheckCircle } from "lucide-react";
 import { Business, Category } from "@/lib/data";
-import { ChatMessage, ReadyPayload, extractReady, toApiMessages } from "@/lib/chat";
+import { ChatMessage, ReadyPayload, FlowType, extractReady, toApiMessages } from "@/lib/chat";
 import AdCard, { Ad } from "./AdCard";
+
+/** Ord och knapptexter per flödestyp så chatten känns rätt för varje bransch. */
+const FLOW_COPY: Record<FlowType, {
+  recipients: string;   // rubrik över företagslistan
+  toContact: string;    // knapp som leder till kontaktformuläret
+  confirmTitle: string; // rubrik i bekräftelsekortet
+  submit: string;       // submit-knappen
+  whatLabel: string;    // etikett för sammanfattningen
+}> = {
+  projekt: { recipients: "Skicka projektförfrågan till:", toContact: "Vidare →", confirmTitle: "Ditt projekt", submit: "Skicka projektförfrågan", whatLabel: "Vad du vill göra" },
+  bokning: { recipients: "Skicka bokningsförfrågan till:", toContact: "Boka →", confirmTitle: "Din bokning", submit: "Skicka bokningsförfrågan", whatLabel: "Vad du vill boka" },
+  tidsbokning: { recipients: "Boka tid hos:", toContact: "Boka tid →", confirmTitle: "Din tidsbokning", submit: "Skicka tidsbokning", whatLabel: "Vad du vill boka" },
+  förfrågan: { recipients: "Skicka förfrågan till:", toContact: "Vidare →", confirmTitle: "Din förfrågan", submit: "Skicka förfrågan", whatLabel: "Vad du söker" },
+  ärende: { recipients: "Skicka ärende till:", toContact: "Vidare →", confirmTitle: "Ditt ärende", submit: "Skicka ärende", whatLabel: "Vad det gäller" },
+  fråga: { recipients: "Skicka fråga till:", toContact: "Vidare →", confirmTitle: "Din fråga", submit: "Skicka fråga", whatLabel: "Vad du undrar" },
+};
+
+const DEFAULT_FLOW_COPY = FLOW_COPY["förfrågan"];
 
 type Props = {
   businesses: Business[];
@@ -148,7 +166,8 @@ export default function ChatPanel({ businesses, categories, ads, greeting, onClo
           contactEmail: contact.email,
           contactPhone: contact.phone,
           businessIds: ready.businessIds,
-          details: {},
+          flowType: ready.flowType ?? null,
+          details: ready.details ?? {},
         }),
       });
       const data = await res.json();
@@ -163,6 +182,8 @@ export default function ChatPanel({ businesses, categories, ads, greeting, onClo
   }
 
   const selectedBusinesses = businesses.filter((b) => ready?.businessIds.includes(b.id));
+  const copy = (ready?.flowType && FLOW_COPY[ready.flowType]) || DEFAULT_FLOW_COPY;
+  const detailEntries = Object.entries(ready?.details ?? {}).filter(([, v]) => v && v.trim());
   const chatAd = ready
     ? (ads.find((a) => a.category_id === ready.categoryId) ?? ads.find((a) => !a.category_id) ?? null)
     : null;
@@ -203,7 +224,7 @@ export default function ChatPanel({ businesses, categories, ads, greeting, onClo
 
         {ready && step === "chat" && (
           <div className="bg-[var(--accent-light)] border border-[var(--accent)]/20 rounded-2xl p-4 space-y-3">
-            <p className="text-sm font-semibold text-[var(--primary)]">Skicka offertförfrågan till:</p>
+            <p className="text-sm font-semibold text-[var(--primary)]">{copy.recipients}</p>
             {selectedBusinesses.map((b) => (
               <div key={b.id} className="flex items-center gap-2 text-sm text-[var(--primary)]">
                 <div className="w-7 h-7 rounded-lg bg-[var(--primary)]/10 flex items-center justify-center text-xs font-bold shrink-0">{b.initials}</div>
@@ -214,7 +235,7 @@ export default function ChatPanel({ businesses, categories, ads, greeting, onClo
               onClick={() => setStep("contact")}
               className="w-full py-2.5 bg-[var(--accent)] text-white rounded-xl text-sm font-semibold hover:bg-[var(--accent)]/90 transition-colors"
             >
-              Ange kontaktuppgifter →
+              {copy.toContact}
             </button>
           </div>
         )}
@@ -241,11 +262,24 @@ export default function ChatPanel({ businesses, categories, ads, greeting, onClo
 
         {step === "confirm" && ready && (
           <div className="bg-white border border-[var(--border)] rounded-2xl p-4 space-y-4 card-shadow">
-            <p className="text-sm font-semibold text-[var(--primary)]">Bekräfta din förfrågan</p>
+            <p className="text-sm font-semibold text-[var(--primary)]">{copy.confirmTitle}</p>
             <div className="bg-[var(--bg)] rounded-xl p-3">
-              <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--muted)] mb-1">Vad du söker</p>
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--muted)] mb-1">{copy.whatLabel}</p>
               <p className="text-sm text-[var(--primary)] leading-relaxed">{ready.summary}</p>
             </div>
+            {detailEntries.length > 0 && (
+              <div className="bg-[var(--bg)] rounded-xl p-3">
+                <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--muted)] mb-1.5">Detaljer</p>
+                <dl className="text-xs space-y-1">
+                  {detailEntries.map(([k, v]) => (
+                    <div key={k} className="flex gap-2">
+                      <dt className="text-[var(--muted)] w-24 shrink-0 capitalize">{k}</dt>
+                      <dd className="font-medium text-[var(--primary)] min-w-0">{v}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
+            )}
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--muted)] mb-1.5">Dina uppgifter</p>
               <dl className="text-xs space-y-1">
@@ -268,7 +302,7 @@ export default function ChatPanel({ businesses, categories, ads, greeting, onClo
             <button onClick={handleSubmitQuote} disabled={submitting}
               className="w-full py-2.5 bg-[var(--primary)] text-white rounded-xl text-sm font-semibold hover:bg-[var(--primary)]/90 transition-colors disabled:opacity-60 flex items-center justify-center gap-2">
               {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
-              {submitting ? "Skickar..." : "Skicka offertförfrågan"}
+              {submitting ? "Skickar..." : copy.submit}
             </button>
             <button onClick={() => setStep("contact")} className="w-full text-xs text-[var(--muted)] hover:text-[var(--primary)]">← Ändra uppgifter</button>
           </div>
