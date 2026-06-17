@@ -31,8 +31,8 @@ create extension if not exists pg_net;
 --       select net.http_post(
 --         url     := 'https://tanumsnaringsliv.com/api/social/post-deals',
 --         headers := jsonb_build_object(
---                      'Content-Type', 'application/json',
---                      'x-social-secret', '<SOCIAL_POST_SECRET>'
+--                      'Content-Type',  'application/json',
+--                      'Authorization', 'Bearer <SOCIAL_POST_SECRET>'
 --                    ),
 --         body    := '{}'::jsonb
 --       );
