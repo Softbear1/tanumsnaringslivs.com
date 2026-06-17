@@ -4,7 +4,6 @@ import { Search, ArrowRight } from "lucide-react";
 import type { SeasonTheme } from "@/lib/season";
 import type { Business, Category } from "@/lib/data";
 import type { Ad } from "./AdCard";
-import ChatPanel from "./ChatPanel";
 
 const CHAT_EXAMPLES = [
   "Jag behöver måla om huset innan vintern...",
@@ -22,21 +21,20 @@ const CHAT_EXAMPLES = [
 type Props = {
   search: string;
   onSearch: (v: string) => void;
+  onStartChat: (message: string) => void;
   theme: SeasonTheme;
   businesses: Business[];
   categories: Category[];
   ads: Ad[];
 };
 
-export default function Hero({ search, onSearch, theme, businesses, categories, ads }: Props) {
+export default function Hero({ search, onSearch, onStartChat, theme }: Props) {
   const [mode, setMode] = useState<"search" | "chat">("search");
-  const [chatOpen, setChatOpen] = useState(false);
   const [chatInput, setChatInput] = useState("");
   const [placeholderIdx, setPlaceholderIdx] = useState(0);
   const [placeholderVisible, setPlaceholderVisible] = useState(true);
   const [userTyping, setUserTyping] = useState(false);
   const chatInputRef = useRef<HTMLInputElement>(null);
-  const [pendingFirstMessage, setPendingFirstMessage] = useState<string | null>(null);
 
   // Rotate placeholder every 2s when user isn't typing
   useEffect(() => {
@@ -54,9 +52,9 @@ export default function Hero({ search, onSearch, theme, businesses, categories, 
   function handleChatSubmit() {
     const text = chatInput.trim();
     if (!text) return;
-    setPendingFirstMessage(text);
     setChatInput("");
-    setChatOpen(true);
+    setUserTyping(false);
+    onStartChat(text);
   }
 
   function handleModeSwitch(m: "search" | "chat") {
@@ -123,7 +121,7 @@ export default function Hero({ search, onSearch, theme, businesses, categories, 
         )}
 
         {/* Chat trigger input */}
-        {mode === "chat" && !chatOpen && (
+        {mode === "chat" && (
           <div className="relative max-w-xl">
             <input
               ref={chatInputRef}
@@ -145,22 +143,6 @@ export default function Hero({ search, onSearch, theme, businesses, categories, 
             >
               <ArrowRight className="w-5 h-5" />
             </button>
-          </div>
-        )}
-
-        {/* Inline chat panel */}
-        {mode === "chat" && chatOpen && (
-          <div className="max-w-xl rounded-2xl overflow-hidden border border-white/20 shadow-2xl" style={{ height: "min(480px, calc(100vh - 200px))" }}>
-            <ChatPanel
-              businesses={businesses}
-              categories={categories}
-              ads={ads}
-              greeting={pendingFirstMessage
-                ? undefined  // ChatPanel uses its own greeting; first msg is seeded below
-                : (theme.chatGreeting || undefined)}
-              onClose={() => { setChatOpen(false); setChatInput(""); setPendingFirstMessage(null); }}
-              initialMessage={pendingFirstMessage ?? undefined}
-            />
           </div>
         )}
       </div>

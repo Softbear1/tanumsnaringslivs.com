@@ -5,6 +5,7 @@ import type { SeasonTheme } from "@/lib/season";
 import Hero from "./Hero";
 import CategoryChips from "./CategoryChips";
 import BusinessGrid from "./BusinessGrid";
+import ChatPanel from "./ChatPanel";
 import type { Ad } from "./AdCard";
 
 type Props = {
@@ -17,6 +18,7 @@ type Props = {
 export default function DirectoryClient({ categories, businesses, ads, theme }: Props) {
   const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+  const [chatPending, setChatPending] = useState<string | null>(null);
 
   const handleSearch = (v: string) => {
     setSearch(v);
@@ -33,6 +35,7 @@ export default function DirectoryClient({ categories, businesses, ads, theme }: 
       <Hero
         search={search}
         onSearch={handleSearch}
+        onStartChat={(msg) => setChatPending(msg)}
         theme={theme}
         businesses={businesses}
         categories={categories}
@@ -52,6 +55,27 @@ export default function DirectoryClient({ categories, businesses, ads, theme }: 
         categoryFilter={categoryFilter}
         search={search}
       />
+
+      {chatPending !== null && (
+        <div
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 p-4"
+          onClick={() => setChatPending(null)}
+        >
+          <div
+            className="w-full max-w-md rounded-2xl overflow-hidden shadow-2xl"
+            style={{ height: "min(600px, 85vh)" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <ChatPanel
+              businesses={businesses}
+              categories={categories}
+              ads={ads}
+              initialMessage={chatPending}
+              onClose={() => setChatPending(null)}
+            />
+          </div>
+        </div>
+      )}
     </>
   );
 }
