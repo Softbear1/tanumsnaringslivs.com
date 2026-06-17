@@ -28,15 +28,18 @@ export default function ChatPanel({ businesses, categories, ads, greeting, onClo
   const [contact, setContact] = useState({ name: "", email: "", phone: "" });
   const [submitting, setSubmitting] = useState(false);
   const [quoteId, setQuoteId] = useState<string | null>(null);
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const messagesRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Scroll only the messages container — never scrollIntoView, which would
+  // scroll the whole page (the overlay is fixed) down to the gallery.
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    const el = messagesRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
   }, [messages, step]);
 
   useEffect(() => {
-    setTimeout(() => inputRef.current?.focus(), 80);
+    setTimeout(() => inputRef.current?.focus({ preventScroll: true }), 80);
   }, []);
 
   // If a first message was typed in the hero input, send it immediately on mount
@@ -177,7 +180,7 @@ export default function ChatPanel({ businesses, categories, ads, greeting, onClo
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-white">
+      <div ref={messagesRef} className="flex-1 overflow-y-auto p-4 space-y-3 bg-white">
         {messages.map((msg, i) => (
           <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
             <div className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed ${
@@ -280,8 +283,6 @@ export default function ChatPanel({ businesses, categories, ads, greeting, onClo
             </p>
           </div>
         )}
-
-        <div ref={bottomRef} />
       </div>
 
       {/* Input */}
