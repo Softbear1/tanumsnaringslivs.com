@@ -108,6 +108,30 @@ export type Database = {
         };
         Relationships: [];
       };
+      offer_clicks: {
+        Row: {
+          id: number;
+          offer_id: string;
+          business_id: string | null;
+          kind: "ad" | "flash";
+          clicked_at: string;
+        };
+        Insert: {
+          id?: number;
+          offer_id: string;
+          business_id?: string | null;
+          kind: "ad" | "flash";
+          clicked_at?: string;
+        };
+        Update: {
+          id?: number;
+          offer_id?: string;
+          business_id?: string | null;
+          kind?: "ad" | "flash";
+          clicked_at?: string;
+        };
+        Relationships: [];
+      };
       quote_requests: {
         Row: {
           id: string;

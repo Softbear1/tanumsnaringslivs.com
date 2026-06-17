@@ -35,9 +35,14 @@ export default async function Home() {
     cta_label: row.cta_label,
     cta_url: row.cta_url,
     category_id: row.category_id,
+    business_id: row.business_id,
     business_name: bizById[row.business_id]?.name ?? "",
     business_initials: bizById[row.business_id]?.initials ?? "?",
   }));
+
+  // Logga en sidvisning för hela katalogen (utan business_id) — underlag för
+  // "sidans visningar"-statistiken i admin. Fire and forget.
+  supabase.from("page_views").insert({}).then(() => {});
 
   // Shuffle ad order server-side so different advertisers lead on different loads
   // when there are more relevant ads than display slots. Done here (not in the

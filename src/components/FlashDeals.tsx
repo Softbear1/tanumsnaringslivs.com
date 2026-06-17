@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { Zap, Eye, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { trackOfferClick } from "@/lib/track";
 
 export type FlashDeal = {
   id: string;
@@ -98,6 +99,7 @@ export default function FlashDeals({ deals, teasers, endsAt }: Props) {
               <Link
                 key={deal.id}
                 href={`/foretag/${deal.business_id}`}
+                onClick={() => trackOfferClick(deal.id, deal.business_id, "flash")}
                 className="group relative bg-white rounded-2xl border border-amber-200 p-4 hover:border-amber-400 hover:shadow-md transition-all overflow-hidden"
               >
                 <div className="absolute top-0 right-0 bg-amber-400 text-white text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-bl-lg">

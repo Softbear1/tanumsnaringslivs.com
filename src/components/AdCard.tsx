@@ -1,4 +1,6 @@
+"use client";
 import { ExternalLink } from "lucide-react";
+import { trackOfferClick } from "@/lib/track";
 
 export interface Ad {
   id: string;
@@ -7,6 +9,7 @@ export interface Ad {
   cta_label: string | null;
   cta_url: string | null;
   category_id: string | null;
+  business_id: string;
   business_name: string;
   business_initials: string;
 }
@@ -35,6 +38,7 @@ export default function AdCard({ ad, variant = "gallery" }: Props) {
             href={ad.cta_url}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() => trackOfferClick(ad.id, ad.business_id, "ad")}
             className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-800 bg-amber-100 hover:bg-amber-200 px-3 py-1.5 rounded-lg transition-colors"
           >
             {ad.cta_label}
@@ -83,6 +87,7 @@ export default function AdCard({ ad, variant = "gallery" }: Props) {
               href={ad.cta_url}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={() => trackOfferClick(ad.id, ad.business_id, "ad")}
               className="flex items-center justify-center gap-2 w-full text-center text-sm font-medium text-amber-700 border border-amber-300 rounded-xl py-2.5 hover:bg-amber-50 transition-colors"
             >
               {ad.cta_label}

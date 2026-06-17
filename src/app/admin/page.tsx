@@ -2,7 +2,7 @@ export const runtime = "edge";
 import { createServerClient } from "@/lib/supabase-server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Star, ExternalLink, Eye, Pause, Play, Plus, Megaphone, Zap, Pencil } from "lucide-react";
+import { Star, ExternalLink, Eye, Pause, Play, Plus, Megaphone, Zap, Pencil, TrendingUp, MousePointerClick } from "lucide-react";
 import { logout, toggleActive } from "./actions";
 
 export default async function AdminPage() {
@@ -34,6 +34,29 @@ export default async function AdminPage() {
   for (const row of viewRows ?? []) {
     const bid = row.business_id as string;
     viewCounts[bid] = (viewCounts[bid] ?? 0) + 1;
+  }
+
+  // Hela sidans visningar de senaste 30 dagarna — försäljningsargument: visar
+  // hur mycket trafik katalogen drar totalt, oavsett vems företag.
+  const { count: siteViews } = await supabase
+    .from("page_views")
+    .select("id", { count: "exact", head: true })
+    .gte("viewed_at", thirtyDaysAgo);
+
+  // Klick på den här ägarens annonser och blixterbjudanden de senaste 30 dagarna.
+  const { data: clickRows } = businessIds.length
+    ? await supabase
+        .from("offer_clicks")
+        .select("kind")
+        .in("business_id", businessIds)
+        .gte("clicked_at", thirtyDaysAgo)
+    : { data: [] };
+
+  let adClicks = 0;
+  let flashClicks = 0;
+  for (const row of clickRows ?? []) {
+    if (row.kind === "ad") adClicks++;
+    else if (row.kind === "flash") flashClicks++;
   }
 
   return (
@@ -82,6 +105,40 @@ export default async function AdminPage() {
               Det kostar ingenting att skapa annonser och blixterbjudanden just nu — men så kommer det inte
               vara för alltid. Passa på att bygga upp din synlighet medan det är gratis!
             </p>
+          </div>
+        </div>
+
+        {/* Statistik — försäljningsargument */}
+        <div className="mb-8 grid gap-4 sm:grid-cols-3">
+          <div className="rounded-2xl border border-[var(--border)] bg-white p-5">
+            <div className="flex items-center gap-2 mb-2 text-[var(--accent)]">
+              <TrendingUp className="w-4 h-4" />
+              <span className="text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">
+                Sidans visningar
+              </span>
+            </div>
+            <div className="text-3xl font-bold text-[var(--primary)]">{siteViews ?? 0}</div>
+            <p className="text-xs text-[var(--muted)] mt-1">Hela katalogen, senaste 30 dagarna</p>
+          </div>
+          <div className="rounded-2xl border border-amber-200 bg-amber-50/60 p-5">
+            <div className="flex items-center gap-2 mb-2 text-amber-700">
+              <MousePointerClick className="w-4 h-4" />
+              <span className="text-xs font-semibold uppercase tracking-wide text-amber-700/80">
+                Klick på dina annonser
+              </span>
+            </div>
+            <div className="text-3xl font-bold text-[var(--primary)]">{adClicks}</div>
+            <p className="text-xs text-[var(--muted)] mt-1">Senaste 30 dagarna</p>
+          </div>
+          <div className="rounded-2xl border border-amber-200 bg-amber-50/60 p-5">
+            <div className="flex items-center gap-2 mb-2 text-amber-700">
+              <Zap className="w-4 h-4 fill-amber-500" />
+              <span className="text-xs font-semibold uppercase tracking-wide text-amber-700/80">
+                Klick på blixterbjudanden
+              </span>
+            </div>
+            <div className="text-3xl font-bold text-[var(--primary)]">{flashClicks}</div>
+            <p className="text-xs text-[var(--muted)] mt-1">Senaste 30 dagarna</p>
           </div>
         </div>
 
