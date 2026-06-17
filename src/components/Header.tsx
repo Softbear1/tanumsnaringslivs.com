@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { TreePine, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { createBrowserClient } from "@/lib/supabase-browser";
 
 export default function Header() {
@@ -33,7 +33,34 @@ export default function Header() {
         <div className="flex items-center justify-between h-16">
           <a href="/" className="flex items-center gap-2 text-[var(--primary)]">
             <div className="w-8 h-8 bg-[var(--accent)] rounded-lg flex items-center justify-center">
-              <TreePine className="w-4 h-4 text-white" />
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="white"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                {/* Sun wheel — circle with 8 spokes */}
+                <circle cx="12" cy="7" r="3" />
+                <line x1="12" y1="4" x2="12" y2="2" />
+                <line x1="14.5" y1="4.5" x2="16" y2="3" />
+                <line x1="15" y1="7" x2="17" y2="7" />
+                <line x1="14.5" y1="9.5" x2="16" y2="11" />
+                <line x1="9.5" y1="4.5" x2="8" y2="3" />
+                <line x1="9" y1="7" x2="7" y2="7" />
+                <line x1="9.5" y1="9.5" x2="8" y2="11" />
+                {/* Boat — curved arc with crew marks */}
+                <path d="M5 17 Q12 14 19 17" />
+                <line x1="9" y1="17" x2="9" y2="15" />
+                <line x1="12" y1="16.5" x2="12" y2="14.5" />
+                <line x1="15" y1="17" x2="15" y2="15" />
+                {/* Boat hull base */}
+                <path d="M5 17 Q12 21 19 17" />
+              </svg>
             </div>
             <div>
               <span className="font-bold text-base leading-tight block">Tanums Näringsliv</span>
