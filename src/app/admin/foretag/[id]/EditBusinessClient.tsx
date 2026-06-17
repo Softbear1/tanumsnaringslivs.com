@@ -28,6 +28,8 @@ interface FlashDeal {
   category_id: string | null;
   deal_date: string;
   active: boolean;
+  post_to_fb: boolean;
+  fb_post_id: string | null;
 }
 
 interface Props {
@@ -192,6 +194,7 @@ export default function EditBusinessClient({ business, categories, ads, flashDea
       category_id: (fd.get("category_id") as string) || null,
       deal_date: fd.get("deal_date") as string,
       active: true,
+      post_to_fb: fd.get("post_to_fb") === "on",
     });
     setDealSubmitting(false);
     if (error) {
@@ -513,6 +516,9 @@ export default function EditBusinessClient({ business, categories, ads, flashDea
                           {isToday && <span className="text-[10px] font-semibold bg-red-100 text-red-700 px-2 py-0.5 rounded-full">Live idag</span>}
                           {isPast && <span className="text-[10px] font-semibold bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">Avslutat</span>}
                           {!deal.active && <span className="text-[10px] font-semibold bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">Pausat</span>}
+                          {deal.fb_post_id
+                            ? <span className="text-[10px] font-semibold bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">Postat på Facebook</span>
+                            : deal.post_to_fb && <span className="text-[10px] font-semibold bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">Postas på Facebook</span>}
                         </div>
                       </div>
                       <div className="flex items-center gap-1.5 shrink-0">
@@ -588,6 +594,19 @@ export default function EditBusinessClient({ business, categories, ads, flashDea
                   </select>
                 </div>
               </div>
+
+              <label className="flex items-start gap-2 pt-1 cursor-pointer">
+                <input
+                  type="checkbox"
+                  name="post_to_fb"
+                  defaultChecked
+                  className="mt-0.5 w-4 h-4 rounded border-[var(--border)] accent-amber-500 focus:ring-2 focus:ring-amber-400"
+                />
+                <span className="text-xs text-[var(--primary)]">
+                  Publicera automatiskt på vår Facebook-sida på morgonen
+                  <span className="block text-[var(--muted)]">Bjud in fler kunder genom att nå sidans följare.</span>
+                </span>
+              </label>
 
               <div className="flex gap-2 pt-1">
                 <button

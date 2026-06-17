@@ -221,6 +221,7 @@ export type Database = {
           active: boolean;
           created_at: string;
           fb_post_id: string | null;
+          post_to_fb: boolean;
         };
         Insert: {
           id?: string;
@@ -232,6 +233,7 @@ export type Database = {
           active?: boolean;
           created_at?: string;
           fb_post_id?: string | null;
+          post_to_fb?: boolean;
         };
         Update: {
           id?: string;
@@ -243,6 +245,7 @@ export type Database = {
           active?: boolean;
           created_at?: string;
           fb_post_id?: string | null;
+          post_to_fb?: boolean;
         };
         Relationships: [];
       };

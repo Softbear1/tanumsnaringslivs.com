@@ -52,6 +52,7 @@ async function handle(request: NextRequest): Promise<Response> {
     .from("flash_deals")
     .select("id, headline, description, business_id, businesses(name, logo_url)")
     .eq("active", true)
+    .eq("post_to_fb", true)
     .eq("deal_date", today)
     .is("fb_post_id", null);
 
