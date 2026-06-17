@@ -3,6 +3,43 @@ import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
 import { createBrowserClient } from "@/lib/supabase-browser";
 
+/** Hällristning-inspirerad logga: solhjul + stickfigurer = Tanums signum */
+function RockArtLogo({ size = 24, color = "currentColor" }: { size?: number; color?: string }) {
+  const s = size;
+  const cx = s / 2;
+  const cy = s / 2;
+  const r = s * 0.28; // solhjulradie
+  const sw = s * 0.075; // strokeWidth
+  return (
+    <svg width={s} height={s} viewBox={`0 0 ${s} ${s}`} fill="none" aria-hidden="true">
+      {/* Solhjul */}
+      <circle cx={cx} cy={cy - s * 0.06} r={r} stroke={color} strokeWidth={sw} />
+      {[0, 45, 90, 135, 180, 225, 270, 315].map((deg) => {
+        const rad = (deg * Math.PI) / 180;
+        const x1 = cx + Math.cos(rad) * r;
+        const y1 = (cy - s * 0.06) + Math.sin(rad) * r;
+        const x2 = cx + Math.cos(rad) * (r + s * 0.14);
+        const y2 = (cy - s * 0.06) + Math.sin(rad) * (r + s * 0.14);
+        return <line key={deg} x1={x1} y1={y1} x2={x2} y2={y2} stroke={color} strokeWidth={sw} strokeLinecap="round" />;
+      })}
+      {/* Stickfigur vänster */}
+      <circle cx={cx - s * 0.26} cy={s * 0.72} r={sw * 0.9} fill={color} />
+      <line x1={cx - s * 0.26} y1={s * 0.74} x2={cx - s * 0.26} y2={s * 0.87} stroke={color} strokeWidth={sw} strokeLinecap="round" />
+      <line x1={cx - s * 0.26} y1={s * 0.87} x2={cx - s * 0.32} y2={s * 0.96} stroke={color} strokeWidth={sw} strokeLinecap="round" />
+      <line x1={cx - s * 0.26} y1={s * 0.87} x2={cx - s * 0.20} y2={s * 0.96} stroke={color} strokeWidth={sw} strokeLinecap="round" />
+      <line x1={cx - s * 0.26} y1={s * 0.79} x2={cx - s * 0.34} y2={s * 0.84} stroke={color} strokeWidth={sw} strokeLinecap="round" />
+      <line x1={cx - s * 0.26} y1={s * 0.79} x2={cx - s * 0.18} y2={s * 0.84} stroke={color} strokeWidth={sw} strokeLinecap="round" />
+      {/* Stickfigur höger */}
+      <circle cx={cx + s * 0.26} cy={s * 0.72} r={sw * 0.9} fill={color} />
+      <line x1={cx + s * 0.26} y1={s * 0.74} x2={cx + s * 0.26} y2={s * 0.87} stroke={color} strokeWidth={sw} strokeLinecap="round" />
+      <line x1={cx + s * 0.26} y1={s * 0.87} x2={cx + s * 0.20} y2={s * 0.96} stroke={color} strokeWidth={sw} strokeLinecap="round" />
+      <line x1={cx + s * 0.26} y1={s * 0.87} x2={cx + s * 0.32} y2={s * 0.96} stroke={color} strokeWidth={sw} strokeLinecap="round" />
+      <line x1={cx + s * 0.26} y1={s * 0.79} x2={cx + s * 0.18} y2={s * 0.84} stroke={color} strokeWidth={sw} strokeLinecap="round" />
+      <line x1={cx + s * 0.26} y1={s * 0.79} x2={cx + s * 0.34} y2={s * 0.84} stroke={color} strokeWidth={sw} strokeLinecap="round" />
+    </svg>
+  );
+}
+
 export default function Header() {
   const [open, setOpen] = useState(false);
   const [user, setUser] = useState<{ id: string; email?: string } | null>(null);
@@ -31,40 +68,14 @@ export default function Header() {
     <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-[var(--border)]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <a href="/" className="flex items-center gap-2 text-[var(--primary)]">
-            <div className="w-8 h-8 bg-[var(--accent)] rounded-lg flex items-center justify-center">
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="white"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-              >
-                {/* Sun wheel — circle with 8 spokes */}
-                <circle cx="12" cy="7" r="3" />
-                <line x1="12" y1="4" x2="12" y2="2" />
-                <line x1="14.5" y1="4.5" x2="16" y2="3" />
-                <line x1="15" y1="7" x2="17" y2="7" />
-                <line x1="14.5" y1="9.5" x2="16" y2="11" />
-                <line x1="9.5" y1="4.5" x2="8" y2="3" />
-                <line x1="9" y1="7" x2="7" y2="7" />
-                <line x1="9.5" y1="9.5" x2="8" y2="11" />
-                {/* Boat — curved arc with crew marks */}
-                <path d="M5 17 Q12 14 19 17" />
-                <line x1="9" y1="17" x2="9" y2="15" />
-                <line x1="12" y1="16.5" x2="12" y2="14.5" />
-                <line x1="15" y1="17" x2="15" y2="15" />
-                {/* Boat hull base */}
-                <path d="M5 17 Q12 21 19 17" />
-              </svg>
+          <a href="/" className="flex items-center gap-3 text-[var(--primary)]">
+            {/* Hällristningslogga — solhjul med stickfigurer */}
+            <div className="w-9 h-9 bg-[var(--primary)] rounded-xl flex items-center justify-center shadow-sm">
+              <RockArtLogo size={22} color="white" />
             </div>
             <div>
-              <span className="font-bold text-base leading-tight block">Tanums Näringsliv</span>
-              <span className="text-[10px] text-[var(--muted)] leading-tight block tracking-wide uppercase">Lokala företag</span>
+              <span className="font-bold text-base leading-tight block tracking-tight">Tanums Näringsliv</span>
+              <span className="text-[10px] text-[var(--muted)] leading-tight block tracking-widest uppercase">Bohuskusten</span>
             </div>
           </a>
 

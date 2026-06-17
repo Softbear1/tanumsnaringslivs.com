@@ -40,6 +40,125 @@ type Props = {
 };
 
 // Pre-generate stable random values to avoid hydration issues
+/** Hällristnings-solhjul — samma komponent som i headern, kopieras hit för att undvika cirkulär import */
+function RockArtLogo({ size = 24, color = "currentColor" }: { size?: number; color?: string }) {
+  const s = size;
+  const cx = s / 2;
+  const cy = s / 2;
+  const r = s * 0.28;
+  const sw = s * 0.075;
+  return (
+    <svg width={s} height={s} viewBox={`0 0 ${s} ${s}`} fill="none" aria-hidden="true">
+      <circle cx={cx} cy={cy - s * 0.06} r={r} stroke={color} strokeWidth={sw} />
+      {[0, 45, 90, 135, 180, 225, 270, 315].map((deg) => {
+        const rad = (deg * Math.PI) / 180;
+        const x1 = cx + Math.cos(rad) * r;
+        const y1 = (cy - s * 0.06) + Math.sin(rad) * r;
+        const x2 = cx + Math.cos(rad) * (r + s * 0.14);
+        const y2 = (cy - s * 0.06) + Math.sin(rad) * (r + s * 0.14);
+        return <line key={deg} x1={x1} y1={y1} x2={x2} y2={y2} stroke={color} strokeWidth={sw} strokeLinecap="round" />;
+      })}
+      <circle cx={cx - s * 0.26} cy={s * 0.72} r={sw * 0.9} fill={color} />
+      <line x1={cx - s * 0.26} y1={s * 0.74} x2={cx - s * 0.26} y2={s * 0.87} stroke={color} strokeWidth={sw} strokeLinecap="round" />
+      <line x1={cx - s * 0.26} y1={s * 0.87} x2={cx - s * 0.32} y2={s * 0.96} stroke={color} strokeWidth={sw} strokeLinecap="round" />
+      <line x1={cx - s * 0.26} y1={s * 0.87} x2={cx - s * 0.20} y2={s * 0.96} stroke={color} strokeWidth={sw} strokeLinecap="round" />
+      <line x1={cx - s * 0.26} y1={s * 0.79} x2={cx - s * 0.34} y2={s * 0.84} stroke={color} strokeWidth={sw} strokeLinecap="round" />
+      <line x1={cx - s * 0.26} y1={s * 0.79} x2={cx - s * 0.18} y2={s * 0.84} stroke={color} strokeWidth={sw} strokeLinecap="round" />
+      <circle cx={cx + s * 0.26} cy={s * 0.72} r={sw * 0.9} fill={color} />
+      <line x1={cx + s * 0.26} y1={s * 0.74} x2={cx + s * 0.26} y2={s * 0.87} stroke={color} strokeWidth={sw} strokeLinecap="round" />
+      <line x1={cx + s * 0.26} y1={s * 0.87} x2={cx + s * 0.20} y2={s * 0.96} stroke={color} strokeWidth={sw} strokeLinecap="round" />
+      <line x1={cx + s * 0.26} y1={s * 0.87} x2={cx + s * 0.32} y2={s * 0.96} stroke={color} strokeWidth={sw} strokeLinecap="round" />
+      <line x1={cx + s * 0.26} y1={s * 0.79} x2={cx + s * 0.18} y2={s * 0.84} stroke={color} strokeWidth={sw} strokeLinecap="round" />
+      <line x1={cx + s * 0.26} y1={s * 0.79} x2={cx + s * 0.34} y2={s * 0.84} stroke={color} strokeWidth={sw} strokeLinecap="round" />
+    </svg>
+  );
+}
+
+/**
+ * Subtil hällristningsbakgrund — tunna etsade linjer som ekar berghällens
+ * karaktär utan att dominera. Bara synliga som ett svagt mönster mot mörkblå.
+ */
+function RockArtBackground() {
+  return (
+    <svg
+      aria-hidden="true"
+      className="absolute inset-0 w-full h-full pointer-events-none"
+      preserveAspectRatio="xMidYMid slice"
+      viewBox="0 0 800 260"
+      style={{ opacity: 0.045 }}
+    >
+      {/* Solhjul uppe till höger */}
+      <circle cx="680" cy="70" r="28" stroke="white" strokeWidth="1.5" fill="none" />
+      {[0, 45, 90, 135, 180, 225, 270, 315].map((deg) => {
+        const rad = (deg * Math.PI) / 180;
+        return (
+          <line
+            key={deg}
+            x1={680 + Math.cos(rad) * 28}
+            y1={70 + Math.sin(rad) * 28}
+            x2={680 + Math.cos(rad) * 42}
+            y2={70 + Math.sin(rad) * 42}
+            stroke="white"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+          />
+        );
+      })}
+      {/* Båt med stickfigurer */}
+      <path d="M 100 170 Q 180 155 260 170" stroke="white" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+      <path d="M 100 170 Q 180 190 260 170" stroke="white" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+      {[130, 160, 190, 220].map((x) => (
+        <g key={x}>
+          <circle cx={x} cy={158} r="4" fill="white" />
+          <line x1={x} y1={162} x2={x} y2={172} stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+          <line x1={x} y1={172} x2={x - 6} y2={180} stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+          <line x1={x} y1={172} x2={x + 6} y2={180} stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+          <line x1={x} y1={165} x2={x - 7} y2={170} stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+          <line x1={x} y1={165} x2={x + 7} y2={170} stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+        </g>
+      ))}
+      {/* Litet solhjul nere till vänster */}
+      <circle cx="60" cy="210" r="16" stroke="white" strokeWidth="1.2" fill="none" />
+      {[0, 60, 120, 180, 240, 300].map((deg) => {
+        const rad = (deg * Math.PI) / 180;
+        return (
+          <line
+            key={deg}
+            x1={60 + Math.cos(rad) * 16}
+            y1={210 + Math.sin(rad) * 16}
+            x2={60 + Math.cos(rad) * 25}
+            y2={210 + Math.sin(rad) * 25}
+            stroke="white"
+            strokeWidth="1.2"
+            strokeLinecap="round"
+          />
+        );
+      })}
+      {/* Djurfigur (hjort-siluett) */}
+      <path d="M 400 130 L 405 110 M 405 110 L 398 100 M 405 110 L 412 102" stroke="white" strokeWidth="1.4" fill="none" strokeLinecap="round" />
+      <ellipse cx="410" cy="135" rx="14" ry="8" stroke="white" strokeWidth="1.4" fill="none" />
+      <line x1="400" y1="143" x2="397" y2="158" stroke="white" strokeWidth="1.4" strokeLinecap="round" />
+      <line x1="406" y1="143" x2="404" y2="158" stroke="white" strokeWidth="1.4" strokeLinecap="round" />
+      <line x1="415" y1="143" x2="418" y2="158" stroke="white" strokeWidth="1.4" strokeLinecap="round" />
+      <line x1="420" y1="140" x2="424" y2="155" stroke="white" strokeWidth="1.4" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function weatherLabel(condition: WeatherCondition): string {
+  const labels: Record<WeatherCondition, string> = {
+    sun: "sol",
+    "partly-cloudy": "halvklart",
+    overcast: "mulet",
+    fog: "dimma",
+    rain: "regn",
+    snow: "snö",
+    storm: "storm",
+  };
+  return labels[condition] ?? "";
+}
+
+// Pre-generate stable random values to avoid hydration issues
 const RAIN_DROPS = Array.from({ length: 25 }, (_, i) => ({
   left: ((i * 37 + 13) % 100),
   delay: ((i * 53) % 2000) / 1000,
@@ -300,22 +419,47 @@ export default function Hero({ search, onSearch, onStartChat, theme }: Props) {
   }
 
   return (
-    <section id="hero" className="relative overflow-hidden bg-[var(--primary)] text-white" style={{ borderTop: `4px solid ${theme.accent}` }}>
-      <div className="absolute inset-0 opacity-[0.03]"
-        style={{ backgroundImage: `radial-gradient(circle at 1px 1px, white 1px, transparent 0)`, backgroundSize: "32px 32px" }} />
-      <div className="absolute -top-32 -right-32 w-96 h-96 opacity-20 rounded-full blur-3xl" style={{ backgroundColor: theme.glow }} />
-      <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-[#1B3A4B] opacity-30 rounded-full blur-3xl" />
+    <section id="hero" className="relative overflow-hidden bg-[var(--primary)] text-white">
+      {/* Subtil hällristningsbakgrund — etsad sten-känsla */}
+      <RockArtBackground />
+
+      {/* Mjuk ljusglow kopplad till årstid */}
+      <div className="absolute -top-40 -right-40 w-[500px] h-[500px] opacity-[0.15] rounded-full blur-[80px] pointer-events-none" style={{ backgroundColor: theme.glow }} />
+      <div className="absolute -bottom-24 -left-24 w-72 h-72 opacity-20 rounded-full blur-[60px] pointer-events-none" style={{ backgroundColor: theme.glow }} />
 
       {/* Weather overlay */}
       {weather && <WeatherOverlay condition={weather} />}
 
+      {/* Tunn accentlinje längs toppen — färgad efter årstid */}
+      <div className="absolute top-0 left-0 right-0 h-[3px] opacity-80" style={{ backgroundColor: theme.accent }} />
+
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="leading-tight">
-            <span className="block text-3xl sm:text-4xl font-bold text-white">Tanum</span>
-            <span className="block text-base sm:text-lg text-white/60 font-normal mt-0.5">— näringsliv, hantverk &amp; upplevelser</span>
-          </h1>
-          <span className="text-2xl" aria-hidden>{theme.emoji}</span>
+        {/* Logga + rubrik — sammanhållen enhet */}
+        <div className="flex items-start justify-between mb-7">
+          <div className="flex items-center gap-4">
+            {/* Hällristningslogga i hero-format */}
+            <div
+              className="flex-shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center"
+              style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" }}
+            >
+              <RockArtLogo size={38} color="rgba(255,255,255,0.90)" />
+            </div>
+            <div>
+              <h1 className="text-3xl sm:text-4xl font-bold text-white leading-none tracking-tight">Tanum</h1>
+              <p className="text-sm sm:text-base text-white/55 font-normal mt-1 leading-snug">
+                Näringsliv, hantverk &amp; upplevelser
+              </p>
+            </div>
+          </div>
+          {/* Väderindikator / årstidsemoji */}
+          <div className="flex flex-col items-end gap-1 mt-1">
+            <span className="text-2xl leading-none" aria-hidden>{theme.emoji}</span>
+            {weather && (
+              <span className="text-[10px] text-white/35 uppercase tracking-widest">
+                {weatherLabel(weather)}
+              </span>
+            )}
+          </div>
         </div>
 
         <div className="relative max-w-xl">
@@ -343,7 +487,7 @@ export default function Hero({ search, onSearch, onStartChat, theme }: Props) {
           </button>
         </div>
 
-        <p className="text-xs text-white/50 mt-2.5">
+        <p className="text-xs text-white/40 mt-2.5 tracking-wide">
           Skriv ett namn eller en kategori — eller ställ en fråga med AI
         </p>
       </div>
