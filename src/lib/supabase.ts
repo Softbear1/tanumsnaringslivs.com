@@ -48,6 +48,7 @@ export type Database = {
           active: boolean;
           created_at: string;
           owner_id: string | null;
+          logo_url: string | null;
         };
         Insert: {
           id?: string;
@@ -66,6 +67,7 @@ export type Database = {
           active?: boolean;
           created_at?: string;
           owner_id?: string | null;
+          logo_url?: string | null;
         };
         Update: {
           id?: string;
@@ -84,6 +86,7 @@ export type Database = {
           active?: boolean;
           created_at?: string;
           owner_id?: string | null;
+          logo_url?: string | null;
         };
         Relationships: [];
       };

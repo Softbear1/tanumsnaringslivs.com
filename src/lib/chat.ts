@@ -50,6 +50,7 @@ export interface BusinessDraft {
   website: string | null;
   address: string;
   initials: string;
+  logo_url?: string | null;
 }
 
 /**

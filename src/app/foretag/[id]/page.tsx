@@ -1,9 +1,11 @@
 export const runtime = "edge";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import Image from "next/image";
 import Link from "next/link";
-import { Phone, Mail, Globe, MapPin, Star, Zap, ArrowLeft } from "lucide-react";
+import { Phone, Mail, Globe, MapPin, Star, Zap, ArrowLeft, Clock } from "lucide-react";
 import { getBusiness } from "@/lib/fetch";
+import { stockholmToday } from "@/lib/time";
 import { getCategory } from "@/lib/data";
 import { createServerClient } from "@/lib/supabase-server";
 import Header from "@/components/Header";
@@ -50,16 +52,27 @@ export default async function ForetagPage({ params }: PageProps) {
 
   // Track page view — fire and forget, never block rendering
   let reviews: Array<{ id: string; reviewer_name: string; rating: number; comment: string | null; created_at: string }> = [];
+  let todayDeal: { headline: string; description: string | null } | null = null;
   try {
     const supabase = await createServerClient();
     supabase.from("page_views").insert({ business_id: id }).then(() => {});
-    const { data } = await supabase
-      .from("reviews")
-      .select("id, reviewer_name, rating, comment, created_at")
-      .eq("business_id", id)
-      .order("created_at", { ascending: false })
-      .limit(20);
-    reviews = data ?? [];
+    const [reviewResult, dealResult] = await Promise.all([
+      supabase
+        .from("reviews")
+        .select("id, reviewer_name, rating, comment, created_at")
+        .eq("business_id", id)
+        .order("created_at", { ascending: false })
+        .limit(20),
+      supabase
+        .from("flash_deals")
+        .select("headline, description")
+        .eq("business_id", id)
+        .eq("active", true)
+        .eq("deal_date", stockholmToday())
+        .maybeSingle(),
+    ]);
+    reviews = reviewResult.data ?? [];
+    todayDeal = dealResult.data ?? null;
   } catch { /* ignore */ }
 
   const cat = getCategory(categories, business.categoryId);
@@ -109,10 +122,14 @@ export default async function ForetagPage({ params }: PageProps) {
               {/* Header */}
               <div className="flex items-start gap-4 mb-6">
                 <div
-                  className="w-16 h-16 rounded-2xl flex items-center justify-center font-bold text-xl flex-shrink-0"
+                  className="w-16 h-16 rounded-2xl flex items-center justify-center font-bold text-xl flex-shrink-0 overflow-hidden"
                   style={{ backgroundColor: cat?.bgColor ?? "#F3F4F6", color: cat?.color ?? "#374151" }}
                 >
-                  {business.initials}
+                  {business.logoUrl ? (
+                    <Image src={business.logoUrl} alt={`${business.name} logotyp`} width={64} height={64} className="object-contain w-full h-full" />
+                  ) : (
+                    business.initials
+                  )}
                 </div>
                 <div className="flex-1">
                   <div className="flex flex-wrap items-center gap-2 mb-1">
@@ -151,7 +168,28 @@ export default async function ForetagPage({ params }: PageProps) {
               </div>
 
               {/* Description */}
-              <p className="text-[var(--muted)] leading-relaxed mb-8">{business.description}</p>
+              <p className="text-[var(--muted)] leading-relaxed mb-6">{business.description}</p>
+
+              {/* Today's flash deal banner */}
+              {todayDeal && (
+                <div className="mb-8 rounded-2xl bg-amber-50 border border-amber-200 p-4 flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-amber-400 flex items-center justify-center shrink-0 mt-0.5">
+                    <Zap className="w-4 h-4 text-white fill-white" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <span className="text-[10px] font-bold uppercase tracking-wide text-amber-600 bg-amber-100 px-2 py-0.5 rounded-full">Blixterbjudande idag</span>
+                      <span className="flex items-center gap-1 text-[10px] text-amber-600 font-medium">
+                        <Clock className="w-3 h-3" /> Gäller till midnatt
+                      </span>
+                    </div>
+                    <p className="font-bold text-[var(--primary)] leading-snug">{todayDeal.headline}</p>
+                    {todayDeal.description && (
+                      <p className="text-sm text-[var(--muted)] mt-1">{todayDeal.description}</p>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {/* Contact */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

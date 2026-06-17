@@ -2,7 +2,15 @@ import type { NextConfig } from "next";
 import { setupDevPlatform } from "@cloudflare/next-on-pages/next-dev";
 
 const nextConfig: NextConfig = {
-  // Required for Cloudflare Pages edge runtime
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "tflrdlyquvndapjwnccu.supabase.co",
+        pathname: "/storage/v1/object/public/**",
+      },
+    ],
+  },
 };
 
 if (process.env.NODE_ENV === "development") {

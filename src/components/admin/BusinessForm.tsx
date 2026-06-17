@@ -1,5 +1,6 @@
 "use client";
-import { useState } from "react";
+import { useState, useRef } from "react";
+import Image from "next/image";
 import AIBoostTextarea from "./AIBoostTextarea";
 
 interface Category {
@@ -18,7 +19,9 @@ interface Props {
     website?: string | null;
     address?: string;
     initials?: string;
+    logo_url?: string | null;
   };
+  businessId?: string;
   onSubmit: (data: {
     name: string;
     category_id: string;
@@ -28,11 +31,12 @@ interface Props {
     website: string | null;
     address: string;
     initials: string;
+    logo_url: string | null;
   }) => Promise<void>;
   loading: boolean;
 }
 
-export default function BusinessForm({ categories, business, onSubmit, loading }: Props) {
+export default function BusinessForm({ categories, business, businessId, onSubmit, loading }: Props) {
   const [name, setName] = useState(business?.name ?? "");
   const [categoryId, setCategoryId] = useState(business?.category_id ?? "");
   const [description, setDescription] = useState(business?.description ?? "");
@@ -41,7 +45,10 @@ export default function BusinessForm({ categories, business, onSubmit, loading }
   const [website, setWebsite] = useState(business?.website ?? "");
   const [address, setAddress] = useState(business?.address ?? "");
   const [initials, setInitials] = useState(business?.initials ?? "");
+  const [logoUrl, setLogoUrl] = useState<string | null>(business?.logo_url ?? null);
+  const [logoUploading, setLogoUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const logoInputRef = useRef<HTMLInputElement>(null);
 
   function handleInitials(v: string) {
     setInitials(v.toUpperCase().slice(0, 3));
@@ -51,6 +58,30 @@ export default function BusinessForm({ categories, business, onSubmit, loading }
     if (!url.trim()) return null;
     if (/^https?:\/\//i.test(url)) return url.trim();
     return `https://${url.trim()}`;
+  }
+
+  async function handleLogoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file || !businessId) return;
+    setLogoUploading(true);
+    try {
+      const { createBrowserClient } = await import("@/lib/supabase-browser");
+      const supabase = createBrowserClient();
+      const ext = file.name.split(".").pop() ?? "jpg";
+      const path = `${businessId}/logo.${ext}`;
+      const { error: upErr } = await supabase.storage.from("logos").upload(path, file, { upsert: true });
+      if (upErr) throw upErr;
+      const { data: { publicUrl } } = supabase.storage.from("logos").getPublicUrl(path);
+      setLogoUrl(publicUrl + "?t=" + Date.now());
+    } catch (err) {
+      alert("Kunde inte ladda upp loggan: " + (err instanceof Error ? err.message : String(err)));
+    } finally {
+      setLogoUploading(false);
+    }
+  }
+
+  async function handleRemoveLogo() {
+    setLogoUrl(null);
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -66,6 +97,7 @@ export default function BusinessForm({ categories, business, onSubmit, loading }
         website: normalizeWebsite(website),
         address,
         initials,
+        logo_url: logoUrl,
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Något gick fel");
@@ -125,6 +157,42 @@ export default function BusinessForm({ categories, business, onSubmit, loading }
             </div>
           </div>
         </div>
+
+        {businessId && (
+          <div className="sm:col-span-2">
+            <label className={labelClass}>Logotyp (valfri)</label>
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 rounded-2xl border-2 border-dashed border-[var(--border)] flex items-center justify-center overflow-hidden bg-[var(--bg)] shrink-0">
+                {logoUrl ? (
+                  <Image src={logoUrl} alt="Logotyp" width={64} height={64} className="object-contain w-full h-full" />
+                ) : (
+                  <span className="text-2xl font-bold text-[var(--muted)]">{initials || "?"}</span>
+                )}
+              </div>
+              <div className="flex flex-col gap-2">
+                <input ref={logoInputRef} type="file" accept="image/*" className="hidden" onChange={handleLogoChange} />
+                <button
+                  type="button"
+                  disabled={logoUploading}
+                  onClick={() => logoInputRef.current?.click()}
+                  className="text-sm px-3 py-1.5 border border-[var(--border)] rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+                >
+                  {logoUploading ? "Laddar upp..." : logoUrl ? "Byt logotyp" : "Ladda upp logotyp"}
+                </button>
+                {logoUrl && (
+                  <button
+                    type="button"
+                    onClick={handleRemoveLogo}
+                    className="text-xs text-red-500 hover:text-red-700 text-left"
+                  >
+                    Ta bort logotyp
+                  </button>
+                )}
+                <p className="text-xs text-[var(--muted)]">PNG eller JPG, max 2 MB</p>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="sm:col-span-2">
           <label className={labelClass}>

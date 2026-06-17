@@ -21,6 +21,7 @@ export type Business = {
   featured: boolean;
   rating: number;
   reviewCount: number;
+  logoUrl?: string;
 };
 
 // Keep static data for SQL seed generation reference and local fallback

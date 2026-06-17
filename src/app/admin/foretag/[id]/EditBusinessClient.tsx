@@ -42,6 +42,7 @@ interface Props {
     address: string;
     initials: string;
     owner_id: string | null;
+    logo_url?: string | null;
   };
   categories: Array<{ id: string; name: string }>;
   ads: Ad[];
@@ -58,6 +59,7 @@ function toDraft(b: Props["business"]): BusinessDraft {
     website: b.website,
     address: b.address,
     initials: b.initials,
+    logo_url: b.logo_url ?? null,
   };
 }
 
@@ -104,6 +106,7 @@ export default function EditBusinessClient({ business, categories, ads, flashDea
     website: string | null;
     address: string;
     initials: string;
+    logo_url: string | null;
   }) {
     setLoading(true);
     const supabase = createBrowserClient();
@@ -275,6 +278,7 @@ export default function EditBusinessClient({ business, categories, ads, flashDea
             key={formKey}
             categories={categories}
             business={formSeed}
+            businessId={business.id}
             onSubmit={handleSubmit}
             loading={loading}
           />

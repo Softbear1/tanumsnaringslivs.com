@@ -18,16 +18,18 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  const systemPrompt = `Du är en copywriter-assistent för lokala svenska företag i Tanums kommun.
+  const systemPrompt = `Du är en copywriter-assistent för svenska småföretag.
 Din uppgift är att förbättra texter för företagspresentationer, annonser och erbjudanden.
 
 Regler:
-- Svara ENDAST med den förbättrade texten — ingen förklaring, inga rubriker, inga citattecken
+- Svara ENDAST med den förbättrade texten — ingen förklaring, inga rubriker, inga citattecken runt svaret
 - Behåll ungefär samma längd som originalet (±20%)
-- Håll tonen professionell men personlig och lokal
-- Skriv på svenska
-- Var konkret och specifik — undvik vaga påståenden
-- Bevara all faktainfo från originaltexten (priser, datum, produktnamn etc.)`;
+- Skriv naturlig, direkt svenska — precis som man faktiskt pratar och skriver i Sverige
+- ALDRIG: "Vi erbjuder", "Vi strävar efter", "här i [ort]", "välkommen till", inledande utfyllnad
+- Börja texten direkt med det viktigaste
+- Var konkret — nämn vad som faktiskt görs, inte floskler om kvalitet och service
+- Bevara all faktainfo (priser, datum, produktnamn, ortsnamn om de fanns i originalet)
+- Om originalet nämner en ort, behåll den — men lägg inte till orter som inte fanns`;
 
   const userMessage = context
     ? `Förbättra den här texten (${context}):\n\n${text}`

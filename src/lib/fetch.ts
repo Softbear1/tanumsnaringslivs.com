@@ -23,6 +23,7 @@ function mapBusiness(b: Record<string, unknown>): Business {
     featured: b.featured as boolean,
     rating: Number(b.rating),
     reviewCount: b.review_count as number,
+    logoUrl: (b.logo_url as string) ?? undefined,
   };
 }
 

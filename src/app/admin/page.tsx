@@ -2,7 +2,7 @@ export const runtime = "edge";
 import { createServerClient } from "@/lib/supabase-server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Star, ExternalLink, Eye, Pause, Play, Plus, Megaphone } from "lucide-react";
+import { Star, ExternalLink, Eye, Pause, Play, Plus, Megaphone, Zap, Pencil } from "lucide-react";
 import { logout, toggleActive } from "./actions";
 
 export default async function AdminPage() {
@@ -153,13 +153,30 @@ export default async function AdminPage() {
                   </div>
 
                   {/* Actions */}
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 flex-wrap">
                     <Link
                       href={`/admin/foretag/${biz.id}`}
-                      className="flex-1 text-center text-sm py-2 px-3 bg-[var(--primary)]/10 text-[var(--primary)] rounded-lg hover:bg-[var(--primary)]/20 transition-colors font-medium"
+                      className="flex items-center gap-1.5 text-sm py-2 px-3 bg-[var(--primary)]/10 text-[var(--primary)] rounded-lg hover:bg-[var(--primary)]/20 transition-colors font-medium"
                     >
+                      <Pencil className="w-3.5 h-3.5" />
                       Redigera
                     </Link>
+                    <Link
+                      href={`/admin/foretag/${biz.id}#annonser`}
+                      className="flex items-center gap-1.5 text-sm py-2 px-3 bg-amber-50 text-amber-700 border border-amber-200 rounded-lg hover:bg-amber-100 transition-colors font-medium"
+                    >
+                      <Megaphone className="w-3.5 h-3.5" />
+                      Annonser
+                    </Link>
+                    <Link
+                      href={`/admin/foretag/${biz.id}#blixterbjudanden`}
+                      className="flex items-center gap-1.5 text-sm py-2 px-3 bg-amber-50 text-amber-700 border border-amber-200 rounded-lg hover:bg-amber-100 transition-colors font-medium"
+                    >
+                      <Zap className="w-3.5 h-3.5 fill-amber-500" />
+                      Blixterbjudanden
+                    </Link>
+                  </div>
+                  <div className="flex gap-2 mt-2">
                     <Link
                       href={`/foretag/${biz.id}`}
                       target="_blank"
