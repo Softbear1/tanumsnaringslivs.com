@@ -7,6 +7,7 @@ import AdChat from "@/components/admin/AdChat";
 import type { BusinessDraft, AdDraft } from "@/lib/chat";
 import Link from "next/link";
 import { Plus, Trash2, Pause, Play, Megaphone, Sparkles, Zap } from "lucide-react";
+import AIBoostTextarea from "@/components/admin/AIBoostTextarea";
 
 interface Ad {
   id: string;
@@ -67,6 +68,8 @@ export default function EditBusinessClient({ business, categories, ads, flashDea
   const [adSubmitting, setAdSubmitting] = useState(false);
   const [dealSubmitting, setDealSubmitting] = useState(false);
   const [dealFormOpen, setDealFormOpen] = useState(false);
+  const [adBody, setAdBody] = useState("");
+  const [dealDescription, setDealDescription] = useState("");
 
   // Business edit: chat can prefill the form. We remount the form (via formKey)
   // when a draft arrives so its defaults pick up the new values.
@@ -88,6 +91,7 @@ export default function EditBusinessClient({ business, categories, ads, flashDea
   function handleAdDraft(ad: AdDraft) {
     const valid = ad.category_id && categories.some((c) => c.id === ad.category_id);
     setAdDraft({ ...ad, category_id: valid ? ad.category_id : null });
+    setAdBody(ad.body ?? "");
     setAdMode("form");
   }
 
@@ -378,11 +382,13 @@ export default function EditBusinessClient({ business, categories, ads, flashDea
 
               <div>
                 <label className="block text-xs font-medium text-[var(--primary)] mb-1">Brödtext (valfri)</label>
-                <textarea
+                <AIBoostTextarea
                   name="body"
+                  value={adBody}
+                  onChange={setAdBody}
                   rows={2}
-                  defaultValue={adDraft?.body ?? ""}
                   placeholder="Kortare beskrivning av erbjudandet..."
+                  context="annonstext för lokalt företag"
                   className="w-full px-3 py-2 rounded-lg border border-[var(--border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)] resize-none"
                 />
               </div>
@@ -452,7 +458,7 @@ export default function EditBusinessClient({ business, categories, ads, flashDea
                 </button>
                 <button
                   type="button"
-                  onClick={() => { setAdMode("none"); setAdDraft(null); }}
+                  onClick={() => { setAdMode("none"); setAdDraft(null); setAdBody(""); }}
                   className="px-4 py-2 border border-[var(--border)] text-sm text-[var(--muted)] rounded-lg hover:bg-gray-50 transition-colors"
                 >
                   Avbryt
@@ -541,10 +547,13 @@ export default function EditBusinessClient({ business, categories, ads, flashDea
 
               <div>
                 <label className="block text-xs font-medium text-[var(--primary)] mb-1">Beskrivning (valfri)</label>
-                <textarea
+                <AIBoostTextarea
                   name="description"
+                  value={dealDescription}
+                  onChange={setDealDescription}
                   rows={2}
                   placeholder="Villkor eller detaljer..."
+                  context="blixterbjudande, kortfattat och lockande"
                   className="w-full px-3 py-2 rounded-lg border border-[var(--border)] text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 resize-none"
                 />
               </div>
@@ -586,7 +595,7 @@ export default function EditBusinessClient({ business, categories, ads, flashDea
                 </button>
                 <button
                   type="button"
-                  onClick={() => setDealFormOpen(false)}
+                  onClick={() => { setDealFormOpen(false); setDealDescription(""); }}
                   className="px-4 py-2 border border-[var(--border)] text-sm text-[var(--muted)] rounded-lg hover:bg-gray-50 transition-colors"
                 >
                   Avbryt
