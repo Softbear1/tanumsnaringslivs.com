@@ -20,86 +20,6 @@ interface CategoryInfo {
   name: string;
 }
 
-/**
- * Per-kategori-recept: vilken typ av flöde det är, vilka frågor som ska ställas
- * och vad CTA-knappen i UI:t kallas. Mottagaren (företaget) behöver de
- * strukturerade svaren för att kunna agera — en byggare kan inte prissätta
- * utan scope och tidplan, en restaurang behöver datum/tid/antal.
- */
-type FlowRecipe = {
-  flowType: string;
-  /** Frågor att samla in, i ordning. En fråga per tur. */
-  collect: string;
-  /** Nycklar som ska finnas i details-objektet i READY-markören. */
-  detailKeys: string[];
-  /** Hur uppdraget ska beskrivas för användaren. */
-  noun: string;
-};
-
-const FLOW_RECIPES: Record<string, FlowRecipe> = {
-  bygg: {
-    flowType: "projekt",
-    collect:
-      "vad som ska göras (typ av arbete), var (adress eller ort), ungefärlig storlek/omfattning, önskat startdatum, ungefärlig budget om kunden har en",
-    detailKeys: ["arbete", "adress", "omfattning", "start", "budget"],
-    noun: "projektet",
-  },
-  restaurang: {
-    flowType: "bokning",
-    collect:
-      "vilket datum, vilken tid, antal gäster, eventuella allergier eller önskemål, anledning (t.ex. middag, fest)",
-    detailKeys: ["datum", "tid", "antal", "allergier", "anledning"],
-    noun: "bokningen",
-  },
-  turism: {
-    flowType: "bokning",
-    collect:
-      "vilken aktivitet, vilket datum, antal deltagare, erfarenhetsnivå (nybörjare/van)",
-    detailKeys: ["aktivitet", "datum", "antal", "erfarenhet"],
-    noun: "bokningen",
-  },
-  skonhet: {
-    flowType: "tidsbokning",
-    collect: "vilken behandling, önskat datum, önskad tid på dagen",
-    detailKeys: ["behandling", "datum", "tid"],
-    noun: "tidsbokningen",
-  },
-  transport: {
-    flowType: "förfrågan",
-    collect:
-      "varifrån, vart, vilket datum, vad som ska transporteras (gods eller passagerare, ungefärlig mängd)",
-    detailKeys: ["från", "till", "datum", "last"],
-    noun: "förfrågan",
-  },
-  it: {
-    flowType: "ärende",
-    collect:
-      "vad problemet eller behovet är, vilket system eller utrustning det gäller, hur brådskande det är",
-    detailKeys: ["problem", "system", "prioritet"],
-    noun: "ärendet",
-  },
-  fastighet: {
-    flowType: "förfrågan",
-    collect:
-      "typ av fastighet, vilken tjänst som behövs, var (ort), önskad tidpunkt",
-    detailKeys: ["fastighet", "tjänst", "ort", "tidpunkt"],
-    noun: "förfrågan",
-  },
-  butiker: {
-    flowType: "fråga",
-    collect: "vilken produkt eller vara, eventuella specifikationer, budget om relevant",
-    detailKeys: ["produkt", "specifikation", "budget"],
-    noun: "frågan",
-  },
-};
-
-const DEFAULT_RECIPE: FlowRecipe = {
-  flowType: "förfrågan",
-  collect: "vad de vill ha gjort, var i Tanum, ungefär när, eventuell budget",
-  detailKeys: ["beskrivning", "plats", "tidpunkt"],
-  noun: "förfrågan",
-};
-
 function buildSystemPrompt(businesses: BusinessInfo[], categories: CategoryInfo[]): string {
   const bizList = businesses
     .map((b) => {
@@ -108,53 +28,28 @@ function buildSystemPrompt(businesses: BusinessInfo[], categories: CategoryInfo[
     })
     .join("\n");
 
-  const detailsExample = (recipe: FlowRecipe) =>
-    `{${recipe.detailKeys.map((k) => `"${k}":"..."`).join(",")}}`;
+  return `Du är assistenten på Tanums Näringsliv — ett lokalt företagsregister för Tanums kommun.
 
-  // Bygg ett kategoristyrt avsnitt: AI:n vet inte i förväg vad kunden vill, så
-  // vi beskriver hur den ska anpassa frågorna när kategorin klarnar.
-  const flowGuide = Object.entries(FLOW_RECIPES)
-    .map(([catId, r]) => {
-      const cat = categories.find((c) => c.id === catId);
-      return `### ${cat?.name ?? catId} (flowType: "${r.flowType}")
-Samla in: ${r.collect}.
-Avsluta med: READY:{"businessIds":[...],"summary":"...","flowType":"${r.flowType}","details":${detailsExample(r)}}`;
-    })
-    .join("\n\n");
+Din uppgift är att hjälpa besökaren hitta rätt lokalt företag baserat på vad de behöver.
 
-  return `Du är assistenten på Tanums Näringsliv — en lokal företagskatalog för Tanums kommun i Bohuslän.
-
-Din uppgift: förstå vad besökaren behöver, hitta rätt lokalt företag, och samla in den konkreta information som företaget behöver för att kunna svara.
-
-## Så här gör du
-1. Öppna med: "Vad behöver du hjälp med?"
-2. Lista ut vilken sorts behov det är och anpassa frågorna efter kategorin (se nedan).
-3. Ställ de konkreta frågorna — EN i taget — tills du har det företaget behöver för att kunna ge ett svar/pris.
-4. Identifiera 1–3 relevanta företag från listan längst ned och föreslå dem.
-5. Avsluta med rätt READY-markör för kategorin.
+## Hur du arbetar
+1. Förstå vad besökaren söker.
+2. Identifiera 1–3 relevanta företag från listan nedan och presentera dem kort.
+3. Om du är osäker, ställ en kort följdfråga.
 
 ## Ton
-- Svara ALLTID på svenska.
-- Var kortfattad och konkret. Max 2 meningar per tur.
-- Gå rakt på sak. Inga inledningsfraser som "Vad kul att du hör av dig!" eller utfyllnad om "Bohuskusten", "havet" eller "vår fina bygd".
-- Ställ EN fråga i taget.
-- Fråga ALDRIG om kontaktuppgifter (namn, e-post, telefon) — det sköts av ett formulär efteråt.
+- Svara alltid på svenska.
+- Kortfattad och konkret — max 2–3 meningar per tur.
+- Gå rakt på sak. Inga utfyllnadsfraser.
 
-## Anpassa frågorna efter behovet
-${flowGuide}
+## När du har hittat matchande företag
+Avsluta svaret med en JSON-markör på sista raden:
+READY:{"businessIds":["id1","id2"],"summary":"kort beskrivning av vad de sökte","categoryId":"kategori-id eller null"}
 
-För övriga behov: samla in ${DEFAULT_RECIPE.collect} och avsluta med READY:{"businessIds":[...],"summary":"...","flowType":"${DEFAULT_RECIPE.flowType}","details":${detailsExample(DEFAULT_RECIPE)}}.
-
-## Regler för READY-markören
-- Lägg den på SISTA raden, först när du har samlat in det som behövs OCH valt företag.
-- businessIds MÅSTE vara exakta id:n från listan nedan. Hitta aldrig på id:n.
-- summary: en kort mening som sammanfattar behovet.
-- details: fyll i de fält du fått svar på; utelämna fält du inte fick svar på (tomma värden är okej men hellre korrekt info).
+businessIds MÅSTE vara exakta id:n från listan nedan.
 
 ## Tillgängliga företag
-${bizList}
-
-Börja konversationen direkt med din första fråga till användaren.`;
+${bizList}`;
 }
 
 export async function POST(request: NextRequest) {
@@ -183,7 +78,7 @@ export async function POST(request: NextRequest) {
     },
     body: JSON.stringify({
       model: "claude-haiku-4-5-20251001",
-      max_tokens: 400,
+      max_tokens: 300,
       system: systemPrompt,
       messages,
       stream: true,
@@ -198,7 +93,6 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  // Forward the SSE stream from Anthropic directly to the client
   return new Response(response.body, {
     headers: {
       "Content-Type": "text/event-stream",

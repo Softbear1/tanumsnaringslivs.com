@@ -3,22 +3,10 @@ export interface ChatMessage {
   content: string;
 }
 
-export type FlowType =
-  | "projekt"
-  | "bokning"
-  | "tidsbokning"
-  | "förfrågan"
-  | "ärende"
-  | "fråga";
-
 export interface ReadyPayload {
   businessIds: string[];
   summary: string;
   categoryId: string | null;
-  /** Vilken typ av förfrågan flödet handlar om — styr ord och CTA i UI:t. */
-  flowType?: FlowType;
-  /** Strukturerade svar från intervjun, t.ex. { datum: "21 juni", antal: "4" }. */
-  details?: Record<string, string>;
 }
 
 /**

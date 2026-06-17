@@ -1,21 +1,19 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
-import { Search, ArrowRight } from "lucide-react";
+import { Search, Sparkles } from "lucide-react";
 import type { SeasonTheme } from "@/lib/season";
 import type { Business, Category } from "@/lib/data";
 import type { Ad } from "./AdCard";
 
-const CHAT_EXAMPLES = [
-  "Jag behöver måla om huset innan vintern...",
-  "Kan någon hjälpa mig laga taket efter stormen?",
-  "Letar efter en frisör i Grebbestad som fixar herrklippning",
-  "Vill boka bord på en restaurang med utsikt i Fjällbacka",
-  "Behöver hjälp med VVS — kranen i köket läcker",
-  "Söker snickare för altanbygge, ca 20 kvm",
-  "Vilket café har bäst frukost i Tanumshede?",
-  "Behöver en elektriker — ska installera laddbox",
-  "Letar efter städfirma som kan komma varannan vecka",
-  "Söker massör eller naprapat i Hamburgsund",
+const PLACEHOLDERS = [
+  "Sök företag eller kategori...",
+  "Vilket café har bäst frukost i Fjällbacka?",
+  "Sök företag eller kategori...",
+  "Letar efter snickare i Grebbestad...",
+  "Sök företag eller kategori...",
+  "Bästa restaurangen med havsvy?",
+  "Sök företag eller kategori...",
+  "VVS-firma nära Hamburgsund?",
 ];
 
 type Props = {
@@ -29,53 +27,54 @@ type Props = {
 };
 
 export default function Hero({ search, onSearch, onStartChat, theme }: Props) {
-  const [mode, setMode] = useState<"search" | "chat">("search");
-  const [chatInput, setChatInput] = useState("");
+  const [value, setValue] = useState(search);
   const [placeholderIdx, setPlaceholderIdx] = useState(0);
   const [placeholderVisible, setPlaceholderVisible] = useState(true);
-  const [userTyping, setUserTyping] = useState(false);
-  const chatInputRef = useRef<HTMLInputElement>(null);
+  const [focused, setFocused] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  // Rotate placeholder every 2s when user isn't typing
+  // Rotate placeholder when idle
   useEffect(() => {
-    if (mode !== "chat" || userTyping) return;
+    if (focused || value) return;
     const id = setInterval(() => {
       setPlaceholderVisible(false);
       setTimeout(() => {
-        setPlaceholderIdx((i) => (i + 1) % CHAT_EXAMPLES.length);
+        setPlaceholderIdx((i) => (i + 1) % PLACEHOLDERS.length);
         setPlaceholderVisible(true);
       }, 200);
-    }, 2000);
+    }, 2500);
     return () => clearInterval(id);
-  }, [mode, userTyping]);
+  }, [focused, value]);
 
-  function handleChatSubmit() {
-    const text = chatInput.trim();
-    if (!text) return;
-    setChatInput("");
-    setUserTyping(false);
-    onStartChat(text);
+  // Keep local value in sync when search is cleared externally
+  useEffect(() => { setValue(search); }, [search]);
+
+  function handleChange(v: string) {
+    setValue(v);
+    // Typing naturally → filter mode
+    onSearch(v);
   }
 
-  function handleModeSwitch(m: "search" | "chat") {
-    setMode(m);
-    if (m === "chat") {
-      setUserTyping(false);
-      setTimeout(() => chatInputRef.current?.focus(), 80);
+  function handleSubmit() {
+    const text = value.trim();
+    if (!text) return;
+    // If it looks like a question rather than a keyword, open AI chat
+    if (text.length > 20 || /\?|vill|letar|söker|behöver|hjälp|bästa/i.test(text)) {
+      setValue("");
+      onSearch("");
+      onStartChat(text);
     }
+    // else: already filtered by onSearch — no action needed
   }
 
   return (
     <section id="hero" className="relative overflow-hidden bg-[var(--primary)] text-white" style={{ borderTop: `4px solid ${theme.accent}` }}>
-      {/* Dot pattern */}
       <div className="absolute inset-0 opacity-[0.03]"
         style={{ backgroundImage: `radial-gradient(circle at 1px 1px, white 1px, transparent 0)`, backgroundSize: "32px 32px" }} />
-      {/* Seasonal glow */}
       <div className="absolute -top-32 -right-32 w-96 h-96 opacity-20 rounded-full blur-3xl" style={{ backgroundColor: theme.glow }} />
       <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-[#1B3A4B] opacity-30 rounded-full blur-3xl" />
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
-        {/* Headline row */}
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl sm:text-3xl font-bold text-white leading-tight">
             Tanums lokala företag
@@ -83,68 +82,34 @@ export default function Hero({ search, onSearch, onStartChat, theme }: Props) {
           <span className="text-2xl" aria-hidden>{theme.emoji}</span>
         </div>
 
-        {/* Tab toggle */}
-        <div className="flex gap-1 bg-white/10 p-1 rounded-xl w-fit mb-4">
+        <div className="relative max-w-xl">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--muted)]" aria-hidden />
+          <input
+            ref={inputRef}
+            type="search"
+            value={value}
+            onChange={(e) => handleChange(e.target.value)}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
+            onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+            placeholder={placeholderVisible ? PLACEHOLDERS[placeholderIdx] : ""}
+            aria-label="Sök bland företag eller ställ en fråga"
+            className="w-full pl-12 pr-14 py-4 rounded-xl bg-white text-[var(--primary)] placeholder:text-[var(--muted)] text-base shadow-lg focus:outline-none focus:ring-2 focus:ring-[var(--accent)] transition-shadow"
+          />
+          {/* AI-trigger button — subtle sparkle icon */}
           <button
-            onClick={() => handleModeSwitch("search")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-              mode === "search" ? "bg-white text-[var(--primary)] shadow-sm" : "text-white/70 hover:text-white"
-            }`}
+            onClick={() => { if (value.trim()) { handleSubmit(); } else { onStartChat("Vad kan du hjälpa mig med?"); } }}
+            aria-label="Fråga AI:n"
+            title="Fråga AI:n"
+            className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-[var(--muted)] hover:text-[var(--accent)] transition-colors"
           >
-            <Search className="w-4 h-4" />
-            Sök
-          </button>
-          <button
-            onClick={() => handleModeSwitch("chat")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-              mode === "chat" ? "bg-white text-[var(--primary)] shadow-sm" : "text-white/70 hover:text-white"
-            }`}
-          >
-            <span className="text-base leading-none">✨</span>
-            Få offert
+            <Sparkles className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Search input */}
-        {mode === "search" && (
-          <div className="relative max-w-xl">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--muted)]" aria-hidden />
-            <input
-              type="search"
-              value={search}
-              onChange={(e) => onSearch(e.target.value)}
-              placeholder="Sök företag eller kategori..."
-              aria-label="Sök bland företag"
-              className="w-full pl-12 pr-4 py-4 rounded-xl bg-white text-[var(--primary)] placeholder:text-[var(--muted)] text-base shadow-lg focus:outline-none focus:ring-2 focus:ring-[var(--accent)] transition-shadow"
-            />
-          </div>
-        )}
-
-        {/* Chat trigger input */}
-        {mode === "chat" && (
-          <div className="relative max-w-xl">
-            <input
-              ref={chatInputRef}
-              type="text"
-              value={chatInput}
-              onChange={(e) => { setChatInput(e.target.value); setUserTyping(true); }}
-              onFocus={() => setUserTyping(true)}
-              onKeyDown={(e) => e.key === "Enter" && handleChatSubmit()}
-              placeholder={placeholderVisible ? CHAT_EXAMPLES[placeholderIdx] : ""}
-              aria-label="Beskriv vad du behöver"
-              className="w-full pl-4 pr-14 py-4 rounded-xl bg-white text-[var(--primary)] placeholder:text-[var(--muted)]/70 text-base shadow-lg focus:outline-none focus:ring-2 focus:ring-[var(--accent)] transition-all"
-              style={{ caretColor: "var(--primary)" }}
-            />
-            <button
-              onClick={handleChatSubmit}
-              disabled={!chatInput.trim()}
-              aria-label="Skicka"
-              className="absolute right-2 top-1/2 -translate-y-1/2 p-2.5 bg-[var(--primary)] text-white rounded-lg hover:bg-[var(--primary)]/80 transition-colors disabled:opacity-40"
-            >
-              <ArrowRight className="w-5 h-5" />
-            </button>
-          </div>
-        )}
+        <p className="text-xs text-white/50 mt-2.5">
+          Skriv ett namn eller en kategori — eller ställ en fråga med ✨
+        </p>
       </div>
     </section>
   );

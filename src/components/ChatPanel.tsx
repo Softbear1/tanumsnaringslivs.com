@@ -1,27 +1,10 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
-import { X, Send, Loader2, CheckCircle } from "lucide-react";
+import { X, Send } from "lucide-react";
 import { Business, Category } from "@/lib/data";
-import { ChatMessage, ReadyPayload, FlowType, extractReady, toApiMessages } from "@/lib/chat";
+import { ChatMessage, ReadyPayload, extractReady, toApiMessages } from "@/lib/chat";
 import AdCard, { Ad } from "./AdCard";
-
-/** Ord och knapptexter per flödestyp så chatten känns rätt för varje bransch. */
-const FLOW_COPY: Record<FlowType, {
-  recipients: string;   // rubrik över företagslistan
-  toContact: string;    // knapp som leder till kontaktformuläret
-  confirmTitle: string; // rubrik i bekräftelsekortet
-  submit: string;       // submit-knappen
-  whatLabel: string;    // etikett för sammanfattningen
-}> = {
-  projekt: { recipients: "Skicka projektförfrågan till:", toContact: "Vidare →", confirmTitle: "Ditt projekt", submit: "Skicka projektförfrågan", whatLabel: "Vad du vill göra" },
-  bokning: { recipients: "Skicka bokningsförfrågan till:", toContact: "Boka →", confirmTitle: "Din bokning", submit: "Skicka bokningsförfrågan", whatLabel: "Vad du vill boka" },
-  tidsbokning: { recipients: "Boka tid hos:", toContact: "Boka tid →", confirmTitle: "Din tidsbokning", submit: "Skicka tidsbokning", whatLabel: "Vad du vill boka" },
-  förfrågan: { recipients: "Skicka förfrågan till:", toContact: "Vidare →", confirmTitle: "Din förfrågan", submit: "Skicka förfrågan", whatLabel: "Vad du söker" },
-  ärende: { recipients: "Skicka ärende till:", toContact: "Vidare →", confirmTitle: "Ditt ärende", submit: "Skicka ärende", whatLabel: "Vad det gäller" },
-  fråga: { recipients: "Skicka fråga till:", toContact: "Vidare →", confirmTitle: "Din fråga", submit: "Skicka fråga", whatLabel: "Vad du undrar" },
-};
-
-const DEFAULT_FLOW_COPY = FLOW_COPY["förfrågan"];
+import Link from "next/link";
 
 type Props = {
   businesses: Business[];
@@ -32,40 +15,31 @@ type Props = {
   initialMessage?: string;
 };
 
-type Step = "chat" | "contact" | "confirm" | "done";
-
 export default function ChatPanel({ businesses, categories, ads, greeting, onClose, initialMessage }: Props) {
   const [messages, setMessages] = useState<ChatMessage[]>([
-    { role: "assistant", content: greeting || "Hej! Vad behöver du hjälp med?" },
+    { role: "assistant", content: greeting || "Hej! Vilket företag letar du efter?" },
   ]);
   const sentInitial = useRef(false);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
   const [ready, setReady] = useState<ReadyPayload | null>(null);
-  const [step, setStep] = useState<Step>("chat");
-  const [contact, setContact] = useState({ name: "", email: "", phone: "" });
-  const [submitting, setSubmitting] = useState(false);
-  const [quoteId, setQuoteId] = useState<string | null>(null);
   const messagesRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Scroll only the messages container — never scrollIntoView, which would
-  // scroll the whole page (the overlay is fixed) down to the gallery.
   useEffect(() => {
     const el = messagesRef.current;
     if (el) el.scrollTop = el.scrollHeight;
-  }, [messages, step]);
+  }, [messages, ready]);
 
   useEffect(() => {
     setTimeout(() => inputRef.current?.focus({ preventScroll: true }), 80);
   }, []);
 
-  // If a first message was typed in the hero input, send it immediately on mount
   useEffect(() => {
     if (!initialMessage || sentInitial.current) return;
     sentInitial.current = true;
     const first: ChatMessage[] = [
-      { role: "assistant", content: greeting || "Hej! Vad behöver du hjälp med?" },
+      { role: "assistant", content: greeting || "Hej! Vilket företag letar du efter?" },
       { role: "user", content: initialMessage },
     ];
     setMessages(first);
@@ -87,15 +61,7 @@ export default function ChatPanel({ businesses, categories, ads, greeting, onClo
         body: JSON.stringify({ messages: toApiMessages(msgs), businesses: bizForAI, categories: catForAI }),
       });
 
-      if (!res.ok) {
-        let detail = "";
-        try {
-          const body = (await res.json()) as { error?: unknown };
-          detail = typeof body.error === "string" ? body.error : JSON.stringify(body.error);
-        } catch { /* non-JSON */ }
-        throw new Error(detail || `AI-tjänsten svarade med fel (${res.status})`);
-      }
-      if (!res.body) throw new Error("Fel från AI");
+      if (!res.ok || !res.body) throw new Error("Fel från AI");
 
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
@@ -126,14 +92,10 @@ export default function ChatPanel({ businesses, categories, ads, greeting, onClo
           } catch { /* skip malformed chunks */ }
         }
       }
-    } catch (err) {
-      const detail = err instanceof Error ? err.message : "";
+    } catch {
       setMessages((prev) => {
         const updated = [...prev];
-        updated[updated.length - 1] = {
-          role: "assistant",
-          content: detail ? `Något gick fel: ${detail}` : "Något gick fel. Försök igen.",
-        };
+        updated[updated.length - 1] = { role: "assistant", content: "Något gick fel. Försök igen." };
         return updated;
       });
     } finally {
@@ -147,43 +109,13 @@ export default function ChatPanel({ businesses, categories, ads, greeting, onClo
     const text = input.trim();
     if (!text || streaming) return;
     setInput("");
+    setReady(null);
     const next: ChatMessage[] = [...messages, { role: "user", content: text }];
     setMessages(next);
     await sendToAI(next);
   }
 
-  async function handleSubmitQuote() {
-    if (!ready) return;
-    setSubmitting(true);
-    try {
-      const res = await fetch("/api/quote", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          summary: ready.summary,
-          categoryId: ready.categoryId,
-          contactName: contact.name,
-          contactEmail: contact.email,
-          contactPhone: contact.phone,
-          businessIds: ready.businessIds,
-          flowType: ready.flowType ?? null,
-          details: ready.details ?? {},
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-      setQuoteId(data.quoteId);
-      setStep("done");
-    } catch (err) {
-      alert(err instanceof Error ? err.message : "Något gick fel");
-    } finally {
-      setSubmitting(false);
-    }
-  }
-
-  const selectedBusinesses = businesses.filter((b) => ready?.businessIds.includes(b.id));
-  const copy = (ready?.flowType && FLOW_COPY[ready.flowType]) || DEFAULT_FLOW_COPY;
-  const detailEntries = Object.entries(ready?.details ?? {}).filter(([, v]) => v && v.trim());
+  const matchedBusinesses = businesses.filter((b) => ready?.businessIds.includes(b.id));
   const chatAd = ready
     ? (ads.find((a) => a.category_id === ready.categoryId) ?? ads.find((a) => !a.category_id) ?? null)
     : null;
@@ -192,7 +124,7 @@ export default function ChatPanel({ businesses, categories, ads, greeting, onClo
     <div className="flex flex-col h-full">
       {/* Header */}
       <div className="bg-[var(--primary)] text-white px-4 py-3 flex items-center justify-between shrink-0">
-        <div className="text-sm font-semibold">AI-assistent · Tanums Näringsliv</div>
+        <div className="text-sm font-semibold">Hitta rätt företag</div>
         {onClose && (
           <button onClick={onClose} className="text-white/70 hover:text-white transition-colors" aria-label="Stäng">
             <X className="w-5 h-5" />
@@ -220,124 +152,47 @@ export default function ChatPanel({ businesses, categories, ads, greeting, onClo
           </div>
         ))}
 
-        {chatAd && step === "chat" && <AdCard ad={chatAd} variant="chat" />}
-
-        {ready && step === "chat" && (
-          <div className="bg-[var(--accent-light)] border border-[var(--accent)]/20 rounded-2xl p-4 space-y-3">
-            <p className="text-sm font-semibold text-[var(--primary)]">{copy.recipients}</p>
-            {selectedBusinesses.map((b) => (
-              <div key={b.id} className="flex items-center gap-2 text-sm text-[var(--primary)]">
-                <div className="w-7 h-7 rounded-lg bg-[var(--primary)]/10 flex items-center justify-center text-xs font-bold shrink-0">{b.initials}</div>
-                {b.name}
-              </div>
+        {/* Matched businesses */}
+        {matchedBusinesses.length > 0 && (
+          <div className="space-y-2">
+            {matchedBusinesses.map((b) => (
+              <Link
+                key={b.id}
+                href={`/foretag/${b.id}`}
+                className="flex items-center gap-3 bg-[var(--bg)] border border-[var(--border)] rounded-xl px-3 py-2.5 hover:border-[var(--accent)] transition-colors group"
+              >
+                <div className="w-8 h-8 rounded-lg bg-[var(--primary)]/10 flex items-center justify-center text-xs font-bold shrink-0 text-[var(--primary)]">
+                  {b.initials}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-[var(--primary)] group-hover:text-[var(--accent)] transition-colors">{b.name}</p>
+                  <p className="text-xs text-[var(--muted)] truncate">{b.description}</p>
+                </div>
+              </Link>
             ))}
-            <button
-              onClick={() => setStep("contact")}
-              className="w-full py-2.5 bg-[var(--accent)] text-white rounded-xl text-sm font-semibold hover:bg-[var(--accent)]/90 transition-colors"
-            >
-              {copy.toContact}
-            </button>
           </div>
         )}
 
-        {step === "contact" && (
-          <div className="bg-[var(--bg)] border border-[var(--border)] rounded-2xl p-4 space-y-3">
-            <p className="text-sm font-semibold text-[var(--primary)]">Dina kontaktuppgifter</p>
-            <input type="text" placeholder="Namn *" value={contact.name}
-              onChange={(e) => setContact((c) => ({ ...c, name: e.target.value }))}
-              className="w-full px-3 py-2.5 rounded-xl border border-[var(--border)] text-sm text-[var(--primary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]" />
-            <input type="email" placeholder="E-post * (du får en länk till din offert)" value={contact.email}
-              onChange={(e) => setContact((c) => ({ ...c, email: e.target.value }))}
-              className="w-full px-3 py-2.5 rounded-xl border border-[var(--border)] text-sm text-[var(--primary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]" />
-            <input type="tel" placeholder="Telefon (valfritt)" value={contact.phone}
-              onChange={(e) => setContact((c) => ({ ...c, phone: e.target.value }))}
-              className="w-full px-3 py-2.5 rounded-xl border border-[var(--border)] text-sm text-[var(--primary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]" />
-            <button onClick={() => contact.name && contact.email && setStep("confirm")}
-              disabled={!contact.name || !contact.email}
-              className="w-full py-2.5 bg-[var(--accent)] text-white rounded-xl text-sm font-semibold hover:bg-[var(--accent)]/90 transition-colors disabled:opacity-50">
-              Fortsätt →
-            </button>
-          </div>
-        )}
-
-        {step === "confirm" && ready && (
-          <div className="bg-white border border-[var(--border)] rounded-2xl p-4 space-y-4 card-shadow">
-            <p className="text-sm font-semibold text-[var(--primary)]">{copy.confirmTitle}</p>
-            <div className="bg-[var(--bg)] rounded-xl p-3">
-              <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--muted)] mb-1">{copy.whatLabel}</p>
-              <p className="text-sm text-[var(--primary)] leading-relaxed">{ready.summary}</p>
-            </div>
-            {detailEntries.length > 0 && (
-              <div className="bg-[var(--bg)] rounded-xl p-3">
-                <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--muted)] mb-1.5">Detaljer</p>
-                <dl className="text-xs space-y-1">
-                  {detailEntries.map(([k, v]) => (
-                    <div key={k} className="flex gap-2">
-                      <dt className="text-[var(--muted)] w-24 shrink-0 capitalize">{k}</dt>
-                      <dd className="font-medium text-[var(--primary)] min-w-0">{v}</dd>
-                    </div>
-                  ))}
-                </dl>
-              </div>
-            )}
-            <div>
-              <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--muted)] mb-1.5">Dina uppgifter</p>
-              <dl className="text-xs space-y-1">
-                <div className="flex gap-2"><dt className="text-[var(--muted)] w-14 shrink-0">Namn</dt><dd className="font-medium">{contact.name}</dd></div>
-                <div className="flex gap-2"><dt className="text-[var(--muted)] w-14 shrink-0">E-post</dt><dd className="font-medium break-all min-w-0">{contact.email}</dd></div>
-                {contact.phone && <div className="flex gap-2"><dt className="text-[var(--muted)] w-14 shrink-0">Telefon</dt><dd className="font-medium">{contact.phone}</dd></div>}
-              </dl>
-            </div>
-            <div>
-              <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--muted)] mb-1.5">Skickas till</p>
-              <div className="flex flex-wrap gap-1.5">
-                {selectedBusinesses.map((b) => (
-                  <span key={b.id} className="inline-flex items-center gap-1.5 bg-[var(--primary)]/5 text-[var(--primary)] text-xs font-medium px-2.5 py-1 rounded-full">
-                    <span className="w-4 h-4 rounded bg-[var(--primary)]/10 flex items-center justify-center text-[8px] font-bold">{b.initials}</span>
-                    {b.name}
-                  </span>
-                ))}
-              </div>
-            </div>
-            <button onClick={handleSubmitQuote} disabled={submitting}
-              className="w-full py-2.5 bg-[var(--primary)] text-white rounded-xl text-sm font-semibold hover:bg-[var(--primary)]/90 transition-colors disabled:opacity-60 flex items-center justify-center gap-2">
-              {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
-              {submitting ? "Skickar..." : copy.submit}
-            </button>
-            <button onClick={() => setStep("contact")} className="w-full text-xs text-[var(--muted)] hover:text-[var(--primary)]">← Ändra uppgifter</button>
-          </div>
-        )}
-
-        {step === "done" && (
-          <div className="bg-green-50 border border-green-200 rounded-2xl p-5 text-center">
-            <CheckCircle className="w-10 h-10 text-green-500 mx-auto mb-3" />
-            <p className="font-semibold text-[var(--primary)] mb-1">Förfrågan skickad!</p>
-            <p className="text-sm text-[var(--muted)]">
-              Kolla din e-post — vi har skickat en länk till din offert på <strong className="break-all">{contact.email}</strong>.
-            </p>
-          </div>
-        )}
+        {chatAd && <AdCard ad={chatAd} variant="chat" />}
       </div>
 
       {/* Input */}
-      {step === "chat" && (
-        <div className="border-t border-[var(--border)] px-3 py-3 shrink-0 flex gap-2 bg-white">
-          <input
-            ref={inputRef}
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
-            placeholder="Skriv ett meddelande..."
-            disabled={streaming}
-            className="flex-1 px-3.5 py-2.5 rounded-xl border border-[var(--border)] text-sm text-[var(--primary)] placeholder:text-[var(--muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)] disabled:opacity-60"
-          />
-          <button onClick={handleSend} disabled={!input.trim() || streaming}
-            className="p-2.5 bg-[var(--primary)] text-white rounded-xl hover:bg-[var(--primary)]/90 transition-colors disabled:opacity-40">
-            <Send className="w-4 h-4" />
-          </button>
-        </div>
-      )}
+      <div className="border-t border-[var(--border)] px-3 py-3 shrink-0 flex gap-2 bg-white">
+        <input
+          ref={inputRef}
+          type="text"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
+          placeholder="Skriv vad du letar efter..."
+          disabled={streaming}
+          className="flex-1 px-3.5 py-2.5 rounded-xl border border-[var(--border)] text-sm text-[var(--primary)] placeholder:text-[var(--muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)] disabled:opacity-60"
+        />
+        <button onClick={handleSend} disabled={!input.trim() || streaming}
+          className="p-2.5 bg-[var(--primary)] text-white rounded-xl hover:bg-[var(--primary)]/90 transition-colors disabled:opacity-40">
+          <Send className="w-4 h-4" />
+        </button>
+      </div>
     </div>
   );
 }

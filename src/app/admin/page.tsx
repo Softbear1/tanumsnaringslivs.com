@@ -2,8 +2,8 @@ export const runtime = "edge";
 import { createServerClient } from "@/lib/supabase-server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Star, ExternalLink, Eye, Pause, Play, Plus, Inbox, Clock, Megaphone } from "lucide-react";
-import { logout, toggleActive, markQuoteHandled } from "./actions";
+import { Star, ExternalLink, Eye, Pause, Play, Plus, Megaphone } from "lucide-react";
+import { logout, toggleActive } from "./actions";
 
 export default async function AdminPage() {
   const supabase = await createServerClient();
@@ -35,24 +35,6 @@ export default async function AdminPage() {
     const bid = row.business_id as string;
     viewCounts[bid] = (viewCounts[bid] ?? 0) + 1;
   }
-
-  // Fetch quote requests for this owner's businesses
-  const { data: quoteLinks } = businessIds.length
-    ? await supabase
-        .from("quote_request_businesses")
-        .select("quote_request_id, business_id")
-        .in("business_id", businessIds)
-    : { data: [] };
-
-  const quoteRequestIds = [...new Set((quoteLinks ?? []).map((r) => r.quote_request_id as string))];
-  const { data: quoteRequests } = quoteRequestIds.length
-    ? await supabase
-        .from("quote_requests")
-        .select("id, summary, details, contact_name, contact_email, contact_phone, status, created_at")
-        .in("id", quoteRequestIds)
-        .order("created_at", { ascending: false })
-        .limit(20)
-    : { data: [] };
 
   return (
     <div className="min-h-screen bg-[var(--bg)]">
@@ -247,82 +229,6 @@ export default async function AdminPage() {
           </div>
         )}
 
-        {/* Quote requests section */}
-        <div className="mt-12">
-          <div className="flex items-center gap-3 mb-6">
-            <Inbox className="w-5 h-5 text-[var(--primary)]" />
-            <h2 className="text-xl font-bold text-[var(--primary)]">Offertförfrågningar</h2>
-            {(quoteRequests ?? []).length > 0 && (
-              <span className="bg-[var(--accent)] text-white text-xs font-bold px-2 py-0.5 rounded-full">
-                {(quoteRequests ?? []).filter((q) => q.status === "pending").length} nya
-              </span>
-            )}
-          </div>
-
-          {(quoteRequests ?? []).length > 0 ? (
-            <div className="space-y-3">
-              {(quoteRequests ?? []).map((q) => (
-                <div key={q.id} className="bg-white rounded-2xl border border-[var(--border)] card-shadow p-5">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-[var(--primary)] leading-snug mb-1">{q.summary}</p>
-                      {(() => {
-                        const pairs = Object.entries((q.details ?? {}) as Record<string, unknown>)
-                          .filter(([, v]) => typeof v === "string" && v.trim());
-                        return pairs.length > 0 ? (
-                          <dl className="flex flex-wrap gap-x-4 gap-y-0.5 text-xs text-[var(--primary)] mb-1.5">
-                            {pairs.map(([k, v]) => (
-                              <div key={k} className="flex gap-1">
-                                <dt className="text-[var(--muted)] capitalize">{k}:</dt>
-                                <dd className="font-medium">{String(v)}</dd>
-                              </div>
-                            ))}
-                          </dl>
-                        ) : null;
-                      })()}
-                      <p className="text-sm text-[var(--muted)]">
-                        {q.contact_name} · {q.contact_email}
-                        {q.contact_phone ? ` · ${q.contact_phone}` : ""}
-                      </p>
-                      <p className="text-xs text-[var(--muted)] mt-1">
-                        {new Date(q.created_at).toLocaleString("sv-SE", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
-                      </p>
-                    </div>
-                    <div className="flex flex-col items-end gap-2 shrink-0">
-                      {q.status === "pending" ? (
-                        <>
-                          <span className="flex items-center gap-1 text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-full">
-                            <Clock className="w-3 h-3" />
-                            Ny
-                          </span>
-                          <form action={markQuoteHandled.bind(null, q.id)}>
-                            <button
-                              type="submit"
-                              className="text-xs font-medium text-[var(--primary)] border border-[var(--border)] hover:border-[var(--accent)] hover:text-[var(--accent)] px-2.5 py-1 rounded-full transition-colors"
-                              title="Markera som hanterad — kunden kan då lämna ett omdöme"
-                            >
-                              Markera som hanterad
-                            </button>
-                          </form>
-                        </>
-                      ) : (
-                        <span className="text-xs font-medium text-[var(--accent)] bg-green-50 border border-green-200 px-2.5 py-1 rounded-full">
-                          Hanterad
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="bg-white rounded-2xl border border-[var(--border)] py-10 text-center">
-              <Inbox className="w-8 h-8 text-[var(--muted)] mx-auto mb-3 opacity-40" />
-              <p className="text-sm text-[var(--muted)]">Inga offertförfrågningar ännu.</p>
-              <p className="text-xs text-[var(--muted)] mt-1">De visas här när kunder använder AI-assistenten.</p>
-            </div>
-          )}
-        </div>
       </main>
     </div>
   );
