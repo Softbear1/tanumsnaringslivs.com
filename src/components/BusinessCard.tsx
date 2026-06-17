@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import Image from "next/image";
 import { Phone, Mail, Globe, MapPin, Star } from "lucide-react";
 import { Business, Category, getCategory } from "@/lib/data";
 import clsx from "clsx";
@@ -27,12 +28,16 @@ export default function BusinessCard({ business, categories, isAd }: Props) {
         {/* Header row */}
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center gap-3 min-w-0">
-            {/* Logo circle */}
+            {/* Logo circle — visar uppladdad logga om den finns, annars initialer */}
             <div
-              className="w-12 h-12 rounded-xl flex items-center justify-center font-bold text-sm flex-shrink-0"
+              className="w-12 h-12 rounded-xl flex items-center justify-center font-bold text-sm flex-shrink-0 overflow-hidden"
               style={{ backgroundColor: cat?.bgColor ?? "#F3F4F6", color: cat?.color ?? "#374151" }}
             >
-              {business.initials}
+              {business.logoUrl ? (
+                <Image src={business.logoUrl} alt={`${business.name} logotyp`} width={48} height={48} className="object-contain w-full h-full" />
+              ) : (
+                business.initials
+              )}
             </div>
             <div className="min-w-0">
               <Link href={`/foretag/${business.id}`} className="group/name">

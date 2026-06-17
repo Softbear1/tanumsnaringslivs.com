@@ -5,7 +5,6 @@ import Header from "@/components/Header";
 import DirectoryClient from "@/components/DirectoryClient";
 import RegisterCTA from "@/components/RegisterCTA";
 import Footer from "@/components/Footer";
-import ChatWidget from "@/components/ChatWidget";
 import type { Ad } from "@/components/AdCard";
 import type { FlashDeal, FlashTeaser } from "@/components/FlashDeals";
 import { stockholmToday, endOfStockholmDayISO, relativeDayLabel } from "@/lib/time";
@@ -70,7 +69,7 @@ export default async function Home() {
     ...new Set([...(dealRows ?? []), ...(teaserRows ?? [])].map((r) => r.business_id as string)),
   ];
   const { data: dealBizRows } = dealBizIds.length
-    ? await supabase.from("businesses").select("id, name, initials").in("id", dealBizIds)
+    ? await supabase.from("businesses").select("id, name, initials, logo_url").in("id", dealBizIds)
     : { data: [] };
   const dealBizById = Object.fromEntries((dealBizRows ?? []).map((b) => [b.id, b]));
 
@@ -81,12 +80,14 @@ export default async function Home() {
     business_id: r.business_id,
     business_name: dealBizById[r.business_id]?.name ?? "",
     business_initials: dealBizById[r.business_id]?.initials ?? "?",
+    business_logo: dealBizById[r.business_id]?.logo_url ?? null,
   }));
 
   const flashTeasers: FlashTeaser[] = (teaserRows ?? []).map((r) => ({
     id: r.id as string,
     business_name: dealBizById[r.business_id as string]?.name ?? "",
     business_initials: dealBizById[r.business_id as string]?.initials ?? "?",
+    business_logo: dealBizById[r.business_id as string]?.logo_url ?? null,
     dayLabel: relativeDayLabel(r.deal_date as string),
   }));
 
@@ -108,7 +109,6 @@ export default async function Home() {
         <RegisterCTA />
       </main>
       <Footer />
-      <ChatWidget businesses={businesses} categories={categories} ads={ads} deals={flashDeals} greeting={theme.chatGreeting} />
     </>
   );
 }

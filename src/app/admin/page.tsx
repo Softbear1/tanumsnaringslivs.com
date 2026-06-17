@@ -71,6 +71,20 @@ export default async function AdminPage() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        {/* Kampanj-info: gratis just nu */}
+        <div className="mb-8 rounded-2xl border-2 border-amber-300 bg-gradient-to-r from-amber-50 to-white p-5 flex items-start gap-4">
+          <span className="flex items-center justify-center w-10 h-10 rounded-xl bg-amber-400 text-white shadow-sm shrink-0">
+            <Zap className="w-5 h-5 fill-current" />
+          </span>
+          <div>
+            <h2 className="font-bold text-[var(--primary)] mb-1">Just nu: helt gratis att synas 🎉</h2>
+            <p className="text-sm text-[var(--muted)] leading-relaxed">
+              Det kostar ingenting att skapa annonser och blixterbjudanden just nu — men så kommer det inte
+              vara för alltid. Passa på att bygga upp din synlighet medan det är gratis!
+            </p>
+          </div>
+        </div>
+
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-2xl font-bold text-[var(--primary)]">Mina företag</h1>

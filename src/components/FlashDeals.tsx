@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { Zap, Eye, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 
 export type FlashDeal = {
   id: string;
@@ -10,14 +11,28 @@ export type FlashDeal = {
   business_id: string;
   business_name: string;
   business_initials: string;
+  business_logo?: string | null;
 };
 
 export type FlashTeaser = {
   id: string;
   business_name: string;
   business_initials: string;
+  business_logo?: string | null;
   dayLabel: string;
 };
+
+function BizBadge({ logo, initials, name }: { logo?: string | null; initials: string; name: string }) {
+  return (
+    <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center text-xs font-bold text-amber-700 shrink-0 overflow-hidden">
+      {logo ? (
+        <Image src={logo} alt={`${name} logotyp`} width={32} height={32} className="object-contain w-full h-full" />
+      ) : (
+        initials
+      )}
+    </div>
+  );
+}
 
 type Props = {
   deals: FlashDeal[];
@@ -89,9 +104,7 @@ export default function FlashDeals({ deals, teasers, endsAt }: Props) {
                   Blixt
                 </div>
                 <div className="flex items-center gap-2.5 mb-2">
-                  <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center text-xs font-bold text-amber-700 shrink-0">
-                    {deal.business_initials}
-                  </div>
+                  <BizBadge logo={deal.business_logo} initials={deal.business_initials} name={deal.business_name} />
                   <p className="text-xs font-medium text-[var(--muted)] truncate">{deal.business_name}</p>
                 </div>
                 <p className="font-bold text-[var(--primary)] leading-snug mb-1 line-clamp-2">{deal.headline}</p>
@@ -122,9 +135,7 @@ export default function FlashDeals({ deals, teasers, endsAt }: Props) {
                   className="shrink-0 flex items-center gap-2.5 bg-white border border-dashed border-amber-300 rounded-xl px-3 py-2.5"
                   title="Erbjudandet avslöjas den dagen"
                 >
-                  <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center text-xs font-bold text-amber-700 shrink-0">
-                    {t.business_initials}
-                  </div>
+                  <BizBadge logo={t.business_logo} initials={t.business_initials} name={t.business_name} />
                   <div className="min-w-0">
                     <p className="text-sm font-semibold text-[var(--primary)] truncate max-w-[10rem]">{t.business_name}</p>
                     <p className="text-[11px] font-medium text-amber-600">⚡ Blixterbjudande {t.dayLabel.toLowerCase()}</p>
@@ -134,6 +145,16 @@ export default function FlashDeals({ deals, teasers, endsAt }: Props) {
             </div>
           </div>
         )}
+
+        {/* Länk till alla blixterbjudanden */}
+        <div className="mt-5">
+          <Link
+            href="/blixterbjudanden"
+            className="inline-flex items-center gap-1.5 text-sm font-semibold text-amber-700 bg-white border border-amber-300 px-4 py-2 rounded-xl hover:bg-amber-50 transition-colors"
+          >
+            Se alla blixterbjudanden <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
       </div>
     </section>
   );

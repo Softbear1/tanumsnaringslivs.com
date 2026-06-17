@@ -145,19 +145,6 @@ function RockArtBackground() {
   );
 }
 
-function weatherLabel(condition: WeatherCondition): string {
-  const labels: Record<WeatherCondition, string> = {
-    sun: "sol",
-    "partly-cloudy": "halvklart",
-    overcast: "mulet",
-    fog: "dimma",
-    rain: "regn",
-    snow: "snö",
-    storm: "storm",
-  };
-  return labels[condition] ?? "";
-}
-
 // Pre-generate stable random values to avoid hydration issues
 const RAIN_DROPS = Array.from({ length: 25 }, (_, i) => ({
   left: ((i * 37 + 13) % 100),
@@ -450,15 +437,6 @@ export default function Hero({ search, onSearch, onStartChat, theme }: Props) {
                 Näringsliv, hantverk &amp; upplevelser
               </p>
             </div>
-          </div>
-          {/* Väderindikator / årstidsemoji */}
-          <div className="flex flex-col items-end gap-1 mt-1">
-            <span className="text-2xl leading-none" aria-hidden>{theme.emoji}</span>
-            {weather && (
-              <span className="text-[10px] text-white/35 uppercase tracking-widest">
-                {weatherLabel(weather)}
-              </span>
-            )}
           </div>
         </div>
 
