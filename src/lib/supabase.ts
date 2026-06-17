@@ -220,6 +220,7 @@ export type Database = {
           deal_date: string;
           active: boolean;
           created_at: string;
+          fb_post_id: string | null;
         };
         Insert: {
           id?: string;
@@ -230,6 +231,7 @@ export type Database = {
           deal_date: string;
           active?: boolean;
           created_at?: string;
+          fb_post_id?: string | null;
         };
         Update: {
           id?: string;
@@ -240,6 +242,7 @@ export type Database = {
           deal_date?: string;
           active?: boolean;
           created_at?: string;
+          fb_post_id?: string | null;
         };
         Relationships: [];
       };
