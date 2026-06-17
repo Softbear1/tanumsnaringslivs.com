@@ -117,11 +117,6 @@ export default async function AdminPage() {
                         </span>
                       </div>
                     </div>
-                    {biz.boosted && (
-                      <span className="text-[10px] font-bold text-[var(--boost)] bg-[var(--boost-bg)] px-2 py-0.5 rounded-full shrink-0">
-                        BOOST
-                      </span>
-                    )}
                   </div>
 
                   <p className="text-sm text-[var(--muted)] line-clamp-2 mb-4 leading-relaxed">

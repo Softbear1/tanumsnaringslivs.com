@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { Phone, Mail, Globe, MapPin, Star, Zap } from "lucide-react";
+import { Phone, Mail, Globe, MapPin, Star } from "lucide-react";
 import { Business, Category, getCategory } from "@/lib/data";
 import clsx from "clsx";
 
@@ -17,8 +17,7 @@ export default function BusinessCard({ business, categories, isAd }: Props) {
     <div
       className={clsx(
         "relative bg-white rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1 group",
-        "card-shadow hover:card-shadow-hover",
-        business.boosted && "ring-1 ring-[var(--boost)]/30"
+        "card-shadow hover:card-shadow-hover"
       )}
     >
       {/* Category color strip */}
@@ -50,19 +49,13 @@ export default function BusinessCard({ business, categories, isAd }: Props) {
             </div>
           </div>
 
-          <div className="flex flex-col items-end gap-1">
-            {business.boosted && (
-              <span className="flex items-center gap-1 text-[10px] font-bold text-[var(--boost)] bg-[var(--boost-bg)] px-2 py-0.5 rounded-full">
-                <Zap className="w-2.5 h-2.5" />
-                BOOST
-              </span>
-            )}
-            {isAd && (
+          {isAd && (
+            <div className="flex flex-col items-end gap-1">
               <span className="text-[10px] text-[var(--muted)] bg-gray-100 px-2 py-0.5 rounded-full">
                 Annonserat
               </span>
-            )}
-          </div>
+            </div>
+          )}
         </div>
 
         {/* Description */}

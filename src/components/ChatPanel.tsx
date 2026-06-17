@@ -4,18 +4,20 @@ import { X, Send } from "lucide-react";
 import { Business, Category } from "@/lib/data";
 import { ChatMessage, ReadyPayload, extractReady, toApiMessages } from "@/lib/chat";
 import AdCard, { Ad } from "./AdCard";
+import type { FlashDeal } from "./FlashDeals";
 import Link from "next/link";
 
 type Props = {
   businesses: Business[];
   categories: Category[];
   ads: Ad[];
+  deals?: FlashDeal[];
   greeting?: string;
   onClose?: () => void;
   initialMessage?: string;
 };
 
-export default function ChatPanel({ businesses, categories, ads, greeting, onClose, initialMessage }: Props) {
+export default function ChatPanel({ businesses, categories, ads, deals = [], greeting, onClose, initialMessage }: Props) {
   const [messages, setMessages] = useState<ChatMessage[]>([
     { role: "assistant", content: greeting || "Hej! Vilket företag letar du efter?" },
   ]);
@@ -51,6 +53,20 @@ export default function ChatPanel({ businesses, categories, ads, greeting, onClo
     setStreaming(true);
     const bizForAI = businesses.map((b) => ({ id: b.id, name: b.name, categoryId: b.categoryId, description: b.description }));
     const catForAI = categories.map((c) => ({ id: c.id, name: c.name }));
+    const offersForAI = [
+      ...ads.map((a) => ({
+        business_name: a.business_name,
+        headline: a.headline,
+        body: a.body,
+        kind: "annons" as const,
+      })),
+      ...deals.map((d) => ({
+        business_name: d.business_name,
+        headline: d.headline,
+        body: d.description,
+        kind: "blixt" as const,
+      })),
+    ];
     let fullText = "";
     setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
 
@@ -58,7 +74,7 @@ export default function ChatPanel({ businesses, categories, ads, greeting, onClo
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: toApiMessages(msgs), businesses: bizForAI, categories: catForAI }),
+        body: JSON.stringify({ messages: toApiMessages(msgs), businesses: bizForAI, categories: catForAI, offers: offersForAI }),
       });
 
       if (!res.ok || !res.body) throw new Error("Fel från AI");

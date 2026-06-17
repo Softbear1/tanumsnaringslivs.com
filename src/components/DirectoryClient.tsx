@@ -75,6 +75,7 @@ export default function DirectoryClient({ categories, businesses, ads, theme, fl
               businesses={businesses}
               categories={categories}
               ads={ads}
+              deals={flashDeals}
               initialMessage={chatPending}
               onClose={() => setChatPending(null)}
             />

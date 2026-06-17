@@ -3,16 +3,18 @@ import { useState, useEffect } from "react";
 import { MessageCircle } from "lucide-react";
 import { Business, Category } from "@/lib/data";
 import type { Ad } from "./AdCard";
+import type { FlashDeal } from "./FlashDeals";
 import ChatPanel from "./ChatPanel";
 
 type Props = {
   businesses: Business[];
   categories: Category[];
   ads: Ad[];
+  deals?: FlashDeal[];
   greeting?: string;
 };
 
-export default function ChatWidget({ businesses, categories, ads, greeting }: Props) {
+export default function ChatWidget({ businesses, categories, ads, deals, greeting }: Props) {
   const [open, setOpen] = useState(false);
   const [heroVisible, setHeroVisible] = useState(true);
 
@@ -50,6 +52,7 @@ export default function ChatWidget({ businesses, categories, ads, greeting }: Pr
             businesses={businesses}
             categories={categories}
             ads={ads}
+            deals={deals}
             greeting={greeting}
             onClose={() => setOpen(false)}
           />

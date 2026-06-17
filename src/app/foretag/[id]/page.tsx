@@ -134,12 +134,6 @@ export default async function ForetagPage({ params }: PageProps) {
                 <div className="flex-1">
                   <div className="flex flex-wrap items-center gap-2 mb-1">
                     <h1 className="text-2xl font-bold text-[var(--primary)]">{business.name}</h1>
-                    {business.boosted && (
-                      <span className="flex items-center gap-1 text-[10px] font-bold text-[var(--boost)] bg-[var(--boost-bg)] px-2 py-0.5 rounded-full">
-                        <Zap className="w-2.5 h-2.5" />
-                        BOOST
-                      </span>
-                    )}
                   </div>
                   {cat && (
                     <span

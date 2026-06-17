@@ -108,7 +108,7 @@ export default async function Home() {
         <RegisterCTA />
       </main>
       <Footer />
-      <ChatWidget businesses={businesses} categories={categories} ads={ads} greeting={theme.chatGreeting} />
+      <ChatWidget businesses={businesses} categories={categories} ads={ads} deals={flashDeals} greeting={theme.chatGreeting} />
     </>
   );
 }
