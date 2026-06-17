@@ -3,8 +3,7 @@ import { useState } from "react";
 import { Category, Business } from "@/lib/data";
 import type { SeasonTheme } from "@/lib/season";
 import Hero from "./Hero";
-import SeasonSpotlight from "./SeasonSpotlight";
-import CategoryGrid from "./CategoryGrid";
+import CategoryChips from "./CategoryChips";
 import BusinessGrid from "./BusinessGrid";
 import type { Ad } from "./AdCard";
 
@@ -31,13 +30,20 @@ export default function DirectoryClient({ categories, businesses, ads, theme }: 
 
   return (
     <>
-      <Hero search={search} onSearch={handleSearch} theme={theme} />
-      <SeasonSpotlight theme={theme} categories={categories} onSelect={handleCategory} />
-      <CategoryGrid
-        categories={categories}
+      <Hero
+        search={search}
+        onSearch={handleSearch}
+        theme={theme}
         businesses={businesses}
+        categories={categories}
+        ads={ads}
+      />
+      <CategoryChips
+        categories={categories}
         selected={categoryFilter}
         onSelect={handleCategory}
+        featuredIds={theme.categoryIds}
+        accentColor={theme.accent}
       />
       <BusinessGrid
         categories={categories}

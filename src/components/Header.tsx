@@ -65,7 +65,7 @@ export default function Header() {
                   href="/admin/logga-in"
                   className="text-sm px-4 py-2 rounded-lg bg-[var(--primary)] text-white font-medium hover:bg-[var(--primary-dark)] transition-colors"
                 >
-                  Lägg till företag – gratis
+                  Registrera ditt företag →
                 </a>
               </>
             )}
