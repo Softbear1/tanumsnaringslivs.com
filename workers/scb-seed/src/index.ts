@@ -57,6 +57,7 @@ function buildQuery(branschCodes: string[]) {
     Kategorier: [
       { Kategori: KOMMUN_KATEGORI, Kod: [TANUM_KOMMUN] },
       { Kategori: "2-siffrig bransch 1", Kod: branschCodes },
+      { Kategori: "Juridisk form", Kod: ["49"] },
     ],
   };
 }
