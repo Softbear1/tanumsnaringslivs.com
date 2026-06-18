@@ -51,6 +51,8 @@ export default function ChatPanel({ businesses, categories, ads, deals = [], gre
 
   async function sendToAI(msgs: ChatMessage[]) {
     setStreaming(true);
+    const bizForAI = businesses.map((b) => ({ id: b.id, name: b.name, categoryId: b.categoryId, description: b.description }));
+    const catForAI = categories.map((c) => ({ id: c.id, name: c.name }));
     const offersForAI = [
       ...ads.map((a) => ({
         business_name: a.business_name,
@@ -72,10 +74,13 @@ export default function ChatPanel({ businesses, categories, ads, deals = [], gre
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: toApiMessages(msgs), offers: offersForAI }),
+        body: JSON.stringify({ messages: toApiMessages(msgs), businesses: bizForAI, categories: catForAI, offers: offersForAI }),
       });
 
-      if (!res.ok || !res.body) throw new Error("Fel från AI");
+      if (!res.ok || !res.body) {
+        const errText = await res.text().catch(() => "Okänt fel");
+        throw new Error(errText || "Fel från AI");
+      }
 
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
@@ -106,10 +111,11 @@ export default function ChatPanel({ businesses, categories, ads, deals = [], gre
           } catch { /* skip malformed chunks */ }
         }
       }
-    } catch {
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Något gick fel. Försök igen.";
       setMessages((prev) => {
         const updated = [...prev];
-        updated[updated.length - 1] = { role: "assistant", content: "Något gick fel. Försök igen." };
+        updated[updated.length - 1] = { role: "assistant", content: msg };
         return updated;
       });
     } finally {

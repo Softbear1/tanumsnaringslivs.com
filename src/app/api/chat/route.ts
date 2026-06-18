@@ -1,12 +1,23 @@
 export const runtime = "edge";
 import type { NextRequest } from "next/server";
-import { createAdminClient } from "@/lib/supabase-admin";
 
-export const maxDuration = 60;
+export const maxDuration = 30;
 
 interface ChatMessage {
   role: "user" | "assistant";
   content: string;
+}
+
+interface BizInfo {
+  id: string;
+  name: string;
+  categoryId: string;
+  description: string;
+}
+
+interface CatInfo {
+  id: string;
+  name: string;
 }
 
 interface OfferInfo {
@@ -16,15 +27,11 @@ interface OfferInfo {
   kind: "annons" | "blixt";
 }
 
-function buildSystemPrompt(
-  businesses: { id: string; name: string; categoryId: string; description: string }[],
-  categories: { id: string; name: string }[],
-  offers: OfferInfo[],
-): string {
+function buildSystemPrompt(businesses: BizInfo[], categories: CatInfo[], offers: OfferInfo[]): string {
   const catMap: Record<string, string> = {};
   for (const c of categories) catMap[c.id] = c.name;
 
-  const byCategory: Record<string, typeof businesses> = {};
+  const byCategory: Record<string, BizInfo[]> = {};
   for (const b of businesses) {
     const cat = catMap[b.categoryId] ?? b.categoryId;
     if (!byCategory[cat]) byCategory[cat] = [];
@@ -40,9 +47,7 @@ function buildSystemPrompt(
 
   const offerLines = offers.length
     ? "\n## Aktuella erbjudanden och annonser\n" +
-      offers
-        .map((o) => `- [${o.kind === "blixt" ? "Blixterbjudande" : "Annons"} – ${o.business_name}] ${o.headline}${o.body ? ": " + o.body.slice(0, 60) : ""}`)
-        .join("\n")
+      offers.map((o) => `- [${o.kind === "blixt" ? "Blixterbjudande" : "Annons"} – ${o.business_name}] ${o.headline}${o.body ? ": " + o.body.slice(0, 60) : ""}`).join("\n")
     : "";
 
   return `Du är en hjälpsam assistent i Tanums Näringsliv — en lokal företagskatalog för Tanums kommun. Din uppgift är att hjälpa besökaren hitta rätt lokalt företag.
@@ -51,7 +56,7 @@ function buildSystemPrompt(
 - Svara ALLTID på svenska, kortfattat och konkret. Max 2–3 meningar per tur. Inga inledningsfraser som "Vad kul att du hör av dig!".
 - Använd ALDRIG markdown — inga **, inga #, inga -, inga listor. Skriv vanlig löptext.
 - Ställ EN följdfråga i taget om du behöver förstå bättre.
-- Matcha mot yrkeskunnande och vad företagen GÖR, inte bara vad de heter. En "snickare" kan finnas under bygg, hantverk eller renovering.
+- Matcha mot yrkeskunnande och vad företagen GÖR, inte bara vad de heter.
 - När du identifierat 1–3 bra matchningar: presentera dem kort och skriv på SISTA raden:
   READY:{"businessIds":["id1","id2"],"summary":"kort sammanfattning","categoryId":"kategori-id eller null"}
 - categoryId: välj det kategori-id som bäst matchar förfrågan, eller null om oklar.
@@ -70,59 +75,32 @@ ${offerLines}`;
 export async function POST(request: NextRequest) {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
-    return new Response(JSON.stringify({ error: "AI-tjänsten är inte konfigurerad." }), {
+    return new Response(JSON.stringify({ error: "ANTHROPIC_API_KEY saknas." }), {
       status: 503,
       headers: { "Content-Type": "application/json" },
     });
   }
 
-  const { messages, offers } = (await request.json()) as {
+  const { messages, businesses, categories, offers } = (await request.json()) as {
     messages: ChatMessage[];
+    businesses: BizInfo[];
+    categories: CatInfo[];
     offers: OfferInfo[];
   };
 
-  // Fetch businesses and categories server-side so the system prompt is
-  // identical across all users → prompt cache hits across sessions.
-  const db = createAdminClient();
-  if (!db) {
-    return new Response(JSON.stringify({ error: "Databaskoppling saknas." }), {
-      status: 503,
-      headers: { "Content-Type": "application/json" },
-    });
-  }
-  const [{ data: bizRows, error: bizErr }, { data: catRows }] = await Promise.all([
-    db.from("businesses").select("id, name, category_id, description").eq("active", true),
-    db.from("categories").select("id, name").order("sort_order"),
-  ]);
-  if (bizErr) {
-    return new Response(JSON.stringify({ error: bizErr.message }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
-  }
-
-  const businesses = (bizRows ?? []).map((b) => ({
-    id: b.id as string,
-    name: b.name as string,
-    categoryId: b.category_id as string,
-    description: (b.description as string) ?? "",
-  }));
-  const categories = (catRows ?? []).map((c) => ({ id: c.id as string, name: c.name as string }));
-
-  const systemPrompt = buildSystemPrompt(businesses, categories, offers ?? []);
+  const systemPrompt = buildSystemPrompt(businesses ?? [], categories ?? [], offers ?? []);
 
   const response = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: {
       "x-api-key": apiKey,
       "anthropic-version": "2023-06-01",
-      "anthropic-beta": "prompt-caching-1",
       "content-type": "application/json",
     },
     body: JSON.stringify({
       model: "claude-sonnet-4-6",
       max_tokens: 400,
-      system: [{ type: "text", text: systemPrompt, cache_control: { type: "ephemeral" } }],
+      system: systemPrompt,
       messages,
       stream: true,
     }),
@@ -130,9 +108,9 @@ export async function POST(request: NextRequest) {
 
   if (!response.ok) {
     const errText = await response.text();
-    return new Response(JSON.stringify({ error: errText }), {
+    return new Response(errText, {
       status: response.status,
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "text/plain" },
     });
   }
 
