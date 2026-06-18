@@ -51,7 +51,12 @@ export default function ChatPanel({ businesses, categories, ads, deals = [], gre
 
   async function sendToAI(msgs: ChatMessage[]) {
     setStreaming(true);
-    const bizForAI = businesses.map((b) => ({ id: b.id, name: b.name, categoryId: b.categoryId, description: b.description }));
+    // Only send businesses with a real description to stay within token limits.
+    // Claimed businesses have rich descriptions; most SCB-imported ones don't.
+    const bizForAI = businesses
+      .filter((b) => b.description && b.description.length > 20)
+      .slice(0, 250)
+      .map((b) => ({ id: b.id, name: b.name, categoryId: b.categoryId, description: b.description }));
     const catForAI = categories.map((c) => ({ id: c.id, name: c.name }));
     const offersForAI = [
       ...ads.map((a) => ({
