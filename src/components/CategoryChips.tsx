@@ -2,12 +2,14 @@
 import {
   Hammer, UtensilsCrossed, Sparkles, ShoppingBag,
   Truck, Monitor, Home, Map, LayoutGrid,
+  Briefcase, Fish, Factory,
 } from "lucide-react";
 import { Category } from "@/lib/data";
 import clsx from "clsx";
 
 const iconMap: Record<string, React.ElementType> = {
   Hammer, UtensilsCrossed, Sparkles, ShoppingBag, Truck, Monitor, Home, Map,
+  Briefcase, Fish, Factory,
 };
 
 type Props = {

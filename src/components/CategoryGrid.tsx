@@ -1,6 +1,7 @@
 "use client";
 import {
   Hammer, UtensilsCrossed, Sparkles, ShoppingBag,
+  Briefcase, Fish, Factory,
   Truck, Monitor, Home, Map, LayoutGrid,
 } from "lucide-react";
 import { Category, Business } from "@/lib/data";
@@ -8,7 +9,8 @@ import { getCategoryCount } from "@/lib/directory";
 import clsx from "clsx";
 
 const iconMap: Record<string, React.ElementType> = {
-  Hammer, UtensilsCrossed, Sparkles, ShoppingBag, Truck, Monitor, Home, Map,
+  Hammer, UtensilsCrossed, Sparkles, ShoppingBag,
+  Briefcase, Fish, Factory, Truck, Monitor, Home, Map,
 };
 
 type Props = {

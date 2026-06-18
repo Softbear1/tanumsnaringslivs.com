@@ -1,13 +1,15 @@
 "use client";
 import {
   Hammer, UtensilsCrossed, Sparkles, ShoppingBag,
+  Briefcase, Fish, Factory,
   Truck, Monitor, Home, Map,
 } from "lucide-react";
 import { Category } from "@/lib/data";
 import type { SeasonTheme } from "@/lib/season";
 
 const iconMap: Record<string, React.ElementType> = {
-  Hammer, UtensilsCrossed, Sparkles, ShoppingBag, Truck, Monitor, Home, Map,
+  Hammer, UtensilsCrossed, Sparkles, ShoppingBag,
+  Briefcase, Fish, Factory, Truck, Monitor, Home, Map,
 };
 
 type Props = {
