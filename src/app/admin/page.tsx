@@ -2,7 +2,7 @@ export const runtime = "edge";
 import { createServerClient } from "@/lib/supabase-server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Star, ExternalLink, Eye, Pause, Play, Plus, Megaphone, Zap, Pencil, TrendingUp, MousePointerClick } from "lucide-react";
+import { ExternalLink, Eye, Pause, Play, Plus, Megaphone, Zap, Pencil, TrendingUp, MousePointerClick } from "lucide-react";
 import { logout, toggleActive } from "./actions";
 import { isSuperAdmin } from "@/lib/auth";
 
@@ -21,7 +21,7 @@ export default async function AdminPage() {
 
   const { data: businesses } = await supabase
     .from("businesses")
-    .select("id, name, description, initials, active, boosted, rating, review_count, created_at, category_id")
+    .select("id, name, description, initials, active, boosted, created_at, category_id")
     .eq("owner_id", user.id)
     .order("created_at", { ascending: false });
 
@@ -201,18 +201,7 @@ export default async function AdminPage() {
                   </p>
 
                   {/* Insights */}
-                  <div className="grid grid-cols-2 gap-2 mb-4">
-                    <div className="bg-[var(--bg)] rounded-xl p-3">
-                      <div className="flex items-center gap-1.5 mb-0.5">
-                        <Star className="w-3.5 h-3.5 text-yellow-400" fill="var(--star)" />
-                        <span className="text-xs font-semibold text-[var(--primary)]">
-                          {biz.rating ? Number(biz.rating).toFixed(1) : "–"}
-                        </span>
-                      </div>
-                      <div className="text-[10px] text-[var(--muted)]">
-                        {biz.review_count ? `${biz.review_count} recensioner` : "Inga recensioner"}
-                      </div>
-                    </div>
+                  <div className="mb-4">
                     <div className="bg-[var(--bg)] rounded-xl p-3">
                       <div className="flex items-center gap-1.5 mb-0.5">
                         <Eye className="w-3.5 h-3.5 text-[var(--accent)]" />

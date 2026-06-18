@@ -132,42 +132,6 @@ export type Database = {
         };
         Relationships: [];
       };
-      quote_requests: {
-        Row: {
-          id: string;
-          summary: string;
-          category_id: string | null;
-          contact_name: string;
-          contact_email: string;
-          contact_phone: string | null;
-          details: Record<string, unknown> | null;
-          status: string;
-          created_at: string;
-        };
-        Insert: {
-          id?: string;
-          summary: string;
-          category_id?: string | null;
-          contact_name: string;
-          contact_email: string;
-          contact_phone?: string | null;
-          details?: Record<string, unknown> | null;
-          status?: string;
-          created_at?: string;
-        };
-        Update: {
-          id?: string;
-          summary?: string;
-          category_id?: string | null;
-          contact_name?: string;
-          contact_email?: string;
-          contact_phone?: string | null;
-          details?: Record<string, unknown> | null;
-          status?: string;
-          created_at?: string;
-        };
-        Relationships: [];
-      };
       ads: {
         Row: {
           id: string;
@@ -260,39 +224,6 @@ export type Database = {
         Update: { id?: string; business_id?: string; deal_date?: string };
         Relationships: [];
       };
-      reviews: {
-        Row: {
-          id: string;
-          business_id: string;
-          quote_request_id: string;
-          reviewer_email: string;
-          reviewer_name: string;
-          rating: number;
-          comment: string | null;
-          created_at: string;
-        };
-        Insert: {
-          id?: string;
-          business_id: string;
-          quote_request_id: string;
-          reviewer_email: string;
-          reviewer_name: string;
-          rating: number;
-          comment?: string | null;
-          created_at?: string;
-        };
-        Update: {
-          id?: string;
-          business_id?: string;
-          quote_request_id?: string;
-          reviewer_email?: string;
-          reviewer_name?: string;
-          rating?: number;
-          comment?: string | null;
-          created_at?: string;
-        };
-        Relationships: [];
-      };
       seasonal_content: {
         Row: {
           week_key: string;
@@ -323,24 +254,6 @@ export type Database = {
           spotlight_body?: string;
           chat_greeting?: string;
           generated_at?: string;
-        };
-        Relationships: [];
-      };
-      quote_request_businesses: {
-        Row: {
-          quote_request_id: string;
-          business_id: string;
-          notified_at: string;
-        };
-        Insert: {
-          quote_request_id: string;
-          business_id: string;
-          notified_at?: string;
-        };
-        Update: {
-          quote_request_id?: string;
-          business_id?: string;
-          notified_at?: string;
         };
         Relationships: [];
       };

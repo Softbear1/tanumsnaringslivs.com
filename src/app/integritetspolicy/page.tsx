@@ -44,7 +44,6 @@ export default function IntegritetspolicyPage() {
           <section>
             <h2 className="text-lg font-semibold text-[var(--primary)] mb-2">Vilka uppgifter vi samlar in</h2>
             <ul className="list-disc pl-5 space-y-1.5">
-              <li><strong>Förfrågningar till företag:</strong> om du skickar en förfrågan via tjänsten lagras de uppgifter du själv anger — t.ex. namn, e-postadress, telefonnummer (om du anger det) och beskrivningen av ditt ärende.</li>
               <li><strong>Företagslistningar:</strong> de kontakt- och företagsuppgifter som ett företag själv väljer att lägga upp.</li>
               <li><strong>Konto:</strong> e-postadress för inloggning (gäller företag som administrerar sin listning).</li>
               <li><strong>Anonym statistik:</strong> antal sidvisningar och klick på erbjudanden. Denna statistik innehåller <strong>ingen IP-adress och ingen uppgift som kan kopplas till en enskild person</strong> — endast tidpunkt och vilket företag/erbjudande det gäller.</li>
@@ -54,7 +53,6 @@ export default function IntegritetspolicyPage() {
           <section>
             <h2 className="text-lg font-semibold text-[var(--primary)] mb-2">Ändamål och rättslig grund</h2>
             <ul className="list-disc pl-5 space-y-1.5">
-              <li><strong>Förmedla offertförfrågningar</strong> till relevanta företag — rättslig grund: ditt samtycke när du skickar förfrågan, samt vårt och företagens berättigade intresse av att kunna svara.</li>
               <li><strong>Hantera företagskonton och listningar</strong> — rättslig grund: fullgörande av tjänsten (avtal).</li>
               <li><strong>Förbättra och visa upp tjänsten</strong> via anonym, aggregerad statistik — rättslig grund: berättigat intresse. (Eftersom statistiken är anonym utgör den i praktiken inte personuppgifter.)</li>
             </ul>
@@ -63,17 +61,14 @@ export default function IntegritetspolicyPage() {
           <section>
             <h2 className="text-lg font-semibold text-[var(--primary)] mb-2">Hur länge vi sparar uppgifterna</h2>
             <p>
-              Offertförfrågningar sparas så länge det behövs för att hantera ärendet och som längst
-              24 månader, därefter raderas eller anonymiseras de. Företagsuppgifter sparas så länge
-              listningen är aktiv. Du kan när som helst be oss radera dina uppgifter (se nedan).
+              Företagsuppgifter sparas så länge listningen är aktiv. Du kan när som helst be oss radera dina uppgifter (se nedan).
             </p>
           </section>
 
           <section>
             <h2 className="text-lg font-semibold text-[var(--primary)] mb-2">Vem får ta del av uppgifterna</h2>
             <p>
-              Offertförfrågningar delas med de företag du valt att kontakta. I övrigt delar vi inte
-              dina uppgifter med andra än de tjänsteleverantörer (personuppgiftsbiträden) som driver
+              Vi delar inte dina uppgifter med andra än de tjänsteleverantörer (personuppgiftsbiträden) som driver
               webbplatsen åt oss:
             </p>
             <ul className="list-disc pl-5 space-y-1.5 mt-2">

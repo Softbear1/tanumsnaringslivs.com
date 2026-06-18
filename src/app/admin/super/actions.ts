@@ -53,9 +53,3 @@ export async function adminDeleteAd(id: string) {
   await admin.from("ads").delete().eq("id", id);
   revalidatePath("/admin/super");
 }
-
-export async function adminUpdateQuoteStatus(id: string, status: string) {
-  const admin = await requireSuperAdmin();
-  await admin.from("quote_requests").update({ status }).eq("id", id);
-  revalidatePath("/admin/super");
-}

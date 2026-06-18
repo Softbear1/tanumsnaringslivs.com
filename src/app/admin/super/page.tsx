@@ -4,7 +4,7 @@ import { createAdminClient } from "@/lib/supabase-admin";
 import { isSuperAdmin } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Building2, Zap, Megaphone, Inbox, Pause, Play, Trash2, Pencil, ExternalLink, ShieldCheck } from "lucide-react";
+import { Building2, Zap, Megaphone, Pause, Play, Trash2, Pencil, ExternalLink, ShieldCheck } from "lucide-react";
 import { logout } from "../actions";
 import {
   adminToggleBusiness, adminDeleteBusiness,
@@ -28,11 +28,10 @@ export default async function SuperAdminPage() {
     return <div className="p-10 text-center text-red-600">SUPABASE_SERVICE_ROLE_KEY saknas — kan inte ladda super-admin.</div>;
   }
 
-  const [{ data: businesses }, { data: deals }, { data: ads }, { data: quotes }, { data: categories }] = await Promise.all([
+  const [{ data: businesses }, { data: deals }, { data: ads }, { data: categories }] = await Promise.all([
     admin.from("businesses").select("id, name, active, boosted, owner_id, created_at, category_id").order("created_at", { ascending: false }),
     admin.from("flash_deals").select("id, headline, deal_date, active, post_to_fb, fb_post_id, business_id").order("deal_date", { ascending: false }),
     admin.from("ads").select("id, headline, active, category_id, business_id").order("created_at", { ascending: false }),
-    admin.from("quote_requests").select("id, summary, contact_name, contact_email, status, created_at").order("created_at", { ascending: false }),
     admin.from("categories").select("id, name"),
   ]);
 
@@ -46,7 +45,6 @@ export default async function SuperAdminPage() {
     { icon: Building2, label: "Företag", value: businesses?.length ?? 0 },
     { icon: Zap, label: "Blixterbjudanden", value: deals?.length ?? 0 },
     { icon: Megaphone, label: "Annonser", value: ads?.length ?? 0 },
-    { icon: Inbox, label: "Offertförfrågningar", value: quotes?.length ?? 0 },
   ];
 
   return (
@@ -210,33 +208,6 @@ export default async function SuperAdminPage() {
           </div>
         </section>
 
-        {/* Offertförfrågningar */}
-        <section>
-          <h2 className="text-lg font-bold text-[var(--primary)] mb-3 flex items-center gap-2"><Inbox className="w-4 h-4" /> Alla offertförfrågningar</h2>
-          <div className="overflow-x-auto rounded-2xl border border-[var(--border)] bg-white">
-            <table className="w-full text-sm">
-              <thead className="bg-[var(--bg)] text-[var(--muted)] text-xs uppercase">
-                <tr>
-                  <th className="text-left px-4 py-3 font-semibold">Sammanfattning</th>
-                  <th className="text-left px-4 py-3 font-semibold hidden sm:table-cell">Kontakt</th>
-                  <th className="text-left px-4 py-3 font-semibold">Status</th>
-                  <th className="text-left px-4 py-3 font-semibold hidden md:table-cell">Datum</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[var(--border)]">
-                {(quotes ?? []).map((q) => (
-                  <tr key={q.id}>
-                    <td className="px-4 py-3 text-[var(--primary)] max-w-xs truncate">{q.summary}</td>
-                    <td className="px-4 py-3 text-[var(--muted)] hidden sm:table-cell">{q.contact_name}<br /><span className="text-xs">{q.contact_email}</span></td>
-                    <td className="px-4 py-3"><span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[var(--accent-light)] text-[var(--accent)]">{q.status}</span></td>
-                    <td className="px-4 py-3 text-[var(--muted)] hidden md:table-cell">{fmtDate(q.created_at)}</td>
-                  </tr>
-                ))}
-                {(quotes ?? []).length === 0 && <tr><td colSpan={4} className="px-4 py-6 text-center text-[var(--muted)]">Inga offertförfrågningar.</td></tr>}
-              </tbody>
-            </table>
-          </div>
-        </section>
       </main>
     </div>
   );

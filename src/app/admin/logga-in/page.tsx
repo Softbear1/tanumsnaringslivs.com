@@ -11,7 +11,6 @@ export default function LoggaIn() {
   const [error, setError] = useState<string | null>(null);
   const searchParams = useSearchParams();
   const next = searchParams.get("next") ?? "/admin";
-  const isCustomer = next.includes("/offert");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -46,9 +45,7 @@ export default function LoggaIn() {
             T
           </a>
           <h1 className="text-2xl font-bold text-[var(--primary)]">Tanums Näringsliv</h1>
-          <p className="text-[var(--muted)] mt-1">
-            {isCustomer ? "Logga in för att se din offertförfrågan" : "Logga in för företag och beställare"}
-          </p>
+          <p className="text-[var(--muted)] mt-1">Logga in för företag</p>
         </div>
 
         <div className="bg-white rounded-2xl shadow-lg border border-[var(--border)] p-8">
@@ -69,9 +66,7 @@ export default function LoggaIn() {
             <>
               <h2 className="text-xl font-semibold text-[var(--primary)] mb-2">Logga in</h2>
               <p className="text-[var(--muted)] mb-6 text-sm">
-                {isCustomer
-                  ? "Ange e-postadressen du använde i offertförfrågan så skickar vi en inloggningslänk."
-                  : "Ange din e-postadress så skickar vi en inloggningslänk — inget lösenord behövs."}
+                Ange din e-postadress så skickar vi en inloggningslänk — inget lösenord behövs.
               </p>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
