@@ -1,6 +1,6 @@
 export const runtime = "edge";
 import type { NextRequest } from "next/server";
-import { createServerClient } from "@/lib/supabase-server";
+import { createAdminClient } from "@/lib/supabase-admin";
 
 export const maxDuration = 60;
 
@@ -83,11 +83,23 @@ export async function POST(request: NextRequest) {
 
   // Fetch businesses and categories server-side so the system prompt is
   // identical across all users → prompt cache hits across sessions.
-  const supabase = await createServerClient();
-  const [{ data: bizRows }, { data: catRows }] = await Promise.all([
-    supabase.from("businesses").select("id, name, category_id, description").eq("active", true),
-    supabase.from("categories").select("id, name"),
+  const db = createAdminClient();
+  if (!db) {
+    return new Response(JSON.stringify({ error: "Databaskoppling saknas." }), {
+      status: 503,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+  const [{ data: bizRows, error: bizErr }, { data: catRows }] = await Promise.all([
+    db.from("businesses").select("id, name, category_id, description").eq("active", true),
+    db.from("categories").select("id, name").order("sort_order"),
   ]);
+  if (bizErr) {
+    return new Response(JSON.stringify({ error: bizErr.message }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
 
   const businesses = (bizRows ?? []).map((b) => ({
     id: b.id as string,
