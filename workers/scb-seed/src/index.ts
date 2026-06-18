@@ -86,6 +86,7 @@ function toRecord(r: Record<string, unknown>) {
   const reklamKod = str(r, "Reklam, kod");
   return {
     scb_org_nr: org,
+    scb_sni_kod: str(r, "Bransch_1, kod") || null,
     name,
     category_id: mapSniToCategory(str(r, "Bransch_1, kod")),
     description: `${name}${ort ? ` i ${ort}` : ""}.`,
