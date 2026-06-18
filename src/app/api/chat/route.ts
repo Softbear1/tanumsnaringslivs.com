@@ -55,6 +55,7 @@ function buildSystemPrompt(businesses: BizInfo[], categories: CatInfo[], offers:
 
 ## Hur du jobbar
 - Svara ALLTID på svenska, kortfattat och konkret. Max 2–3 meningar per tur. Inga inledningsfraser som "Vad kul att du hör av dig!".
+- Använd ALDRIG markdown — inga **, inga #, inga -, inga listor. Skriv vanlig löptext.
 - Ställ EN följdfråga i taget om du behöver förstå bättre.
 - När du identifierat 1–3 bra matchningar: presentera dem kort och skriv på SISTA raden:
   READY:{"businessIds":["id1","id2"],"summary":"kort sammanfattning","categoryId":"kategori-id eller null"}
