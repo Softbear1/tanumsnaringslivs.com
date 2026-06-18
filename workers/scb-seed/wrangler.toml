@@ -10,7 +10,7 @@ crons = ["15 3 * * *"]
 #   wrangler mtls-certificate upload --cert .scb/scb-cert.pem --key .scb/scb-key.pem --name scb-sokpavar
 [[mtls_certificates]]
 binding = "SCB_CERT"
-certificate_id = "FYLL_I_EFTER_UPPLADDNING"
+certificate_id = "5365bb37-6ab5-44d2-80d2-7ebf8539259e"
 
 # Icke-hemliga vars. Hemligheter sätts med `wrangler secret put`:
 #   SUPABASE_SERVICE_ROLE_KEY, SEED_SECRET
