@@ -49,6 +49,29 @@ interface Props {
   categories: Array<{ id: string; name: string }>;
   ads: Ad[];
   flashDeals: FlashDeal[];
+  // När satt (super-admin) går alla skrivningar via server actions med
+  // admin-klienten, så att även företag man inte äger kan redigeras.
+  adminActions?: AdminActions;
+}
+
+interface AdminActions {
+  updateBusiness: (id: string, data: {
+    name: string; category_id: string; description: string; phone: string;
+    email: string; website: string | null; address: string; initials: string; logo_url: string | null;
+  }) => Promise<void>;
+  deleteBusiness: (id: string) => Promise<void>;
+  createAd: (data: {
+    business_id: string; headline: string; body: string | null; cta_label: string | null;
+    cta_url: string | null; category_id: string | null; starts_at: string | null; ends_at: string | null;
+  }) => Promise<void>;
+  toggleAd: (id: string, active: boolean) => Promise<void>;
+  deleteAd: (id: string) => Promise<void>;
+  createDeal: (data: {
+    business_id: string; headline: string; description: string | null;
+    category_id: string | null; deal_date: string; post_to_fb: boolean;
+  }) => Promise<void>;
+  toggleDeal: (id: string, active: boolean) => Promise<void>;
+  deleteDeal: (id: string) => Promise<void>;
 }
 
 function toDraft(b: Props["business"]): BusinessDraft {
@@ -65,7 +88,8 @@ function toDraft(b: Props["business"]): BusinessDraft {
   };
 }
 
-export default function EditBusinessClient({ business, categories, ads, flashDeals }: Props) {
+export default function EditBusinessClient({ business, categories, ads, flashDeals, adminActions }: Props) {
+  const doneHref = adminActions ? "/admin/super" : "/admin";
   const [loading, setLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -111,6 +135,17 @@ export default function EditBusinessClient({ business, categories, ads, flashDea
     logo_url: string | null;
   }) {
     setLoading(true);
+    if (adminActions) {
+      try {
+        await adminActions.updateBusiness(business.id, data);
+      } catch (err) {
+        setLoading(false);
+        throw err instanceof Error ? err : new Error(String(err));
+      }
+      setLoading(false);
+      window.location.href = doneHref;
+      return;
+    }
     const supabase = createBrowserClient();
     const { error } = await supabase
       .from("businesses")
@@ -119,7 +154,7 @@ export default function EditBusinessClient({ business, categories, ads, flashDea
 
     setLoading(false);
     if (error) throw new Error(error.message);
-    window.location.href = "/admin";
+    window.location.href = doneHref;
   }
 
   async function handleDelete() {
@@ -128,6 +163,18 @@ export default function EditBusinessClient({ business, categories, ads, flashDea
       return;
     }
     setDeleting(true);
+    if (adminActions) {
+      try {
+        await adminActions.deleteBusiness(business.id);
+      } catch (err) {
+        setDeleting(false);
+        alert("Kunde inte ta bort företaget: " + (err instanceof Error ? err.message : String(err)));
+        return;
+      }
+      setDeleting(false);
+      window.location.href = doneHref;
+      return;
+    }
     const supabase = createBrowserClient();
     const { error } = await supabase.from("businesses").delete().eq("id", business.id);
     setDeleting(false);
@@ -135,15 +182,14 @@ export default function EditBusinessClient({ business, categories, ads, flashDea
       alert("Kunde inte ta bort företaget: " + error.message);
       return;
     }
-    window.location.href = "/admin";
+    window.location.href = doneHref;
   }
 
   async function handleCreateAd(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setAdSubmitting(true);
     const fd = new FormData(e.currentTarget);
-    const supabase = createBrowserClient();
-    const { error } = await supabase.from("ads").insert({
+    const adData = {
       business_id: business.id,
       headline: fd.get("headline") as string,
       body: (fd.get("body") as string) || null,
@@ -152,8 +198,19 @@ export default function EditBusinessClient({ business, categories, ads, flashDea
       category_id: (fd.get("category_id") as string) || null,
       starts_at: (fd.get("starts_at") as string) || null,
       ends_at: (fd.get("ends_at") as string) || null,
-      active: true,
-    });
+    };
+    if (adminActions) {
+      try { await adminActions.createAd(adData); } catch (err) {
+        setAdSubmitting(false);
+        alert("Kunde inte skapa annonsen: " + (err instanceof Error ? err.message : String(err)));
+        return;
+      }
+      setAdSubmitting(false);
+      window.location.reload();
+      return;
+    }
+    const supabase = createBrowserClient();
+    const { error } = await supabase.from("ads").insert({ ...adData, active: true });
     setAdSubmitting(false);
     if (error) {
       alert("Kunde inte skapa annonsen: " + error.message);
@@ -163,6 +220,14 @@ export default function EditBusinessClient({ business, categories, ads, flashDea
   }
 
   async function handleToggleAd(adId: string, currentlyActive: boolean) {
+    if (adminActions) {
+      try { await adminActions.toggleAd(adId, currentlyActive); } catch (err) {
+        alert("Kunde inte uppdatera annonsen: " + (err instanceof Error ? err.message : String(err)));
+        return;
+      }
+      window.location.reload();
+      return;
+    }
     const supabase = createBrowserClient();
     const { error } = await supabase.from("ads").update({ active: !currentlyActive }).eq("id", adId);
     if (error) {
@@ -173,6 +238,14 @@ export default function EditBusinessClient({ business, categories, ads, flashDea
   }
 
   async function handleDeleteAd(adId: string) {
+    if (adminActions) {
+      try { await adminActions.deleteAd(adId); } catch (err) {
+        alert("Kunde inte ta bort annonsen: " + (err instanceof Error ? err.message : String(err)));
+        return;
+      }
+      window.location.reload();
+      return;
+    }
     const supabase = createBrowserClient();
     const { error } = await supabase.from("ads").delete().eq("id", adId);
     if (error) {
@@ -186,16 +259,26 @@ export default function EditBusinessClient({ business, categories, ads, flashDea
     e.preventDefault();
     setDealSubmitting(true);
     const fd = new FormData(e.currentTarget);
-    const supabase = createBrowserClient();
-    const { error } = await supabase.from("flash_deals").insert({
+    const dealData = {
       business_id: business.id,
       headline: fd.get("headline") as string,
       description: (fd.get("description") as string) || null,
       category_id: (fd.get("category_id") as string) || null,
       deal_date: fd.get("deal_date") as string,
-      active: true,
       post_to_fb: fd.get("post_to_fb") === "on",
-    });
+    };
+    if (adminActions) {
+      try { await adminActions.createDeal(dealData); } catch (err) {
+        setDealSubmitting(false);
+        alert("Kunde inte skapa blixterbjudandet: " + (err instanceof Error ? err.message : String(err)));
+        return;
+      }
+      setDealSubmitting(false);
+      window.location.reload();
+      return;
+    }
+    const supabase = createBrowserClient();
+    const { error } = await supabase.from("flash_deals").insert({ ...dealData, active: true });
     setDealSubmitting(false);
     if (error) {
       alert("Kunde inte skapa blixterbjudandet: " + error.message);
@@ -205,6 +288,14 @@ export default function EditBusinessClient({ business, categories, ads, flashDea
   }
 
   async function handleToggleDeal(dealId: string, currentlyActive: boolean) {
+    if (adminActions) {
+      try { await adminActions.toggleDeal(dealId, currentlyActive); } catch (err) {
+        alert("Kunde inte uppdatera blixterbjudandet: " + (err instanceof Error ? err.message : String(err)));
+        return;
+      }
+      window.location.reload();
+      return;
+    }
     const supabase = createBrowserClient();
     const { error } = await supabase.from("flash_deals").update({ active: !currentlyActive }).eq("id", dealId);
     if (error) {
@@ -215,6 +306,14 @@ export default function EditBusinessClient({ business, categories, ads, flashDea
   }
 
   async function handleDeleteDeal(dealId: string) {
+    if (adminActions) {
+      try { await adminActions.deleteDeal(dealId); } catch (err) {
+        alert("Kunde inte ta bort blixterbjudandet: " + (err instanceof Error ? err.message : String(err)));
+        return;
+      }
+      window.location.reload();
+      return;
+    }
     const supabase = createBrowserClient();
     const { error } = await supabase.from("flash_deals").delete().eq("id", dealId);
     if (error) {
@@ -244,12 +343,12 @@ export default function EditBusinessClient({ business, categories, ads, flashDea
     <div className="min-h-screen bg-[var(--background)]">
       <header className="bg-[var(--primary)] text-white shadow">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-4 flex items-center gap-4">
-          <Link href="/admin" className="text-white/70 hover:text-white transition-colors">
+          <Link href={doneHref} className="text-white/70 hover:text-white transition-colors">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </Link>
-          <h1 className="font-semibold">Redigera företag</h1>
+          <h1 className="font-semibold">Redigera företag{adminActions && <span className="ml-2 text-xs font-normal text-amber-300">(super-admin)</span>}</h1>
         </div>
       </header>
 

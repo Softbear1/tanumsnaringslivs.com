@@ -4,13 +4,13 @@ import { createAdminClient } from "@/lib/supabase-admin";
 import { isSuperAdmin } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Building2, Zap, Megaphone, Pause, Play, Trash2, Pencil, ExternalLink, ShieldCheck } from "lucide-react";
+import { Building2, Zap, Megaphone, Pause, Play, Trash2, ShieldCheck } from "lucide-react";
 import { logout } from "../actions";
 import {
-  adminToggleBusiness, adminDeleteBusiness,
   adminToggleDeal, adminDeleteDeal,
   adminToggleAd, adminDeleteAd,
 } from "./actions";
+import SuperBusinessTable from "./SuperBusinessTable";
 
 function fmtDate(s: string | null): string {
   if (!s) return "–";
@@ -82,46 +82,7 @@ export default async function SuperAdminPage() {
         {/* Företag */}
         <section>
           <h2 className="text-lg font-bold text-[var(--primary)] mb-3 flex items-center gap-2"><Building2 className="w-4 h-4" /> Alla företag</h2>
-          <div className="overflow-x-auto rounded-2xl border border-[var(--border)] bg-white">
-            <table className="w-full text-sm">
-              <thead className="bg-[var(--bg)] text-[var(--muted)] text-xs uppercase">
-                <tr>
-                  <th className="text-left px-4 py-3 font-semibold">Namn</th>
-                  <th className="text-left px-4 py-3 font-semibold hidden sm:table-cell">Kategori</th>
-                  <th className="text-left px-4 py-3 font-semibold">Status</th>
-                  <th className="text-right px-4 py-3 font-semibold">Åtgärder</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[var(--border)]">
-                {(businesses ?? []).map((b) => (
-                  <tr key={b.id}>
-                    <td className="px-4 py-3 font-medium text-[var(--primary)]">
-                      {b.name}
-                      {b.boosted && <span className="ml-2 text-[10px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full">Boost</span>}
-                      {!b.owner_id && <span className="ml-2 text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-full">Ingen ägare</span>}
-                    </td>
-                    <td className="px-4 py-3 text-[var(--muted)] hidden sm:table-cell">{catName[b.category_id] ?? b.category_id}</td>
-                    <td className="px-4 py-3">
-                      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${b.active ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}>{b.active ? "Aktiv" : "Pausad"}</span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center justify-end gap-1.5">
-                        <Link href={`/admin/foretag/${b.id}`} className="p-2 text-[var(--muted)] hover:text-[var(--primary)] border border-[var(--border)] rounded-lg" title="Redigera"><Pencil className="w-3.5 h-3.5" /></Link>
-                        <Link href={`/foretag/${b.id}`} target="_blank" rel="noopener noreferrer" className="p-2 text-[var(--muted)] hover:text-[var(--accent)] border border-[var(--border)] rounded-lg" title="Visa publik profil"><ExternalLink className="w-3.5 h-3.5" /></Link>
-                        <form action={adminToggleBusiness.bind(null, b.id, b.active)}>
-                          <button type="submit" className="p-2 text-[var(--muted)] hover:text-[var(--primary)] border border-[var(--border)] rounded-lg" title={b.active ? "Pausa" : "Aktivera"}>{b.active ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}</button>
-                        </form>
-                        <form action={adminDeleteBusiness.bind(null, b.id)}>
-                          <button type="submit" className="p-2 text-[var(--muted)] hover:text-red-600 border border-[var(--border)] rounded-lg" title="Ta bort"><Trash2 className="w-3.5 h-3.5" /></button>
-                        </form>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-                {(businesses ?? []).length === 0 && <tr><td colSpan={4} className="px-4 py-6 text-center text-[var(--muted)]">Inga företag.</td></tr>}
-              </tbody>
-            </table>
-          </div>
+          <SuperBusinessTable businesses={businesses ?? []} catName={catName} />
         </section>
 
         {/* Blixterbjudanden */}
