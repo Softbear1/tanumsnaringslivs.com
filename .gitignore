@@ -45,3 +45,5 @@ next-env.d.ts
 
 # SCB-certifikat (committas ALDRIG)
 .scb/
+workers/*/node_modules/
+workers/*/package-lock.json
