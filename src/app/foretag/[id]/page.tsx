@@ -72,14 +72,16 @@ export default async function ForetagPage({ params }: PageProps) {
     "@type": "LocalBusiness",
     name: business.name,
     description: business.description,
-    telephone: business.phone,
-    email: business.email,
-    address: {
-      "@type": "PostalAddress",
-      streetAddress: business.address,
-      addressLocality: "Tanum",
-      addressCountry: "SE",
-    },
+    ...(business.claimed && business.phone ? { telephone: business.phone } : {}),
+    ...(business.claimed && business.email ? { email: business.email } : {}),
+    ...(business.claimed && business.address ? {
+      address: {
+        "@type": "PostalAddress",
+        streetAddress: business.address,
+        addressLocality: "Tanum",
+        addressCountry: "SE",
+      },
+    } : {}),
     ...(business.website ? { url: business.website.startsWith("http") ? business.website : `https://${business.website}` } : {}),
   };
 
@@ -183,27 +185,36 @@ export default async function ForetagPage({ params }: PageProps) {
               )}
 
               {/* Contact */}
+              {!business.claimed && (
+                <div className="mb-4 rounded-xl border border-dashed border-gray-200 bg-gray-50 p-4 text-sm text-[var(--muted)] text-center">
+                  Kontaktuppgifter visas när företaget har tagit över sin listning.
+                </div>
+              )}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <a
-                  href={`tel:${business.phone.replace(/\s/g, "")}`}
-                  className="flex items-center gap-3 p-4 rounded-xl bg-[var(--bg)] hover:bg-gray-100 transition-colors"
-                >
-                  <Phone className="w-5 h-5 text-[var(--accent)] flex-shrink-0" />
-                  <div>
-                    <div className="text-xs text-[var(--muted)]">Telefon</div>
-                    <div className="text-sm font-medium text-[var(--primary)]">{business.phone}</div>
-                  </div>
-                </a>
-                <a
-                  href={`mailto:${business.email}`}
-                  className="flex items-center gap-3 p-4 rounded-xl bg-[var(--bg)] hover:bg-gray-100 transition-colors"
-                >
-                  <Mail className="w-5 h-5 text-[var(--accent)] flex-shrink-0" />
-                  <div className="min-w-0">
-                    <div className="text-xs text-[var(--muted)]">E-post</div>
-                    <div className="text-sm font-medium text-[var(--primary)] truncate">{business.email}</div>
-                  </div>
-                </a>
+                {business.claimed && business.phone && (
+                  <a
+                    href={`tel:${business.phone.replace(/\s/g, "")}`}
+                    className="flex items-center gap-3 p-4 rounded-xl bg-[var(--bg)] hover:bg-gray-100 transition-colors"
+                  >
+                    <Phone className="w-5 h-5 text-[var(--accent)] flex-shrink-0" />
+                    <div>
+                      <div className="text-xs text-[var(--muted)]">Telefon</div>
+                      <div className="text-sm font-medium text-[var(--primary)]">{business.phone}</div>
+                    </div>
+                  </a>
+                )}
+                {business.claimed && business.email && (
+                  <a
+                    href={`mailto:${business.email}`}
+                    className="flex items-center gap-3 p-4 rounded-xl bg-[var(--bg)] hover:bg-gray-100 transition-colors"
+                  >
+                    <Mail className="w-5 h-5 text-[var(--accent)] flex-shrink-0" />
+                    <div className="min-w-0">
+                      <div className="text-xs text-[var(--muted)]">E-post</div>
+                      <div className="text-sm font-medium text-[var(--primary)] truncate">{business.email}</div>
+                    </div>
+                  </a>
+                )}
                 {business.website && (
                   <a
                     href={business.website.startsWith("http") ? business.website : `https://${business.website}`}
@@ -218,13 +229,15 @@ export default async function ForetagPage({ params }: PageProps) {
                     </div>
                   </a>
                 )}
-                <div className="flex items-center gap-3 p-4 rounded-xl bg-[var(--bg)]">
-                  <MapPin className="w-5 h-5 text-[var(--accent)] flex-shrink-0" />
-                  <div className="min-w-0">
-                    <div className="text-xs text-[var(--muted)]">Adress</div>
-                    <div className="text-sm font-medium text-[var(--primary)]">{business.address}</div>
+                {business.claimed && business.address && (
+                  <div className="flex items-center gap-3 p-4 rounded-xl bg-[var(--bg)]">
+                    <MapPin className="w-5 h-5 text-[var(--accent)] flex-shrink-0" />
+                    <div className="min-w-0">
+                      <div className="text-xs text-[var(--muted)]">Adress</div>
+                      <div className="text-sm font-medium text-[var(--primary)]">{business.address}</div>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             </div>
           </div>

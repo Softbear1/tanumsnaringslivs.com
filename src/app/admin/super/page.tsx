@@ -4,7 +4,7 @@ import { createAdminClient } from "@/lib/supabase-admin";
 import { isSuperAdmin } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Building2, Zap, Megaphone, Pause, Play, Trash2, ShieldCheck } from "lucide-react";
+import { Building2, Zap, Megaphone, Pause, Play, Trash2, ShieldCheck, Eye, BadgeCheck } from "lucide-react";
 import { logout } from "../actions";
 import {
   adminToggleDeal, adminDeleteDeal,
@@ -28,11 +28,18 @@ export default async function SuperAdminPage() {
     return <div className="p-10 text-center text-red-600">SUPABASE_SERVICE_ROLE_KEY saknas — kan inte ladda super-admin.</div>;
   }
 
-  const [{ data: businesses }, { data: deals }, { data: ads }, { data: categories }] = await Promise.all([
-    admin.from("businesses").select("id, name, active, boosted, owner_id, created_at, category_id").order("created_at", { ascending: false }),
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+
+  const [{ data: businesses }, { data: deals }, { data: ads }, { data: categories }, { count: views7d }, { count: views30d }, { count: claimedCount }, { count: unclaimedCount }] = await Promise.all([
+    admin.from("businesses").select("id, name, active, boosted, owner_id, created_at, category_id, claimed").order("created_at", { ascending: false }),
     admin.from("flash_deals").select("id, headline, deal_date, active, post_to_fb, fb_post_id, business_id").order("deal_date", { ascending: false }),
     admin.from("ads").select("id, headline, active, category_id, business_id").order("created_at", { ascending: false }),
     admin.from("categories").select("id, name"),
+    admin.from("page_views").select("*", { count: "exact", head: true }).gte("viewed_at", sevenDaysAgo),
+    admin.from("page_views").select("*", { count: "exact", head: true }).gte("viewed_at", thirtyDaysAgo),
+    admin.from("businesses").select("*", { count: "exact", head: true }).eq("claimed", true),
+    admin.from("businesses").select("*", { count: "exact", head: true }).eq("claimed", false),
   ]);
 
   const catName: Record<string, string> = {};
@@ -45,6 +52,9 @@ export default async function SuperAdminPage() {
     { icon: Building2, label: "Företag", value: businesses?.length ?? 0 },
     { icon: Zap, label: "Blixterbjudanden", value: deals?.length ?? 0 },
     { icon: Megaphone, label: "Annonser", value: ads?.length ?? 0 },
+    { icon: Eye, label: "Besök 7 dagar", value: views7d ?? 0 },
+    { icon: Eye, label: "Besök 30 dagar", value: views30d ?? 0 },
+    { icon: BadgeCheck, label: "Claimade", value: claimedCount ?? 0, sub: `${unclaimedCount ?? 0} ej claimade` },
   ];
 
   return (
@@ -67,7 +77,7 @@ export default async function SuperAdminPage() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
         {/* Statistik */}
-        <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
           {stats.map((s) => (
             <div key={s.label} className="rounded-2xl border border-[var(--border)] bg-white p-5">
               <div className="flex items-center gap-2 mb-2 text-[var(--accent)]">
@@ -75,6 +85,7 @@ export default async function SuperAdminPage() {
                 <span className="text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">{s.label}</span>
               </div>
               <div className="text-3xl font-bold text-[var(--primary)]">{s.value}</div>
+              {"sub" in s && s.sub && <div className="text-xs text-[var(--muted)] mt-1">{s.sub}</div>}
             </div>
           ))}
         </div>
