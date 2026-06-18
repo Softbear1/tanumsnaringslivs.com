@@ -111,13 +111,26 @@ export default function BusinessCard({ business, categories, isAd }: Props) {
             )}
           </div>
         ) : (
-          <Link
-            href={`/foretag/${business.id}/ta-over`}
-            className="flex items-center gap-2 text-sm text-[var(--muted)] hover:text-[var(--primary)] transition-colors"
-          >
-            <BadgeCheck className="w-4 h-4 flex-shrink-0 text-[var(--accent)]" />
-            <span>Är detta ditt företag? <span className="text-[var(--accent)] font-medium">Ta över →</span></span>
-          </Link>
+          <div className="space-y-2">
+            {business.website && (
+              <a
+                href={business.website.startsWith("http") ? business.website : `https://${business.website}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2.5 text-sm text-[var(--muted)] hover:text-[var(--accent)] transition-colors min-w-0"
+              >
+                <Globe className="w-4 h-4 flex-shrink-0" />
+                <span className="truncate">{business.website.replace(/^https?:\/\//, "")}</span>
+              </a>
+            )}
+            <Link
+              href={`/foretag/${business.id}/ta-over`}
+              className="flex items-center gap-2 text-sm text-[var(--muted)] hover:text-[var(--primary)] transition-colors"
+            >
+              <BadgeCheck className="w-4 h-4 flex-shrink-0 text-[var(--accent)]" />
+              <span>Är detta ditt företag? <span className="text-[var(--accent)] font-medium">Ta över →</span></span>
+            </Link>
+          </div>
         )}
 
         <Link
