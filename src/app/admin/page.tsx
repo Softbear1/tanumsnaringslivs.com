@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ExternalLink, Eye, Pause, Play, Plus, Megaphone, Zap, Pencil, TrendingUp, MousePointerClick } from "lucide-react";
 import { logout, toggleActive } from "./actions";
 import { isSuperAdmin } from "@/lib/auth";
+import MarketingCoach from "@/components/admin/MarketingCoach";
 
 export default async function AdminPage() {
   const supabase = await createServerClient();
@@ -308,6 +309,8 @@ export default async function AdminPage() {
         )}
 
       </main>
+
+      <MarketingCoach businessNames={(businesses ?? []).map((b) => b.name)} />
     </div>
   );
 }
