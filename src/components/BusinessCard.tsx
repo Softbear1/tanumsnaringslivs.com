@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import Image from "next/image";
-import { Phone, Mail, Globe, MapPin } from "lucide-react";
+import { Phone, Mail, Globe, MapPin, BadgeCheck } from "lucide-react";
 import { Business, Category, getCategory } from "@/lib/data";
 import clsx from "clsx";
 
@@ -72,37 +72,53 @@ export default function BusinessCard({ business, categories, isAd }: Props) {
         <div className="border-t border-[var(--border)] mb-4" />
 
         {/* Contact info */}
-        <div className="space-y-2">
-          <a
-            href={`tel:${business.phone.replace(/\s/g, "")}`}
-            className="flex items-center gap-2.5 text-sm text-[var(--muted)] hover:text-[var(--accent)] transition-colors group/link"
-          >
-            <Phone className="w-4 h-4 flex-shrink-0" />
-            <span>{business.phone}</span>
-          </a>
-          <a
-            href={`mailto:${business.email}`}
-            className="flex items-center gap-2.5 text-sm text-[var(--muted)] hover:text-[var(--accent)] transition-colors group/link"
-          >
-            <Mail className="w-4 h-4 flex-shrink-0" />
-            <span className="truncate">{business.email}</span>
-          </a>
-          {business.website && (
-            <a
-              href={business.website.startsWith("http") ? business.website : `https://${business.website}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2.5 text-sm text-[var(--muted)] hover:text-[var(--accent)] transition-colors group/link min-w-0"
-            >
-              <Globe className="w-4 h-4 flex-shrink-0" />
-              <span className="truncate">{business.website.replace(/^https?:\/\//, "")}</span>
-            </a>
-          )}
-          <div className="flex items-center gap-2.5 text-sm text-[var(--muted)]">
-            <MapPin className="w-4 h-4 flex-shrink-0" />
-            <span className="truncate">{business.address}</span>
+        {business.claimed ? (
+          <div className="space-y-2">
+            {business.phone && (
+              <a
+                href={`tel:${business.phone.replace(/\s/g, "")}`}
+                className="flex items-center gap-2.5 text-sm text-[var(--muted)] hover:text-[var(--accent)] transition-colors group/link"
+              >
+                <Phone className="w-4 h-4 flex-shrink-0" />
+                <span>{business.phone}</span>
+              </a>
+            )}
+            {business.email && (
+              <a
+                href={`mailto:${business.email}`}
+                className="flex items-center gap-2.5 text-sm text-[var(--muted)] hover:text-[var(--accent)] transition-colors group/link"
+              >
+                <Mail className="w-4 h-4 flex-shrink-0" />
+                <span className="truncate">{business.email}</span>
+              </a>
+            )}
+            {business.website && (
+              <a
+                href={business.website.startsWith("http") ? business.website : `https://${business.website}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2.5 text-sm text-[var(--muted)] hover:text-[var(--accent)] transition-colors group/link min-w-0"
+              >
+                <Globe className="w-4 h-4 flex-shrink-0" />
+                <span className="truncate">{business.website.replace(/^https?:\/\//, "")}</span>
+              </a>
+            )}
+            {business.address && (
+              <div className="flex items-center gap-2.5 text-sm text-[var(--muted)]">
+                <MapPin className="w-4 h-4 flex-shrink-0" />
+                <span className="truncate">{business.address}</span>
+              </div>
+            )}
           </div>
-        </div>
+        ) : (
+          <Link
+            href={`/foretag/${business.id}/ta-over`}
+            className="flex items-center gap-2 text-sm text-[var(--muted)] hover:text-[var(--primary)] transition-colors"
+          >
+            <BadgeCheck className="w-4 h-4 flex-shrink-0 text-[var(--accent)]" />
+            <span>Är detta ditt företag? <span className="text-[var(--accent)] font-medium">Ta över →</span></span>
+          </Link>
+        )}
 
         <Link
           href={`/foretag/${business.id}`}
