@@ -21,13 +21,13 @@ type Props = {
 export default function CategoryChips({ categories, selected, onSelect, featuredIds = [], accentColor }: Props) {
   return (
     <div id="kategorier" className="bg-white border-b border-[var(--border)]">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex gap-2 overflow-x-auto py-3 px-4 sm:px-6 lg:px-8 scrollbar-hide">
-          {/* All chip */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+        <div className="flex flex-wrap gap-2">
+          {/* Alla */}
           <button
             onClick={() => onSelect(null)}
             className={clsx(
-              "inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-sm font-medium whitespace-nowrap shrink-0 transition-all",
+              "inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-sm font-medium transition-all",
               selected === null
                 ? "bg-[var(--primary)] text-white shadow-sm"
                 : "bg-[var(--bg)] text-[var(--primary)] hover:bg-[var(--primary)]/10 border border-[var(--border)]"
@@ -46,7 +46,7 @@ export default function CategoryChips({ categories, selected, onSelect, featured
                 key={cat.id}
                 onClick={() => onSelect(isActive ? null : cat.id)}
                 className={clsx(
-                  "relative inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-sm font-medium whitespace-nowrap shrink-0 transition-all",
+                  "relative inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-sm font-medium transition-all",
                   isActive
                     ? "bg-[var(--primary)] text-white shadow-sm"
                     : "bg-[var(--bg)] text-[var(--primary)] hover:bg-[var(--primary)]/10 border border-[var(--border)]"
@@ -59,7 +59,6 @@ export default function CategoryChips({ categories, selected, onSelect, featured
                   />
                 )}
                 {cat.name}
-                {/* Seasonal dot indicator */}
                 {isFeatured && !isActive && (
                   <span
                     className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full ring-1 ring-white"
