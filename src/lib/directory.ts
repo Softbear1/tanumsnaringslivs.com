@@ -1,47 +1,9 @@
 import { Business, Category, getCategory } from "./data";
 
-// Expanderar söktermen med vanliga svenska yrkesynonymer så att t.ex.
-// "snickare" matchar företag som heter "Bygg AB" eller har "snickeri" i beskrivningen.
-const SYNONYMS: Record<string, string[]> = {
-  snickare: ["bygg", "snickeri", "hantverk", "träarbete", "renovering", "carpenter"],
-  elektriker: ["el", "elektro", "elinstallation", "installation"],
-  rörmokare: ["vvs", "rör", "värme", "vatten", "sanitär"],
-  målare: ["måleri", "fasad", "tapetsering", "renovering"],
-  städ: ["städning", "rengöring", "hemservice", "lokalvård"],
-  frisör: ["hår", "salong", "klippning", "frisörsal"],
-  massör: ["massage", "naprapat", "kiropraktor", "spa", "behandling"],
-  restaurang: ["mat", "lunch", "middag", "café", "krog", "pizzeria"],
-  bageri: ["bröd", "konditori", "café", "bakverk"],
-  bilverkstad: ["bil", "mekaniker", "service", "däck", "motor"],
-  taxi: ["transport", "skjuts", "bil"],
-  flyttfirma: ["flytt", "transport", "lastbil"],
-  trädgård: ["mark", "anläggning", "gräs", "häck", "utomhus"],
-  städfirma: ["städ", "rengöring", "lokalvård", "hemstäd"],
-  advokat: ["juridik", "juridisk", "rätt", "lag"],
-  revisor: ["redovisning", "bokföring", "ekonomi", "skatt"],
-  fotograf: ["foto", "bild", "studio"],
-  arkitekt: ["ritning", "design", "hus", "bygg"],
-};
-
-function expandQuery(q: string): string[] {
-  const terms = [q];
-  for (const [key, syns] of Object.entries(SYNONYMS)) {
-    if (key.includes(q) || q.includes(key)) {
-      terms.push(...syns, key);
-    }
-    for (const syn of syns) {
-      if (syn.includes(q) || q.includes(syn)) {
-        terms.push(key, ...syns);
-        break;
-      }
-    }
-  }
-  return [...new Set(terms)];
-}
-
 /**
  * Filtrerar företag baserat på vald kategori och fritextsökning.
- * Sökning matchar mot namn, kategorinamn och beskrivning, med synonymexpansion.
+ * Matchar mot namn, kategorinamn och beskrivning. Semantisk matchning
+ * hanteras av AI-chatten — gallerisöket är avsiktligt precist.
  */
 export function filterBusinesses(
   businesses: Business[],
@@ -55,13 +17,11 @@ export function filterBusinesses(
       const q = search.toLowerCase().trim();
       if (!q) return true;
       const cat = getCategory(categories, b.categoryId);
-      const haystack = [
-        b.name.toLowerCase(),
-        cat?.name.toLowerCase() ?? "",
-        b.description.toLowerCase(),
-      ].join(" ");
-      const terms = expandQuery(q);
-      return terms.some((t) => haystack.includes(t));
+      return (
+        b.name.toLowerCase().includes(q) ||
+        (cat?.name.toLowerCase().includes(q) ?? false) ||
+        b.description.toLowerCase().includes(q)
+      );
     }
     return true;
   });
