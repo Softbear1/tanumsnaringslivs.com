@@ -87,7 +87,13 @@ export async function POST(request: NextRequest) {
     offers: OfferInfo[];
   };
 
-  const systemPrompt = buildSystemPrompt(businesses ?? [], categories ?? [], offers ?? []);
+  // Cap at 300 businesses to keep the prompt within token limits.
+  // Prefer businesses with longer (richer) descriptions.
+  const cappedBusinesses = (businesses ?? [])
+    .sort((a, b) => b.description.length - a.description.length)
+    .slice(0, 300);
+
+  const systemPrompt = buildSystemPrompt(cappedBusinesses, categories ?? [], offers ?? []);
 
   const response = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",

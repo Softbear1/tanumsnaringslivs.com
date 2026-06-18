@@ -46,17 +46,31 @@ export default function ChatWidget({ businesses, categories, ads, deals, greetin
 
       {/* Floating panel overlay */}
       {open && (
-        <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 w-[min(420px,calc(100vw-2rem))] bg-white rounded-2xl shadow-2xl border border-[var(--border)] flex flex-col overflow-hidden"
-          style={{ maxHeight: "min(600px, calc(100vh - 48px))" }}>
-          <ChatPanel
-            businesses={businesses}
-            categories={categories}
-            ads={ads}
-            deals={deals}
-            greeting={greeting}
-            onClose={() => setOpen(false)}
-          />
-        </div>
+        <>
+          {/* Mobile: full-screen */}
+          <div className="sm:hidden fixed inset-0 z-50 bg-white flex flex-col">
+            <ChatPanel
+              businesses={businesses}
+              categories={categories}
+              ads={ads}
+              deals={deals}
+              greeting={greeting}
+              onClose={() => setOpen(false)}
+            />
+          </div>
+          {/* Desktop: floating panel */}
+          <div className="hidden sm:flex fixed bottom-6 right-6 z-50 w-[420px] bg-white rounded-2xl shadow-2xl border border-[var(--border)] flex-col overflow-hidden"
+            style={{ maxHeight: "min(600px, calc(100vh - 48px))" }}>
+            <ChatPanel
+              businesses={businesses}
+              categories={categories}
+              ads={ads}
+              deals={deals}
+              greeting={greeting}
+              onClose={() => setOpen(false)}
+            />
+          </div>
+        </>
       )}
     </>
   );
