@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Star, ExternalLink, Eye, Pause, Play, Plus, Megaphone, Zap, Pencil, TrendingUp, MousePointerClick } from "lucide-react";
 import { logout, toggleActive } from "./actions";
+import { isSuperAdmin } from "@/lib/auth";
 
 export default async function AdminPage() {
   const supabase = await createServerClient();
@@ -11,6 +12,11 @@ export default async function AdminPage() {
 
   if (!user) {
     redirect("/admin/logga-in");
+  }
+
+  // Super-admin (Elias) får en global vy över alla företag, erbjudanden m.m.
+  if (isSuperAdmin(user)) {
+    redirect("/admin/super");
   }
 
   const { data: businesses } = await supabase
