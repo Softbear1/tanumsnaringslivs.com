@@ -24,6 +24,7 @@ function mapBusiness(b: Record<string, unknown>): Business {
     rating: Number(b.rating),
     reviewCount: b.review_count as number,
     logoUrl: (b.logo_url as string) ?? undefined,
+    claimed: (b.claimed as boolean) ?? true,
   };
 }
 

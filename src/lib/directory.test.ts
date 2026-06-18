@@ -18,6 +18,7 @@ function biz(partial: Partial<Business> & Pick<Business, "id" | "name" | "catego
     featured: false,
     rating: 4,
     reviewCount: 1,
+    claimed: true,
     ...partial,
   };
 }

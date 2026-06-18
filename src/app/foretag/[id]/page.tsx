@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { Phone, Mail, Globe, MapPin, Star, Zap, ArrowLeft, Clock } from "lucide-react";
+import { Phone, Mail, Globe, MapPin, Zap, ArrowLeft, Clock, BadgeCheck } from "lucide-react";
 import { getBusiness } from "@/lib/fetch";
 import { stockholmToday } from "@/lib/time";
 import { getCategory } from "@/lib/data";
@@ -51,28 +51,18 @@ export default async function ForetagPage({ params }: PageProps) {
   }
 
   // Track page view — fire and forget, never block rendering
-  let reviews: Array<{ id: string; reviewer_name: string; rating: number; comment: string | null; created_at: string }> = [];
   let todayDeal: { headline: string; description: string | null } | null = null;
   try {
     const supabase = await createServerClient();
     supabase.from("page_views").insert({ business_id: id }).then(() => {});
-    const [reviewResult, dealResult] = await Promise.all([
-      supabase
-        .from("reviews")
-        .select("id, reviewer_name, rating, comment, created_at")
-        .eq("business_id", id)
-        .order("created_at", { ascending: false })
-        .limit(20),
-      supabase
-        .from("flash_deals")
-        .select("headline, description")
-        .eq("business_id", id)
-        .eq("active", true)
-        .eq("deal_date", stockholmToday())
-        .maybeSingle(),
-    ]);
-    reviews = reviewResult.data ?? [];
-    todayDeal = dealResult.data ?? null;
+    const { data } = await supabase
+      .from("flash_deals")
+      .select("headline, description")
+      .eq("business_id", id)
+      .eq("active", true)
+      .eq("deal_date", stockholmToday())
+      .maybeSingle();
+    todayDeal = data ?? null;
   } catch { /* ignore */ }
 
   const cat = getCategory(categories, business.categoryId);
@@ -91,11 +81,6 @@ export default async function ForetagPage({ params }: PageProps) {
       addressCountry: "SE",
     },
     ...(business.website ? { url: business.website.startsWith("http") ? business.website : `https://${business.website}` } : {}),
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: business.rating,
-      reviewCount: business.reviewCount,
-    },
   };
 
   return (
@@ -114,6 +99,28 @@ export default async function ForetagPage({ params }: PageProps) {
             <ArrowLeft className="w-4 h-4" />
             Tillbaka till listan
           </Link>
+
+          {/* Ta över-banner — visas bara för oclaimerade listningar */}
+          {!business.claimed && (
+            <div className="mb-6 rounded-2xl border-2 border-[var(--accent)]/40 bg-[var(--accent)]/5 p-5 flex flex-col sm:flex-row sm:items-center gap-4">
+              <div className="w-10 h-10 rounded-xl bg-[var(--accent)]/15 flex items-center justify-center shrink-0">
+                <BadgeCheck className="w-5 h-5 text-[var(--accent)]" />
+              </div>
+              <div className="flex-1">
+                <h2 className="font-semibold text-[var(--primary)] mb-0.5">Är detta ditt företag?</h2>
+                <p className="text-sm text-[var(--muted)]">
+                  Ta över din kostnadsfria listning så kan du redigera uppgifterna, skapa
+                  blixterbjudanden och annonser — gratis.
+                </p>
+              </div>
+              <Link
+                href={`/foretag/${business.id}/ta-over`}
+                className="inline-flex items-center justify-center gap-1.5 bg-[var(--primary)] text-white px-4 py-2.5 rounded-xl font-medium hover:bg-[var(--primary)]/90 transition-colors text-sm whitespace-nowrap"
+              >
+                Ta över företaget →
+              </Link>
+            </div>
+          )}
 
           <div className="bg-white rounded-2xl card-shadow overflow-hidden">
             <div className="h-2 w-full" style={{ backgroundColor: cat?.color ?? "#6B7280" }} />
@@ -134,6 +141,11 @@ export default async function ForetagPage({ params }: PageProps) {
                 <div className="flex-1">
                   <div className="flex flex-wrap items-center gap-2 mb-1">
                     <h1 className="text-2xl font-bold text-[var(--primary)]">{business.name}</h1>
+                    {business.claimed && (
+                      <span className="inline-flex items-center gap-1 text-[11px] font-medium text-[var(--accent)]" title="Verifierad ägare">
+                        <BadgeCheck className="w-3.5 h-3.5" /> Verifierad
+                      </span>
+                    )}
                   </div>
                   {cat && (
                     <span
@@ -144,21 +156,6 @@ export default async function ForetagPage({ params }: PageProps) {
                     </span>
                   )}
                 </div>
-              </div>
-
-              {/* Rating */}
-              <div className="flex items-center gap-1 mb-6">
-                {[1, 2, 3, 4, 5].map((s) => (
-                  <Star
-                    key={s}
-                    className="w-4 h-4"
-                    fill={s <= Math.round(business.rating) ? "var(--star)" : "none"}
-                    stroke={s <= Math.round(business.rating) ? "var(--star)" : "var(--star-empty)"}
-                  />
-                ))}
-                <span className="text-sm text-[var(--muted)] ml-1">
-                  {business.rating.toFixed(1)} ({business.reviewCount} recensioner)
-                </span>
               </div>
 
               {/* Description */}
@@ -231,38 +228,6 @@ export default async function ForetagPage({ params }: PageProps) {
               </div>
             </div>
           </div>
-
-          {/* Reviews */}
-          {reviews.length > 0 && (
-            <div className="bg-white rounded-2xl card-shadow mt-6 p-6 sm:p-8">
-              <h2 className="text-lg font-bold text-[var(--primary)] mb-5">
-                Omdömen ({reviews.length})
-              </h2>
-              <div className="space-y-5">
-                {reviews.map((r) => (
-                  <div key={r.id} className="border-b border-[var(--border)] last:border-0 pb-5 last:pb-0">
-                    <div className="flex items-center justify-between gap-3 mb-1.5">
-                      <span className="text-sm font-medium text-[var(--primary)]">{r.reviewer_name}</span>
-                      <span className="text-xs text-[var(--muted)]">
-                        {new Date(r.created_at).toLocaleDateString("sv-SE", { year: "numeric", month: "short", day: "numeric" })}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-0.5 mb-2">
-                      {[1, 2, 3, 4, 5].map((s) => (
-                        <Star
-                          key={s}
-                          className="w-3.5 h-3.5"
-                          fill={s <= r.rating ? "var(--star)" : "none"}
-                          stroke={s <= r.rating ? "var(--star)" : "var(--star-empty)"}
-                        />
-                      ))}
-                    </div>
-                    {r.comment && <p className="text-sm text-[var(--muted)] leading-relaxed">{r.comment}</p>}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       </main>
       <Footer />

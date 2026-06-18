@@ -3,6 +3,42 @@ import { createBrowserClient as createSSRBrowserClient } from "@supabase/ssr";
 export type Database = {
   public: {
     Tables: {
+      claim_requests: {
+        Row: {
+          id: string;
+          business_id: string;
+          claimant_email: string;
+          claimant_user_id: string | null;
+          message: string | null;
+          method: string;
+          status: string;
+          created_at: string;
+          resolved_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          business_id: string;
+          claimant_email: string;
+          claimant_user_id?: string | null;
+          message?: string | null;
+          method?: string;
+          status?: string;
+          created_at?: string;
+          resolved_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          business_id?: string;
+          claimant_email?: string;
+          claimant_user_id?: string | null;
+          message?: string | null;
+          method?: string;
+          status?: string;
+          created_at?: string;
+          resolved_at?: string | null;
+        };
+        Relationships: [];
+      };
       categories: {
         Row: {
           id: string;
@@ -49,6 +85,13 @@ export type Database = {
           created_at: string;
           owner_id: string | null;
           logo_url: string | null;
+          scb_org_nr: string | null;
+          claimed: boolean;
+          claim_email: string | null;
+          reklamsparr: boolean;
+          source: string;
+          postort: string | null;
+          scb_synced_at: string | null;
         };
         Insert: {
           id?: string;
@@ -68,6 +111,13 @@ export type Database = {
           created_at?: string;
           owner_id?: string | null;
           logo_url?: string | null;
+          scb_org_nr?: string | null;
+          claimed?: boolean;
+          claim_email?: string | null;
+          reklamsparr?: boolean;
+          source?: string;
+          postort?: string | null;
+          scb_synced_at?: string | null;
         };
         Update: {
           id?: string;
@@ -87,6 +137,13 @@ export type Database = {
           created_at?: string;
           owner_id?: string | null;
           logo_url?: string | null;
+          scb_org_nr?: string | null;
+          claimed?: boolean;
+          claim_email?: string | null;
+          reklamsparr?: boolean;
+          source?: string;
+          postort?: string | null;
+          scb_synced_at?: string | null;
         };
         Relationships: [];
       };
