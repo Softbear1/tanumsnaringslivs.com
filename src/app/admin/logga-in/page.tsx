@@ -100,6 +100,12 @@ export default function LoggaIn() {
                 >
                   {loading ? "Skickar..." : "Skicka magisk länk"}
                 </button>
+                <p className="text-xs text-[var(--muted)] text-center mt-3 leading-relaxed">
+                  Genom att logga in godkänner du våra{" "}
+                  <a href="/anvandarvillkor" className="underline hover:text-[var(--primary)]">användarvillkor</a>{" "}
+                  och{" "}
+                  <a href="/integritetspolicy" className="underline hover:text-[var(--primary)]">integritetspolicy</a>.
+                </p>
               </form>
             </>
           )}

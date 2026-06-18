@@ -62,8 +62,12 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-white/10 mt-10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs">
-          <span>© 2025 Tanums Näringsliv</span>
+        <div className="border-t border-white/10 mt-10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+            <span>© {new Date().getFullYear()} Tanums Näringsliv</span>
+            <a href="/integritetspolicy" className="hover:text-white transition-colors">Integritetspolicy</a>
+            <a href="/anvandarvillkor" className="hover:text-white transition-colors">Användarvillkor</a>
+          </div>
           <span className="text-white/40">Byggt med kärlek för Tanums lokala näringsliv 🌿</span>
         </div>
       </div>
