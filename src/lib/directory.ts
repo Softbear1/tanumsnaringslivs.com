@@ -32,10 +32,9 @@ export function sortBoostedFirst(businesses: Business[]): Business[] {
 }
 
 /** Tillgängliga sorteringsval för katalogen på förstasidan. */
-export type SortKey = "boosted" | "name-asc" | "name-desc";
+export type SortKey = "name-asc" | "name-desc";
 
 export const SORT_OPTIONS: { value: SortKey; label: string }[] = [
-  { value: "boosted", label: "Boost först" },
   { value: "name-asc", label: "Namn (A–Ö)" },
   { value: "name-desc", label: "Namn (Ö–A)" },
 ];
@@ -43,13 +42,11 @@ export const SORT_OPTIONS: { value: SortKey; label: string }[] = [
 /** Sorterar företagslistan enligt valt sorteringsval. */
 export function sortBusinesses(businesses: Business[], key: SortKey): Business[] {
   switch (key) {
-    case "name-asc":
-      return [...businesses].sort((a, b) => a.name.localeCompare(b.name, "sv"));
     case "name-desc":
       return [...businesses].sort((a, b) => b.name.localeCompare(a.name, "sv"));
-    case "boosted":
+    case "name-asc":
     default:
-      return sortBoostedFirst(businesses);
+      return [...businesses].sort((a, b) => a.name.localeCompare(b.name, "sv"));
   }
 }
 

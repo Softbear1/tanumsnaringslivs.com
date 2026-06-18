@@ -201,7 +201,7 @@ export default async function AdminPage() {
                   </p>
 
                   {/* Insights */}
-                  <div className="mb-4">
+                  <div className="grid grid-cols-2 gap-2 mb-4">
                     <div className="bg-[var(--bg)] rounded-xl p-3">
                       <div className="flex items-center gap-1.5 mb-0.5">
                         <Eye className="w-3.5 h-3.5 text-[var(--accent)]" />

@@ -61,15 +61,16 @@ export default function IntegritetspolicyPage() {
           <section>
             <h2 className="text-lg font-semibold text-[var(--primary)] mb-2">Hur länge vi sparar uppgifterna</h2>
             <p>
-              Företagsuppgifter sparas så länge listningen är aktiv. Du kan när som helst be oss radera dina uppgifter (se nedan).
+              Företagsuppgifter sparas så länge listningen är aktiv. Du kan när som helst be oss
+              radera dina uppgifter (se nedan).
             </p>
           </section>
 
           <section>
             <h2 className="text-lg font-semibold text-[var(--primary)] mb-2">Vem får ta del av uppgifterna</h2>
             <p>
-              Vi delar inte dina uppgifter med andra än de tjänsteleverantörer (personuppgiftsbiträden) som driver
-              webbplatsen åt oss:
+              Vi delar inte dina uppgifter med andra än de tjänsteleverantörer (personuppgiftsbiträden)
+              som driver webbplatsen åt oss:
             </p>
             <ul className="list-disc pl-5 space-y-1.5 mt-2">
               <li><strong>Supabase</strong> — databas och lagring.</li>

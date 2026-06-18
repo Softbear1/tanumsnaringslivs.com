@@ -11,7 +11,6 @@ export default function LoggaIn() {
   const [error, setError] = useState<string | null>(null);
   const searchParams = useSearchParams();
   const next = searchParams.get("next") ?? "/admin";
-
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);

@@ -5,9 +5,6 @@ import { isSuperAdmin } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
-// Verifierar att den inloggade användaren är super-admin och returnerar en
-// service-role-klient (kringgår RLS). Kastar/omdirigerar annars — så att inga
-// globala mutationer kan göras av en vanlig ägare.
 async function requireSuperAdmin() {
   const supabase = await createServerClient();
   const { data: { user } } = await supabase.auth.getUser();

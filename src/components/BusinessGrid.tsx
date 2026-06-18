@@ -16,7 +16,7 @@ type Props = {
 };
 
 export default function BusinessGrid({ categories, businesses, ads, categoryFilter, search }: Props) {
-  const [sortKey, setSortKey] = useState<SortKey>("boosted");
+  const [sortKey, setSortKey] = useState<SortKey>("name-asc");
   const filtered = filterBusinesses(businesses, categories, categoryFilter, search);
   const sorted = sortBusinesses(filtered, sortKey);
 
