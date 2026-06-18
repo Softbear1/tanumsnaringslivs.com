@@ -47,7 +47,7 @@ export async function getDirectoryData(): Promise<{ categories: Category[]; busi
     const supabase = await createServerClient();
     const [catsResult, bizResult] = await Promise.all([
       supabase.from("categories").select("*").order("sort_order"),
-      supabase.from("businesses").select("*").eq("active", true),
+      supabase.from("businesses").select("*").eq("active", true).order("claimed", { ascending: false }).order("boosted", { ascending: false }).order("created_at", { ascending: true }),
     ]);
 
     if (catsResult.data && catsResult.data.length > 0) {
