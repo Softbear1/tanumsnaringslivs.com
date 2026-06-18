@@ -1,0 +1,18 @@
+name = "scb-seed"
+main = "src/index.ts"
+compatibility_date = "2025-06-01"
+
+# Nattlig körning 03:15 UTC (SCB uppdaterar varje natt utom lör→sön).
+[triggers]
+crons = ["15 3 * * *"]
+
+# mTLS-binding mot SCB. certificate_id fås av:
+#   wrangler mtls-certificate upload --cert .scb/scb-cert.pem --key .scb/scb-key.pem --name scb-sokpavar
+[[mtls_certificates]]
+binding = "SCB_CERT"
+certificate_id = "FYLL_I_EFTER_UPPLADDNING"
+
+# Icke-hemliga vars. Hemligheter sätts med `wrangler secret put`:
+#   SUPABASE_SERVICE_ROLE_KEY, SEED_SECRET
+[vars]
+SUPABASE_URL = "https://tflrdlyquvndapjwnccu.supabase.co"
