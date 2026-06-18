@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import Image from "next/image";
-import { Phone, Mail, Globe, MapPin, Star } from "lucide-react";
+import { Phone, Mail, Globe, MapPin } from "lucide-react";
 import { Business, Category, getCategory } from "@/lib/data";
 import clsx from "clsx";
 
@@ -67,21 +67,6 @@ export default function BusinessCard({ business, categories, isAd }: Props) {
         <p className="text-sm text-[var(--muted)] leading-relaxed mb-4 line-clamp-2">
           {business.description}
         </p>
-
-        {/* Rating */}
-        <div className="flex items-center gap-1 mb-4">
-          {[1, 2, 3, 4, 5].map((s) => (
-            <Star
-              key={s}
-              className="w-3.5 h-3.5"
-              fill={s <= Math.round(business.rating) ? "var(--star)" : "none"}
-              stroke={s <= Math.round(business.rating) ? "var(--star)" : "var(--star-empty)"}
-            />
-          ))}
-          <span className="text-xs text-[var(--muted)] ml-1">
-            {business.rating.toFixed(1)} ({business.reviewCount} recensioner)
-          </span>
-        </div>
 
         {/* Divider */}
         <div className="border-t border-[var(--border)] mb-4" />
