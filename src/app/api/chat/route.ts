@@ -88,25 +88,20 @@ export async function POST(request: NextRequest) {
     offers: OfferInfo[];
   };
 
-  // Cap at 300 businesses to keep the prompt within token limits.
-  // Prefer businesses with longer (richer) descriptions.
-  const cappedBusinesses = (businesses ?? [])
-    .sort((a, b) => b.description.length - a.description.length)
-    .slice(0, 300);
-
-  const systemPrompt = buildSystemPrompt(cappedBusinesses, categories ?? [], offers ?? []);
+  const systemPrompt = buildSystemPrompt(businesses ?? [], categories ?? [], offers ?? []);
 
   const response = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: {
       "x-api-key": apiKey,
       "anthropic-version": "2023-06-01",
+      "anthropic-beta": "prompt-caching-1",
       "content-type": "application/json",
     },
     body: JSON.stringify({
       model: "claude-sonnet-4-6",
       max_tokens: 400,
-      system: systemPrompt,
+      system: [{ type: "text", text: systemPrompt, cache_control: { type: "ephemeral" } }],
       messages,
       stream: true,
     }),

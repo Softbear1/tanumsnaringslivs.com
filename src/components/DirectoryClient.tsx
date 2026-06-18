@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { Category, Business } from "@/lib/data";
 import type { SeasonTheme } from "@/lib/season";
 import Hero from "./Hero";
@@ -21,23 +21,29 @@ type Props = {
 
 export default function DirectoryClient({ categories, businesses, ads, theme, flashDeals, flashTeasers, dealsEndAt }: Props) {
   const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
+  const [inputValue, setInputValue] = useState("");
   const [search, setSearch] = useState("");
   const [chatPending, setChatPending] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
 
   const handleSearch = (v: string) => {
-    setSearch(v);
-    if (v) setCategoryFilter(null);
+    setInputValue(v);
+    startTransition(() => {
+      setSearch(v);
+      if (v) setCategoryFilter(null);
+    });
   };
 
   const handleCategory = (id: string | null) => {
     setCategoryFilter(id);
-    setSearch("");
+    setInputValue("");
+    startTransition(() => setSearch(""));
   };
 
   return (
     <>
       <Hero
-        search={search}
+        search={inputValue}
         onSearch={handleSearch}
         onStartChat={(msg) => setChatPending(msg)}
         theme={theme}
@@ -53,13 +59,15 @@ export default function DirectoryClient({ categories, businesses, ads, theme, fl
         featuredIds={theme.categoryIds}
         accentColor={theme.accent}
       />
-      <BusinessGrid
-        categories={categories}
-        businesses={businesses}
-        ads={ads}
-        categoryFilter={categoryFilter}
-        search={search}
-      />
+      <div className={`transition-opacity duration-150 ${isPending ? "opacity-60" : "opacity-100"}`}>
+        <BusinessGrid
+          categories={categories}
+          businesses={businesses}
+          ads={ads}
+          categoryFilter={categoryFilter}
+          search={search}
+        />
+      </div>
 
       {chatPending !== null && (
         <div
