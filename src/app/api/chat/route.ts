@@ -1,23 +1,12 @@
 export const runtime = "edge";
 import type { NextRequest } from "next/server";
+import { createServerClient } from "@/lib/supabase-server";
 
-export const maxDuration = 30;
+export const maxDuration = 60;
 
 interface ChatMessage {
   role: "user" | "assistant";
   content: string;
-}
-
-interface BizInfo {
-  id: string;
-  name: string;
-  categoryId: string;
-  description: string;
-}
-
-interface CatInfo {
-  id: string;
-  name: string;
 }
 
 interface OfferInfo {
@@ -27,12 +16,15 @@ interface OfferInfo {
   kind: "annons" | "blixt";
 }
 
-function buildSystemPrompt(businesses: BizInfo[], categories: CatInfo[], offers: OfferInfo[]): string {
+function buildSystemPrompt(
+  businesses: { id: string; name: string; categoryId: string; description: string }[],
+  categories: { id: string; name: string }[],
+  offers: OfferInfo[],
+): string {
   const catMap: Record<string, string> = {};
   for (const c of categories) catMap[c.id] = c.name;
 
-  // Group businesses by category to keep prompt compact
-  const byCategory: Record<string, BizInfo[]> = {};
+  const byCategory: Record<string, typeof businesses> = {};
   for (const b of businesses) {
     const cat = catMap[b.categoryId] ?? b.categoryId;
     if (!byCategory[cat]) byCategory[cat] = [];
@@ -48,7 +40,9 @@ function buildSystemPrompt(businesses: BizInfo[], categories: CatInfo[], offers:
 
   const offerLines = offers.length
     ? "\n## Aktuella erbjudanden och annonser\n" +
-      offers.map((o) => `- [${o.kind === "blixt" ? "Blixterbjudande" : "Annons"} – ${o.business_name}] ${o.headline}${o.body ? ": " + o.body.slice(0, 60) : ""}`).join("\n")
+      offers
+        .map((o) => `- [${o.kind === "blixt" ? "Blixterbjudande" : "Annons"} – ${o.business_name}] ${o.headline}${o.body ? ": " + o.body.slice(0, 60) : ""}`)
+        .join("\n")
     : "";
 
   return `Du är en hjälpsam assistent i Tanums Näringsliv — en lokal företagskatalog för Tanums kommun. Din uppgift är att hjälpa besökaren hitta rätt lokalt företag.
@@ -57,6 +51,7 @@ function buildSystemPrompt(businesses: BizInfo[], categories: CatInfo[], offers:
 - Svara ALLTID på svenska, kortfattat och konkret. Max 2–3 meningar per tur. Inga inledningsfraser som "Vad kul att du hör av dig!".
 - Använd ALDRIG markdown — inga **, inga #, inga -, inga listor. Skriv vanlig löptext.
 - Ställ EN följdfråga i taget om du behöver förstå bättre.
+- Matcha mot yrkeskunnande och vad företagen GÖR, inte bara vad de heter. En "snickare" kan finnas under bygg, hantverk eller renovering.
 - När du identifierat 1–3 bra matchningar: presentera dem kort och skriv på SISTA raden:
   READY:{"businessIds":["id1","id2"],"summary":"kort sammanfattning","categoryId":"kategori-id eller null"}
 - categoryId: välj det kategori-id som bäst matchar förfrågan, eller null om oklar.
@@ -81,14 +76,28 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  const { messages, businesses, categories, offers } = (await request.json()) as {
+  const { messages, offers } = (await request.json()) as {
     messages: ChatMessage[];
-    businesses: BizInfo[];
-    categories: CatInfo[];
     offers: OfferInfo[];
   };
 
-  const systemPrompt = buildSystemPrompt(businesses ?? [], categories ?? [], offers ?? []);
+  // Fetch businesses and categories server-side so the system prompt is
+  // identical across all users → prompt cache hits across sessions.
+  const supabase = await createServerClient();
+  const [{ data: bizRows }, { data: catRows }] = await Promise.all([
+    supabase.from("businesses").select("id, name, category_id, description").eq("active", true),
+    supabase.from("categories").select("id, name"),
+  ]);
+
+  const businesses = (bizRows ?? []).map((b) => ({
+    id: b.id as string,
+    name: b.name as string,
+    categoryId: b.category_id as string,
+    description: (b.description as string) ?? "",
+  }));
+  const categories = (catRows ?? []).map((c) => ({ id: c.id as string, name: c.name as string }));
+
+  const systemPrompt = buildSystemPrompt(businesses, categories, offers ?? []);
 
   const response = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
@@ -108,7 +117,8 @@ export async function POST(request: NextRequest) {
   });
 
   if (!response.ok) {
-    return new Response(JSON.stringify({ error: await response.text() }), {
+    const errText = await response.text();
+    return new Response(JSON.stringify({ error: errText }), {
       status: response.status,
       headers: { "Content-Type": "application/json" },
     });

@@ -51,8 +51,6 @@ export default function ChatPanel({ businesses, categories, ads, deals = [], gre
 
   async function sendToAI(msgs: ChatMessage[]) {
     setStreaming(true);
-    const bizForAI = businesses.map((b) => ({ id: b.id, name: b.name, categoryId: b.categoryId, description: b.description }));
-    const catForAI = categories.map((c) => ({ id: c.id, name: c.name }));
     const offersForAI = [
       ...ads.map((a) => ({
         business_name: a.business_name,
@@ -74,7 +72,7 @@ export default function ChatPanel({ businesses, categories, ads, deals = [], gre
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: toApiMessages(msgs), businesses: bizForAI, categories: catForAI, offers: offersForAI }),
+        body: JSON.stringify({ messages: toApiMessages(msgs), offers: offersForAI }),
       });
 
       if (!res.ok || !res.body) throw new Error("Fel från AI");
