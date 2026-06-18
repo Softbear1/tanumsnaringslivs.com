@@ -10,6 +10,7 @@ import { getCategory } from "@/lib/data";
 import { createServerClient } from "@/lib/supabase-server";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import EliasClaimButton from "@/components/EliasClaimButton";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -115,12 +116,7 @@ export default async function ForetagPage({ params }: PageProps) {
                   blixterbjudanden och annonser — gratis.
                 </p>
               </div>
-              <Link
-                href={`/foretag/${business.id}/ta-over`}
-                className="inline-flex items-center justify-center gap-1.5 bg-[var(--primary)] text-white px-4 py-2.5 rounded-xl font-medium hover:bg-[var(--primary)]/90 transition-colors text-sm whitespace-nowrap"
-              >
-                Ta över företaget →
-              </Link>
+              <EliasClaimButton businessId={business.id} businessName={business.name} />
             </div>
           )}
 

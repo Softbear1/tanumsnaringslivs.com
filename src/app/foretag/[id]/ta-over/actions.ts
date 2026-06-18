@@ -16,8 +16,7 @@ export type ClaimResult =
   | { status: "no-email" }
   | { status: "error"; message: string };
 
-// Skickar en inloggningslänk till företagets SCB-registrerade e-post. Den som
-// kan ta emot mejlet bevisar därmed ägarskap — själva inloggningen är beviset.
+// Gammalt flöde — skickar länk till företagets registrerade e-post.
 export async function sendClaimLink(businessId: string): Promise<ClaimResult> {
   const admin = createAdminClient();
   if (!admin) return { status: "error", message: "Tjänsten är inte konfigurerad." };
@@ -43,8 +42,46 @@ export async function sendClaimLink(businessId: string): Promise<ClaimResult> {
   return { status: "sent", email: biz.claim_email };
 }
 
-// Fallback: man har inte tillgång till den registrerade adressen och begär
-// manuellt övertagande. Hamnar i super-admin för granskning.
+// Nytt Elias-flöde: verifiera org-nr, skicka magic link till angiven e-post.
+export async function verifyAndSendClaim(
+  businessId: string,
+  email: string,
+  orgNr: string,
+): Promise<{ ok: boolean; error?: string }> {
+  const admin = createAdminClient();
+  if (!admin) return { ok: false, error: "Tjänsten är inte konfigurerad." };
+
+  const { data: biz } = await admin
+    .from("businesses")
+    .select("id, name, claimed, owner_id, scb_org_nr")
+    .eq("id", businessId)
+    .maybeSingle();
+
+  if (!biz) return { ok: false, error: "Företaget hittades inte." };
+  if (biz.owner_id || biz.claimed) return { ok: false, error: "Det här företaget har redan en ägare." };
+
+  const normalize = (s: string) => s.replace(/\D/g, "");
+  if (!biz.scb_org_nr || normalize(orgNr) !== normalize(biz.scb_org_nr)) {
+    return { ok: false, error: "Organisationsnumret stämmer inte. Kontrollera och försök igen." };
+  }
+
+  const cleanEmail = email.trim().toLowerCase();
+
+  // Sätt claim_email till angiven adress så att slutfor-sidan kan verifiera.
+  await admin.from("businesses").update({ claim_email: cleanEmail }).eq("id", businessId);
+
+  const supabase = await createServerClient();
+  const next = `/foretag/${businessId}/slutfor`;
+  const { error } = await supabase.auth.signInWithOtp({
+    email: cleanEmail,
+    options: { emailRedirectTo: `${await origin()}/auth/callback?next=${encodeURIComponent(next)}` },
+  });
+
+  if (error) return { ok: false, error: error.message };
+  return { ok: true };
+}
+
+// Fallback: manuell begäran för super-admin-granskning.
 export async function requestManualClaim(
   businessId: string,
   claimantEmail: string,

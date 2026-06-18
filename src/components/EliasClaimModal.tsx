@@ -1,0 +1,224 @@
+"use client";
+import { useState, useEffect, useRef } from "react";
+import { X, Send, MailCheck, BadgeCheck } from "lucide-react";
+import { verifyAndSendClaim } from "@/app/foretag/[id]/ta-over/actions";
+
+type Step = "pitch" | "email" | "orgnr" | "sending" | "sent" | "error";
+
+interface Msg {
+  from: "elias" | "user";
+  text: string;
+}
+
+interface Props {
+  businessId: string;
+  businessName: string;
+  onClose: () => void;
+}
+
+const TYPING_DELAY = 700;
+
+export default function EliasClaimModal({ businessId, businessName, onClose }: Props) {
+  const [step, setStep] = useState<Step>("pitch");
+  const [messages, setMessages] = useState<Msg[]>([]);
+  const [typing, setTyping] = useState(false);
+  const [input, setInput] = useState("");
+  const [email, setEmail] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
+  const bottomRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  function elias(text: string, nextStep?: Step, delay = TYPING_DELAY) {
+    setTyping(true);
+    setTimeout(() => {
+      setMessages((m) => [...m, { from: "elias", text }]);
+      setTyping(false);
+      if (nextStep) setStep(nextStep);
+      setTimeout(() => inputRef.current?.focus({ preventScroll: true }), 50);
+    }, delay);
+  }
+
+  useEffect(() => {
+    elias(
+      `Hej! Kul att du vill ta över ${businessName}. Som verifierad ägare får du direkt tillgång till:\n\n` +
+      `→ Redigera och hålla uppgifterna uppdaterade\n` +
+      `→ Posta blixterbjudanden som syns i katalogen\n` +
+      `→ Skapa riktade annonser\n` +
+      `→ Mig — din personliga marknadsföringscoach\n\n` +
+      `Det är gratis och tar en minut. Ska vi köra?`,
+      undefined,
+      300,
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, typing]);
+
+  // Lock body scroll
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = ""; };
+  }, []);
+
+  function handleStart() {
+    setMessages((m) => [...m, { from: "user", text: "Ja, kör!" }]);
+    elias("Vad är din e-postadress?", "email");
+  }
+
+  function handleEmailSubmit() {
+    const val = input.trim().toLowerCase();
+    if (!val.includes("@") || !val.includes(".")) return;
+    setMessages((m) => [...m, { from: "user", text: val }]);
+    setEmail(val);
+    setInput("");
+    elias(`Bra! Och vad är organisationsnumret för ${businessName}?`, "orgnr");
+  }
+
+  async function handleOrgNrSubmit() {
+    const val = input.trim();
+    if (!val) return;
+    setMessages((m) => [...m, { from: "user", text: val }]);
+    setInput("");
+    setStep("sending");
+    setTyping(true);
+
+    const res = await verifyAndSendClaim(businessId, email, val);
+
+    setTyping(false);
+    if (res.ok) {
+      setMessages((m) => [...m, { from: "elias", text: `Perfekt! Jag har skickat en inloggningslänk till ${email}. Klicka på länken i mejlet så är du inne direkt.` }]);
+      setStep("sent");
+    } else {
+      setMessages((m) => [...m, { from: "elias", text: res.error ?? "Något gick fel. Försök igen." }]);
+      setErrorMsg(res.error ?? "");
+      setStep("error");
+    }
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent) {
+    if (e.key !== "Enter" || e.shiftKey) return;
+    if (step === "email") handleEmailSubmit();
+    else if (step === "orgnr") handleOrgNrSubmit();
+  }
+
+  const placeholder =
+    step === "email" ? "din@email.se" :
+    step === "orgnr" ? "XXXXXX-XXXX" : "";
+
+  const inputType = step === "email" ? "email" : "text";
+  const canSubmit = input.trim().length > 0 && (step === "email" || step === "orgnr");
+
+  return (
+    <>
+      {/* Backdrop */}
+      <div className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+
+      {/* Panel — full screen mobile, centered card desktop */}
+      <div className="fixed inset-x-0 bottom-0 z-50 flex flex-col bg-white sm:inset-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:w-[440px] sm:rounded-2xl sm:shadow-2xl"
+        style={{ height: "100dvh", maxHeight: "100dvh" }}
+      >
+        {/* Header */}
+        <div className="bg-[var(--primary)] text-white px-4 py-3 flex items-center gap-3 shrink-0 sm:rounded-t-2xl">
+          <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-sm font-bold shrink-0">E</div>
+          <div className="flex-1">
+            <div className="text-sm font-semibold leading-tight">Elias</div>
+            <div className="text-[11px] text-white/70">Tanums Näringsliv</div>
+          </div>
+          <button onClick={onClose} className="text-white/70 hover:text-white transition-colors">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Messages */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50">
+          {messages.map((msg, i) => (
+            <div key={i} className={`flex ${msg.from === "user" ? "justify-end" : "justify-start gap-2"}`}>
+              {msg.from === "elias" && (
+                <div className="w-7 h-7 rounded-full bg-[var(--primary)] text-white flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">E</div>
+              )}
+              <div className={`max-w-[80%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed whitespace-pre-line ${
+                msg.from === "user"
+                  ? "bg-[var(--primary)] text-white rounded-tr-sm"
+                  : "bg-white text-[var(--primary)] rounded-tl-sm shadow-sm"
+              }`}>
+                {msg.text}
+              </div>
+            </div>
+          ))}
+
+          {typing && (
+            <div className="flex gap-2 items-start">
+              <div className="w-7 h-7 rounded-full bg-[var(--primary)] text-white flex items-center justify-center text-xs font-bold shrink-0">E</div>
+              <div className="bg-white rounded-2xl rounded-tl-sm px-3.5 py-3 shadow-sm flex gap-1 items-center">
+                <span className="w-1.5 h-1.5 rounded-full bg-[var(--muted)] animate-bounce" style={{ animationDelay: "0ms" }} />
+                <span className="w-1.5 h-1.5 rounded-full bg-[var(--muted)] animate-bounce" style={{ animationDelay: "150ms" }} />
+                <span className="w-1.5 h-1.5 rounded-full bg-[var(--muted)] animate-bounce" style={{ animationDelay: "300ms" }} />
+              </div>
+            </div>
+          )}
+
+          {step === "sent" && !typing && (
+            <div className="flex justify-center pt-2">
+              <div className="flex items-center gap-2 text-green-600 text-sm font-medium bg-green-50 px-4 py-2 rounded-full">
+                <MailCheck className="w-4 h-4" /> Kolla din e-post!
+              </div>
+            </div>
+          )}
+
+          <div ref={bottomRef} />
+        </div>
+
+        {/* Action area */}
+        <div className="shrink-0 bg-white border-t border-[var(--border)] p-3 sm:rounded-b-2xl">
+          {step === "pitch" && !typing && messages.length > 0 && (
+            <button
+              onClick={handleStart}
+              className="w-full py-3 bg-[var(--primary)] text-white rounded-xl font-semibold hover:bg-[var(--primary)]/90 transition-colors text-sm"
+            >
+              Ja, kör! →
+            </button>
+          )}
+
+          {(step === "email" || step === "orgnr") && (
+            <div className="flex gap-2">
+              <input
+                ref={inputRef}
+                type={inputType}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder={placeholder}
+                autoComplete={step === "email" ? "email" : "off"}
+                className="flex-1 px-3.5 py-2.5 rounded-xl border border-[var(--border)] text-[16px] text-[var(--primary)] placeholder:text-[var(--muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
+              />
+              <button
+                onClick={step === "email" ? handleEmailSubmit : handleOrgNrSubmit}
+                disabled={!canSubmit}
+                className="p-2.5 bg-[var(--primary)] text-white rounded-xl hover:bg-[var(--primary)]/90 transition-colors disabled:opacity-40"
+              >
+                <Send className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+
+          {step === "error" && (
+            <button
+              onClick={() => { setInput(""); setStep("orgnr"); }}
+              className="w-full py-3 border border-[var(--border)] rounded-xl text-sm text-[var(--primary)] hover:bg-[var(--bg)] transition-colors"
+            >
+              Försök igen
+            </button>
+          )}
+
+          {step === "sent" && (
+            <button onClick={onClose} className="w-full py-3 bg-[var(--primary)] text-white rounded-xl font-semibold hover:bg-[var(--primary)]/90 transition-colors text-sm flex items-center justify-center gap-2">
+              <BadgeCheck className="w-4 h-4" /> Stäng
+            </button>
+          )}
+        </div>
+      </div>
+    </>
+  );
+}

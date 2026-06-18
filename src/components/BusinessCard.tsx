@@ -124,7 +124,7 @@ export default function BusinessCard({ business, categories, isAd }: Props) {
               </a>
             )}
             <Link
-              href={`/foretag/${business.id}/ta-over`}
+              href={`/foretag/${business.id}`}
               className="flex items-center gap-2 text-sm text-[var(--muted)] hover:text-[var(--primary)] transition-colors"
             >
               <BadgeCheck className="w-4 h-4 flex-shrink-0 text-[var(--accent)]" />
