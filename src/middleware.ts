@@ -26,8 +26,9 @@ export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
   const isLoginPage = path === "/admin/logga-in";
 
-  if (path.startsWith("/admin") && !isLoginPage && !user) {
-    return NextResponse.redirect(new URL("/admin/logga-in", request.url));
+  if ((path.startsWith("/admin") || path.startsWith("/arbetsgivare")) && !isLoginPage && !user) {
+    const next = encodeURIComponent(request.nextUrl.pathname);
+    return NextResponse.redirect(new URL(`/admin/logga-in?next=${next}`, request.url));
   }
   if (isLoginPage && user && !request.nextUrl.searchParams.get("next")) {
     return NextResponse.redirect(new URL("/admin", request.url));
@@ -36,4 +37,4 @@ export async function middleware(request: NextRequest) {
   return supabaseResponse;
 }
 
-export const config = { matcher: ["/admin/:path*"] };
+export const config = { matcher: ["/admin/:path*", "/arbetsgivare/:path*"] };

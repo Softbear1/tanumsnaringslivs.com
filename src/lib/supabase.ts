@@ -314,6 +314,93 @@ export type Database = {
         };
         Relationships: [];
       };
+      jobs: {
+        Row: {
+          id: string;
+          business_id: string | null;
+          owner_id: string | null;
+          title: string;
+          description: string;
+          requirements: string | null;
+          location: string;
+          job_type: string;
+          category_id: string | null;
+          salary_range: string | null;
+          start_date: string | null;
+          end_date: string | null;
+          apply_email: string;
+          apply_url: string | null;
+          status: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          business_id?: string | null;
+          owner_id?: string | null;
+          title: string;
+          description: string;
+          requirements?: string | null;
+          location: string;
+          job_type?: string;
+          category_id?: string | null;
+          salary_range?: string | null;
+          start_date?: string | null;
+          end_date?: string | null;
+          apply_email: string;
+          apply_url?: string | null;
+          status?: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          business_id?: string | null;
+          owner_id?: string | null;
+          title?: string;
+          description?: string;
+          requirements?: string | null;
+          location?: string;
+          job_type?: string;
+          category_id?: string | null;
+          salary_range?: string | null;
+          start_date?: string | null;
+          end_date?: string | null;
+          apply_email?: string;
+          apply_url?: string | null;
+          status?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      applications: {
+        Row: {
+          id: string;
+          job_id: string;
+          applicant_name: string;
+          applicant_email: string;
+          applicant_phone: string | null;
+          cover_letter: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          job_id: string;
+          applicant_name: string;
+          applicant_email: string;
+          applicant_phone?: string | null;
+          cover_letter: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          job_id?: string;
+          applicant_name?: string;
+          applicant_email?: string;
+          applicant_phone?: string | null;
+          cover_letter?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
