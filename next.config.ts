@@ -11,6 +11,15 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async rewrites() {
+    return [
+      // Serve the static /sommarjobb shell for all job detail URLs.
+      // Client JS reads usePathname() to extract the job id.
+      { source: "/sommarjobb/:id", destination: "/sommarjobb" },
+      // Same for employer job form/edit.
+      { source: "/arbetsgivare/annons/:id", destination: "/arbetsgivare" },
+    ];
+  },
 };
 
 if (process.env.NODE_ENV === "development") {
