@@ -4,6 +4,7 @@ import { useSearchParams, usePathname } from "next/navigation";
 import { createBrowserClient } from "@/lib/supabase";
 import Link from "next/link";
 import { Briefcase, MapPin, Calendar, Clock, ArrowLeft, Building2 } from "lucide-react";
+import Header from "@/components/Header";
 import type { Database } from "@/lib/supabase";
 
 type Job = Database["public"]["Tables"]["jobs"]["Row"];
@@ -80,6 +81,7 @@ function JobDetail({ id }: { id: string }) {
 
   return (
     <div className="min-h-screen bg-[var(--bg)]">
+      <Header />
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
         <Link href="/sommarjobb" className="inline-flex items-center gap-2 text-sm text-[var(--muted)] hover:text-[var(--primary)] transition-colors mb-6">
           <ArrowLeft className="w-4 h-4" />Alla jobb
@@ -217,6 +219,7 @@ function JobBoard() {
 
   return (
     <div className="min-h-screen bg-[var(--bg)]">
+      <Header />
       <div className="bg-[var(--primary)] text-white py-12">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
           <div className="flex items-center gap-3 mb-3">

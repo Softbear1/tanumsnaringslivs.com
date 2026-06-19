@@ -3,6 +3,7 @@ export const runtime = "edge";
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { createBrowserClient } from "@/lib/supabase-browser";
+import BusinessSearchClaim from "@/components/BusinessSearchClaim";
 
 export default function LoggaIn() {
   const [email, setEmail] = useState("");
@@ -109,6 +110,26 @@ export default function LoggaIn() {
           <a href="/" className="text-sm text-[var(--muted)] hover:text-[var(--primary)] transition-colors">
             ← Tillbaka till Tanums Näringsliv
           </a>
+        </div>
+
+        {/* Employer claim section */}
+        <div className="mt-8">
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-[var(--border)]" />
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-3 bg-[var(--background)] text-[var(--muted)]">Ny arbetsgivare?</span>
+            </div>
+          </div>
+
+          <div className="mt-4 bg-white rounded-2xl shadow-lg border border-[var(--border)] p-6">
+            <h3 className="font-semibold text-[var(--primary)] mb-1">Hitta och claima ditt företag</h3>
+            <p className="text-sm text-[var(--muted)] mb-4">
+              Sök upp ditt företag — claima det gratis och börja lägga upp sommarjobb och blixterbjudanden.
+            </p>
+            <BusinessSearchClaim />
+          </div>
         </div>
       </div>
     </div>
