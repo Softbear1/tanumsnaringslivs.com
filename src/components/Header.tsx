@@ -46,6 +46,7 @@ export default function Header() {
           <nav className="hidden md:flex items-center gap-6">
             <a href="#kategorier" className="text-sm text-[var(--muted)] hover:text-[var(--primary)] transition-colors">Kategorier</a>
             <a href="/blixterbjudanden" className="text-sm text-[var(--muted)] hover:text-[var(--primary)] transition-colors">Blixterbjudanden</a>
+            <a href="/sommarjobb" className="text-sm text-[var(--muted)] hover:text-[var(--primary)] transition-colors">Sommarjobb</a>
             {user ? (
               <>
                 {hasBusiness ? (
@@ -86,6 +87,7 @@ export default function Header() {
         <div className="md:hidden border-t border-[var(--border)] bg-white px-4 py-4 flex flex-col gap-3">
           <a href="#kategorier" onClick={() => setOpen(false)} className="text-sm text-[var(--muted)] py-2">Kategorier</a>
           <a href="/blixterbjudanden" onClick={() => setOpen(false)} className="text-sm text-[var(--muted)] py-2">Blixterbjudanden</a>
+          <a href="/sommarjobb" onClick={() => setOpen(false)} className="text-sm text-[var(--muted)] py-2">Sommarjobb</a>
           {user ? (
             <>
               {hasBusiness ? (
