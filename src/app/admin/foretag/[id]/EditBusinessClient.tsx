@@ -6,7 +6,7 @@ import ListingChat from "@/components/admin/ListingChat";
 import AdChat from "@/components/admin/AdChat";
 import type { BusinessDraft, AdDraft } from "@/lib/chat";
 import Link from "next/link";
-import { Plus, Trash2, Pause, Play, Megaphone, Sparkles, Zap } from "lucide-react";
+import { Plus, Trash2, Pause, Play, Megaphone, Sparkles, Zap, Briefcase, Users, Pencil } from "lucide-react";
 import AIBoostTextarea from "@/components/admin/AIBoostTextarea";
 
 interface Ad {
@@ -32,6 +32,14 @@ interface FlashDeal {
   fb_post_id: string | null;
 }
 
+interface Job {
+  id: string;
+  title: string;
+  location: string;
+  status: string;
+  job_type: string;
+}
+
 interface Props {
   business: {
     id: string;
@@ -49,6 +57,8 @@ interface Props {
   categories: Array<{ id: string; name: string }>;
   ads: Ad[];
   flashDeals: FlashDeal[];
+  jobs: Job[];
+  applicationCounts: Record<string, number>;
   // När satt (super-admin) går alla skrivningar via server actions med
   // admin-klienten, så att även företag man inte äger kan redigeras.
   adminActions?: AdminActions;
@@ -72,6 +82,8 @@ interface AdminActions {
   }) => Promise<void>;
   toggleDeal: (id: string, active: boolean) => Promise<void>;
   deleteDeal: (id: string) => Promise<void>;
+  toggleJob: (id: string, status: string) => Promise<void>;
+  deleteJob: (id: string) => Promise<void>;
 }
 
 function toDraft(b: Props["business"]): BusinessDraft {
@@ -88,7 +100,7 @@ function toDraft(b: Props["business"]): BusinessDraft {
   };
 }
 
-export default function EditBusinessClient({ business, categories, ads, flashDeals, adminActions }: Props) {
+export default function EditBusinessClient({ business, categories, ads, flashDeals, jobs, applicationCounts, adminActions }: Props) {
   const doneHref = adminActions ? "/admin/super" : "/admin";
   const [loading, setLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -318,6 +330,42 @@ export default function EditBusinessClient({ business, categories, ads, flashDea
     const { error } = await supabase.from("flash_deals").delete().eq("id", dealId);
     if (error) {
       alert("Kunde inte ta bort blixterbjudandet: " + error.message);
+      return;
+    }
+    window.location.reload();
+  }
+
+  async function handleToggleJob(jobId: string, status: string) {
+    if (adminActions) {
+      try { await adminActions.toggleJob(jobId, status); } catch (err) {
+        alert("Kunde inte uppdatera jobbet: " + (err instanceof Error ? err.message : String(err)));
+        return;
+      }
+      window.location.reload();
+      return;
+    }
+    const supabase = createBrowserClient();
+    const { error } = await supabase.from("jobs").update({ status: status === "active" ? "closed" : "active" }).eq("id", jobId);
+    if (error) {
+      alert("Kunde inte uppdatera jobbet: " + error.message);
+      return;
+    }
+    window.location.reload();
+  }
+
+  async function handleDeleteJob(jobId: string) {
+    if (adminActions) {
+      try { await adminActions.deleteJob(jobId); } catch (err) {
+        alert("Kunde inte ta bort jobbet: " + (err instanceof Error ? err.message : String(err)));
+        return;
+      }
+      window.location.reload();
+      return;
+    }
+    const supabase = createBrowserClient();
+    const { error } = await supabase.from("jobs").delete().eq("id", jobId);
+    if (error) {
+      alert("Kunde inte ta bort jobbet: " + error.message);
       return;
     }
     window.location.reload();
@@ -724,6 +772,69 @@ export default function EditBusinessClient({ business, categories, ads, flashDea
                 </button>
               </div>
             </form>
+          )}
+        </div>
+
+        {/* Sommarjobb section */}
+        <div id="sommarjobb" className="bg-white rounded-2xl border border-[var(--border)] shadow-sm p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Briefcase className="w-5 h-5 text-blue-600" />
+              <h2 className="font-semibold text-[var(--primary)]">Sommarjobb</h2>
+            </div>
+            <Link
+              href="/arbetsgivare/annons/new"
+              className="flex items-center gap-1.5 text-sm text-blue-600 border border-blue-300 px-3 py-1.5 rounded-lg hover:bg-blue-50 transition-colors font-medium"
+            >
+              <Plus className="w-4 h-4" />
+              Nytt jobb
+            </Link>
+          </div>
+
+          <p className="text-sm text-[var(--muted)] mb-4 leading-relaxed">
+            Jobbannonser visas på sidan <em>Sommarjobb</em> där jobbsökande kan söka direkt. Du ser ansökningarna när du redigerar ett jobb.
+          </p>
+
+          {jobs.length > 0 && (
+            <div className="space-y-3 mb-2">
+              {jobs.map((job) => {
+                const isActive = job.status === "active";
+                const count = applicationCounts[job.id] ?? 0;
+                return (
+                  <div key={job.id} className={`rounded-xl border p-4 ${isActive ? "border-blue-200 bg-blue-50/50" : "border-gray-200 bg-gray-50 opacity-60"}`}>
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm text-[var(--primary)] leading-snug">{job.title}</p>
+                        <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                          <span className="text-[10px] bg-[var(--bg)] text-[var(--muted)] px-2 py-0.5 rounded-full border border-[var(--border)]">{job.location}</span>
+                          <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${isActive ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}>
+                            {isActive ? "Aktiv" : "Stängd"}
+                          </span>
+                          <span className="text-[10px] font-semibold bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full inline-flex items-center gap-1">
+                            <Users className="w-3 h-3" />{count} {count === 1 ? "ansökan" : "ansökningar"}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <Link href={`/arbetsgivare/annons/${job.id}`} className="p-2.5 text-[var(--muted)] hover:text-[var(--primary)] border border-[var(--border)] rounded-lg transition-colors" title="Redigera & ansökningar">
+                          <Pencil className="w-3.5 h-3.5" />
+                        </Link>
+                        <button onClick={() => handleToggleJob(job.id, job.status)} className="p-2.5 text-[var(--muted)] hover:text-[var(--primary)] border border-[var(--border)] rounded-lg transition-colors" title={isActive ? "Stäng" : "Återöppna"}>
+                          {isActive ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+                        </button>
+                        <button onClick={() => handleDeleteJob(job.id)} className="p-2.5 text-[var(--muted)] hover:text-red-600 border border-[var(--border)] rounded-lg transition-colors" title="Ta bort">
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {jobs.length === 0 && (
+            <p className="text-sm text-[var(--muted)] italic">Du har inga sommarjobb ännu.</p>
           )}
         </div>
 

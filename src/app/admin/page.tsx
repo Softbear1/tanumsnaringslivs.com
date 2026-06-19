@@ -2,7 +2,7 @@ export const runtime = "edge";
 import { createServerClient } from "@/lib/supabase-server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { ExternalLink, Eye, Pause, Play, Plus, Megaphone, Zap, Pencil, TrendingUp, MousePointerClick } from "lucide-react";
+import { ExternalLink, Eye, Pause, Play, Plus, Megaphone, Zap, Pencil, TrendingUp, MousePointerClick, Briefcase } from "lucide-react";
 import { logout, toggleActive } from "./actions";
 import { isSuperAdmin } from "@/lib/auth";
 import MarketingCoach from "@/components/admin/MarketingCoach";
@@ -236,6 +236,13 @@ export default async function AdminPage() {
                     >
                       <Zap className="w-3.5 h-3.5 fill-amber-500" />
                       Blixterbjudanden
+                    </Link>
+                    <Link
+                      href={`/admin/foretag/${biz.id}#sommarjobb`}
+                      className="flex items-center gap-1.5 text-sm py-2 px-3 bg-blue-50 text-blue-700 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors font-medium"
+                    >
+                      <Briefcase className="w-3.5 h-3.5" />
+                      Sommarjobb
                     </Link>
                   </div>
                   <div className="flex gap-2 mt-2">

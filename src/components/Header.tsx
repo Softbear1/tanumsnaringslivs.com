@@ -7,18 +7,11 @@ import RockArtLogo from "./RockArtLogo";
 export default function Header() {
   const [open, setOpen] = useState(false);
   const [user, setUser] = useState<{ id: string; email?: string } | null>(null);
-  const [hasBusiness, setHasBusiness] = useState(false);
 
   useEffect(() => {
     const supabase = createBrowserClient();
-    supabase.auth.getUser().then(async ({ data: { user } }) => {
-      if (!user) return;
-      setUser(user);
-      const { count } = await supabase
-        .from("businesses")
-        .select("id", { count: "exact", head: true })
-        .eq("owner_id", user.id);
-      setHasBusiness((count ?? 0) > 0);
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) setUser(user);
     });
   }, []);
 
@@ -49,11 +42,7 @@ export default function Header() {
             <a href="/sommarjobb" className="text-sm text-[var(--muted)] hover:text-[var(--primary)] transition-colors">Sommarjobb</a>
             {user ? (
               <>
-                {hasBusiness ? (
-                  <a href="/admin" className="text-sm text-[var(--muted)] hover:text-[var(--primary)] transition-colors">Admin</a>
-                ) : (
-                  <a href="/profil" className="text-sm text-[var(--muted)] hover:text-[var(--primary)] transition-colors">Profil</a>
-                )}
+                <a href="/admin" className="text-sm text-[var(--muted)] hover:text-[var(--primary)] transition-colors">Admin</a>
                 <button
                   onClick={handleLogout}
                   className="text-sm text-[var(--muted)] hover:text-[var(--primary)] transition-colors"
@@ -90,11 +79,7 @@ export default function Header() {
           <a href="/sommarjobb" onClick={() => setOpen(false)} className="text-sm text-[var(--muted)] py-2">Sommarjobb</a>
           {user ? (
             <>
-              {hasBusiness ? (
-                <a href="/admin" onClick={() => setOpen(false)} className="text-sm text-[var(--muted)] py-2">Admin</a>
-              ) : (
-                <a href="/profil" onClick={() => setOpen(false)} className="text-sm text-[var(--muted)] py-2">Profil</a>
-              )}
+              <a href="/admin" onClick={() => setOpen(false)} className="text-sm text-[var(--muted)] py-2">Admin</a>
               <button onClick={handleLogout} className="text-sm text-[var(--muted)] py-2 text-left">Logga ut</button>
             </>
           ) : (

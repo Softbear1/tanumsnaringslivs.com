@@ -24,7 +24,7 @@ Givet en kort beskrivning av ett jobb, returnera ENDAST ett JSON-objekt med dess
   "salary_range": "Löneinformation om känd, annars null",
   "job_type": "sommarjobb" | "deltid" | "heltid" | "praktik"
 }
-Ton: vänlig, lokal, inbjudande. Max 300 ord totalt. Returnera BARA JSON, ingen annan text.`;
+Ton: vänlig, lokal, inbjudande. Max 300 ord totalt. Returnera ENDAST rå JSON utan markdown-fences, ingen annan text.`;
 
   const userMsg = [
     description,
@@ -54,8 +54,11 @@ Ton: vänlig, lokal, inbjudande. Max 300 ord totalt. Returnera BARA JSON, ingen 
   const data = await res.json() as { content: Array<{ text: string }> };
   const text = data.content?.[0]?.text ?? "{}";
 
+  // Claude kan lägga objektet i ```json-fences eller prosa runt — extrahera
+  // strängen mellan första { och sista } innan parsning.
+  const match = text.match(/\{[\s\S]*\}/);
   try {
-    const parsed = JSON.parse(text);
+    const parsed = JSON.parse(match ? match[0] : text);
     return Response.json(parsed);
   } catch {
     return Response.json({ error: "parse error", raw: text }, { status: 500 });

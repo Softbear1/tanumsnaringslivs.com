@@ -93,6 +93,18 @@ export async function adminDeleteDeal(id: string) {
   revalidatePath("/admin/super");
 }
 
+export async function adminToggleJob(id: string, status: string) {
+  const admin = await requireSuperAdmin();
+  await admin.from("jobs").update({ status: status === "active" ? "closed" : "active" }).eq("id", id);
+  revalidatePath("/admin/super");
+}
+
+export async function adminDeleteJob(id: string) {
+  const admin = await requireSuperAdmin();
+  await admin.from("jobs").delete().eq("id", id);
+  revalidatePath("/admin/super");
+}
+
 export async function adminToggleAd(id: string, active: boolean) {
   const admin = await requireSuperAdmin();
   await admin.from("ads").update({ active: !active }).eq("id", id);
