@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Briefcase, MapPin, Calendar, Clock, ArrowLeft, Building2 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import JobAlertSignup from "@/components/JobAlertSignup";
 import type { Database } from "@/lib/supabase";
 
 type Job = Database["public"]["Tables"]["jobs"]["Row"];
@@ -311,6 +312,7 @@ function JobBoard() {
           </div>
         )}
       </div>
+      <JobAlertSignup />
       <Footer />
     </div>
   );

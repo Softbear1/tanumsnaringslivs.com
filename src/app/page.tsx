@@ -6,6 +6,7 @@ import DirectoryClient from "@/components/DirectoryClient";
 import RegisterCTA from "@/components/RegisterCTA";
 import VisitorCTAs from "@/components/VisitorCTAs";
 import JobSpotlight from "@/components/JobSpotlight";
+import JobAlertSignup from "@/components/JobAlertSignup";
 import Footer from "@/components/Footer";
 import type { Ad } from "@/components/AdCard";
 import type { FlashDeal, FlashTeaser } from "@/components/FlashDeals";
@@ -124,6 +125,7 @@ export default async function Home() {
         />
         {featuredJobs.length > 0 && <JobSpotlight jobs={featuredJobs} />}
         <VisitorCTAs />
+        <JobAlertSignup />
         <RegisterCTA />
       </main>
       <Footer />

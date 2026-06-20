@@ -12,15 +12,15 @@ const cards = [
   {
     icon: Briefcase,
     title: "Sommarjobb i Tanum",
-    subtitle: "Se lediga tjänster och anmäl jobbevakning",
+    subtitle: "Se lediga tjänster och anmäl jobbevakning — gratis",
     href: "/sommarjobb",
     color: "#B45309",
     bg: "#FFFBEB",
   },
   {
     icon: Building2,
-    title: "Ta plats i katalogen",
-    subtitle: "Gratis profil, jobb och annonser",
+    title: "Ta över ditt företag",
+    subtitle: "Claima din profil, lägg upp jobb och annonsera — helt gratis",
     href: "/admin/logga-in",
     color: "var(--accent)",
     bg: "var(--accent-light)",

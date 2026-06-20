@@ -161,14 +161,14 @@ export default async function ForetagPage({ params }: PageProps) {
 
               {/* Today's flash deal banner */}
               {todayDeal && (
-                <div className="mb-8 rounded-2xl bg-amber-50 border border-amber-200 p-4 flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-amber-400 flex items-center justify-center shrink-0 mt-0.5">
+                <div className="mb-8 rounded-2xl bg-[var(--boost-bg)] border border-[var(--boost-border)] p-4 flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-[var(--boost)] flex items-center justify-center shrink-0 mt-0.5">
                     <Zap className="w-4 h-4 text-white fill-white" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-0.5">
-                      <span className="text-[10px] font-bold uppercase tracking-wide text-amber-600 bg-amber-100 px-2 py-0.5 rounded-full">Blixterbjudande idag</span>
-                      <span className="flex items-center gap-1 text-[10px] text-amber-600 font-medium">
+                      <span className="text-[10px] font-bold uppercase tracking-wide text-[var(--boost)] bg-[var(--boost-bg)] px-2 py-0.5 rounded-full">Blixterbjudande idag</span>
+                      <span className="flex items-center gap-1 text-[10px] text-[var(--boost)] font-medium">
                         <Clock className="w-3 h-3" /> Gäller till midnatt
                       </span>
                     </div>
