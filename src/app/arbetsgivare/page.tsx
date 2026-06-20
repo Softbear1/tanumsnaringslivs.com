@@ -5,6 +5,8 @@ import { createBrowserClient } from "@/lib/supabase";
 import Link from "next/link";
 import { Briefcase, Plus, Eye, Users, PenLine, XCircle, CheckCircle2, ArrowLeft, Sparkles, Loader2, Mail, Phone, Calendar } from "lucide-react";
 import { staticCategories } from "@/lib/data";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import type { Database } from "@/lib/supabase";
 
 type Job = Database["public"]["Tables"]["jobs"]["Row"];
@@ -152,6 +154,7 @@ function JobForm({ annonsId }: { annonsId: string }) {
 
   return (
     <div className="min-h-screen bg-[var(--bg)]">
+      <Header />
       <div className="bg-[var(--primary)] text-white py-8">
         <div className="max-w-2xl mx-auto px-4 sm:px-6">
           <Link href="/arbetsgivare" className="flex items-center gap-2 text-white/70 hover:text-white text-sm mb-3 transition-colors">
@@ -173,7 +176,7 @@ function JobForm({ annonsId }: { annonsId: string }) {
             <textarea value={aiDesc} onChange={(e) => setAiDesc(e.target.value)} rows={2}
               placeholder='Beskriv jobbet i en mening, t.ex. "Vi söker en glad servitör för sommaren på vår restaurang i Fjällbacka"'
               className="w-full px-3.5 py-2.5 rounded-lg border border-amber-200 text-sm text-[16px] focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white resize-none" />
-            {aiError && <p className="text-xs text-red-600 mt-1">{aiError}</p>}
+            {aiError && <p className="text-xs text-[var(--error)] mt-1">{aiError}</p>}
             <button type="button" onClick={generateWithAI} disabled={aiLoading || !aiDesc.trim()}
               className="mt-2 flex items-center gap-2 px-4 py-2 rounded-lg bg-amber-600 text-white text-sm font-medium hover:bg-amber-700 transition-colors disabled:opacity-50">
               {aiLoading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
@@ -270,7 +273,7 @@ function JobForm({ annonsId }: { annonsId: string }) {
             <p className="text-xs text-[var(--muted)] mt-1">Om satt skickas sökanden dit istället för in-app-formulär.</p>
           </div>
 
-          {error && <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</p>}
+          {error && <p className="text-sm text-[var(--error)] bg-[var(--error-bg)] border border-[var(--error-border)] rounded-lg px-3 py-2">{error}</p>}
 
           <div className="flex gap-3 pt-2">
             <button type="submit" disabled={saving}
@@ -326,6 +329,7 @@ function JobForm({ annonsId }: { annonsId: string }) {
           </div>
         )}
       </div>
+      <Footer />
     </div>
   );
 }
@@ -398,6 +402,7 @@ function Dashboard() {
 
   return (
     <div className="min-h-screen bg-[var(--bg)]">
+      <Header />
       <div className="bg-[var(--primary)] text-white py-10">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 flex items-center justify-between">
           <div>
@@ -477,6 +482,7 @@ function Dashboard() {
           </div>
         )}
       </div>
+      <Footer />
     </div>
   );
 }

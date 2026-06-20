@@ -5,6 +5,7 @@ import { createBrowserClient } from "@/lib/supabase";
 import Link from "next/link";
 import { Briefcase, MapPin, Calendar, Clock, ArrowLeft, Building2 } from "lucide-react";
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import type { Database } from "@/lib/supabase";
 
 type Job = Database["public"]["Tables"]["jobs"]["Row"];
@@ -126,10 +127,10 @@ function JobDetail({ id }: { id: string }) {
                   Ansök via arbetsgivarens sida →
                 </a>
               ) : sent ? (
-                <div className="flex items-start gap-3 bg-green-50 border border-green-200 rounded-xl px-5 py-4">
+                <div className="flex items-start gap-3 bg-[var(--success-bg)] border border-[var(--success-border)] rounded-xl px-5 py-4">
                   <div>
-                    <p className="font-medium text-green-800">Din ansökan är skickad!</p>
-                    <p className="text-sm text-green-700 mt-0.5">Arbetsgivaren kontaktar dig på {email}.</p>
+                    <p className="font-medium text-[var(--success)]">Din ansökan är skickad!</p>
+                    <p className="text-sm text-[var(--success)] opacity-80 mt-0.5">Arbetsgivaren kontaktar dig på {email}.</p>
                   </div>
                 </div>
               ) : (
@@ -157,7 +158,7 @@ function JobDetail({ id }: { id: string }) {
                         placeholder="Berätta lite om dig själv och varför du söker det här jobbet..."
                         className="w-full px-3.5 py-2.5 rounded-lg border border-[var(--border)] text-sm text-[16px] focus:outline-none focus:ring-2 focus:ring-[var(--accent)] resize-none" />
                     </div>
-                    {applyError && <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{applyError}</p>}
+                    {applyError && <p className="text-sm text-[var(--error)] bg-[var(--error-bg)] border border-[var(--error-border)] rounded-lg px-3 py-2">{applyError}</p>}
                     <button type="submit" disabled={sending}
                       className="w-full py-3 rounded-xl bg-[var(--primary)] text-white font-medium hover:bg-[var(--primary)]/90 transition-colors disabled:opacity-50">
                       {sending ? "Skickar..." : "Skicka ansökan"}
@@ -170,6 +171,7 @@ function JobDetail({ id }: { id: string }) {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }
@@ -309,6 +311,7 @@ function JobBoard() {
           </div>
         )}
       </div>
+      <Footer />
     </div>
   );
 }
