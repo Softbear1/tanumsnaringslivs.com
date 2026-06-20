@@ -7,6 +7,8 @@ import { Briefcase, MapPin, Calendar, Clock, ArrowLeft, Building2 } from "lucide
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import JobAlertSignup from "@/components/JobAlertSignup";
+import Spinner from "@/components/Spinner";
+import EmptyState from "@/components/EmptyState";
 import type { Database } from "@/lib/supabase";
 
 type Job = Database["public"]["Tables"]["jobs"]["Row"];
@@ -71,13 +73,7 @@ function JobDetail({ id }: { id: string }) {
     setSent(true);
   }
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[var(--bg)] flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-[var(--primary)] border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
+  if (loading) return <Spinner />;
 
   if (!job) return null;
 
@@ -261,14 +257,12 @@ function JobBoard() {
             {[1, 2, 3].map((i) => <div key={i} className="bg-white border border-[var(--border)] rounded-xl p-5 h-24 animate-pulse" />)}
           </div>
         ) : !jobs.length ? (
-          <div className="text-center py-20 text-[var(--muted)]">
-            <Briefcase className="w-12 h-12 mx-auto mb-4 opacity-30" />
-            <p className="text-lg font-medium">Inga jobb just nu</p>
-            <p className="text-sm mt-1">Kom tillbaka snart — arbetsgivare lägger upp annonser löpande</p>
-            <a href="/arbetsgivare" className="inline-block mt-6 px-5 py-2.5 rounded-lg bg-[var(--primary)] text-white text-sm font-medium hover:bg-[var(--primary)]/90">
-              Är du arbetsgivare? Lägg upp ett jobb →
-            </a>
-          </div>
+          <EmptyState
+            icon={<Briefcase className="w-12 h-12" />}
+            title="Inga jobb just nu"
+            subtitle="Kom tillbaka snart — arbetsgivare lägger upp annonser löpande"
+            action={{ label: "Är du arbetsgivare? Lägg upp ett jobb", href: "/arbetsgivare" }}
+          />
         ) : (
           <div className="space-y-3">
             {jobs.map((job) => (

@@ -121,14 +121,14 @@ export default async function ForetagPage({ params }: PageProps) {
           )}
 
           <div className="bg-white rounded-2xl card-shadow overflow-hidden">
-            <div className="h-2 w-full" style={{ backgroundColor: cat?.color ?? "#6B7280" }} />
+            <div className="h-2 w-full" style={{ backgroundColor: cat?.color ?? "var(--muted)" }} />
 
             <div className="p-6 sm:p-8">
               {/* Header */}
               <div className="flex items-start gap-4 mb-6">
                 <div
                   className="w-16 h-16 rounded-2xl flex items-center justify-center font-bold text-xl flex-shrink-0 overflow-hidden"
-                  style={{ backgroundColor: cat?.bgColor ?? "#F3F4F6", color: cat?.color ?? "#374151" }}
+                  style={{ backgroundColor: cat?.bgColor ?? "var(--hover-bg)", color: cat?.color ?? "var(--muted)" }}
                 >
                   {business.logoUrl ? (
                     <Image src={business.logoUrl} alt={`${business.name} logotyp`} width={64} height={64} className="object-contain w-full h-full" />
@@ -190,7 +190,7 @@ export default async function ForetagPage({ params }: PageProps) {
                 {business.claimed && business.phone && (
                   <a
                     href={`tel:${business.phone.replace(/\s/g, "")}`}
-                    className="flex items-center gap-3 p-4 rounded-xl bg-[var(--bg)] hover:bg-gray-100 transition-colors"
+                    className="flex items-center gap-3 p-4 rounded-xl bg-[var(--bg)] hover:bg-[var(--hover-bg)] transition-colors"
                   >
                     <Phone className="w-5 h-5 text-[var(--accent)] flex-shrink-0" />
                     <div>
@@ -202,7 +202,7 @@ export default async function ForetagPage({ params }: PageProps) {
                 {business.claimed && business.email && (
                   <a
                     href={`mailto:${business.email}`}
-                    className="flex items-center gap-3 p-4 rounded-xl bg-[var(--bg)] hover:bg-gray-100 transition-colors"
+                    className="flex items-center gap-3 p-4 rounded-xl bg-[var(--bg)] hover:bg-[var(--hover-bg)] transition-colors"
                   >
                     <Mail className="w-5 h-5 text-[var(--accent)] flex-shrink-0" />
                     <div className="min-w-0">
@@ -216,7 +216,7 @@ export default async function ForetagPage({ params }: PageProps) {
                     href={business.website.startsWith("http") ? business.website : `https://${business.website}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-3 p-4 rounded-xl bg-[var(--bg)] hover:bg-gray-100 transition-colors"
+                    className="flex items-center gap-3 p-4 rounded-xl bg-[var(--bg)] hover:bg-[var(--hover-bg)] transition-colors"
                   >
                     <Globe className="w-5 h-5 text-[var(--accent)] flex-shrink-0" />
                     <div className="min-w-0">

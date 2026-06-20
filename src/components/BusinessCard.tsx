@@ -22,7 +22,7 @@ export default function BusinessCard({ business, categories, isAd }: Props) {
       )}
     >
       {/* Category color strip */}
-      <div className="h-1 w-full" style={{ backgroundColor: cat?.color ?? "#6B7280" }} />
+      <div className="h-1 w-full" style={{ backgroundColor: cat?.color ?? "var(--muted)" }} />
 
       <div className="p-5">
         {/* Header row */}
@@ -31,7 +31,7 @@ export default function BusinessCard({ business, categories, isAd }: Props) {
             {/* Logo circle — visar uppladdad logga om den finns, annars initialer */}
             <div
               className="w-12 h-12 rounded-xl flex items-center justify-center font-bold text-sm flex-shrink-0 overflow-hidden"
-              style={{ backgroundColor: cat?.bgColor ?? "#F3F4F6", color: cat?.color ?? "#374151" }}
+              style={{ backgroundColor: cat?.bgColor ?? "var(--hover-bg)", color: cat?.color ?? "var(--muted)" }}
             >
               {business.logoUrl ? (
                 <Image src={business.logoUrl} alt={`${business.name} logotyp`} width={48} height={48} className="object-contain w-full h-full" />
@@ -47,7 +47,7 @@ export default function BusinessCard({ business, categories, isAd }: Props) {
               </Link>
               <span
                 className="inline-block text-[11px] font-medium mt-1 px-2 py-0.5 rounded-full"
-                style={{ backgroundColor: cat?.bgColor ?? "#F3F4F6", color: cat?.color ?? "#374151" }}
+                style={{ backgroundColor: cat?.bgColor ?? "var(--hover-bg)", color: cat?.color ?? "var(--muted)" }}
               >
                 {cat?.name}
               </span>

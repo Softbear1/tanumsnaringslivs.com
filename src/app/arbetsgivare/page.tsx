@@ -7,6 +7,8 @@ import { Briefcase, Plus, Eye, Users, PenLine, XCircle, CheckCircle2, ArrowLeft,
 import { staticCategories } from "@/lib/data";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import Spinner from "@/components/Spinner";
+import EmptyState from "@/components/EmptyState";
 import type { Database } from "@/lib/supabase";
 
 type Job = Database["public"]["Tables"]["jobs"]["Row"];
@@ -146,11 +148,7 @@ function JobForm({ annonsId }: { annonsId: string }) {
     router.push("/arbetsgivare");
   }
 
-  if (loading) return (
-    <div className="min-h-screen bg-[var(--bg)] flex items-center justify-center">
-      <div className="w-8 h-8 border-2 border-[var(--primary)] border-t-transparent rounded-full animate-spin" />
-    </div>
-  );
+  if (loading) return <Spinner />;
 
   return (
     <div className="min-h-screen bg-[var(--bg)]">
@@ -292,9 +290,8 @@ function JobForm({ annonsId }: { annonsId: string }) {
               <Users className="w-4 h-4" />Ansökningar ({applications.length})
             </h2>
             {!applications.length ? (
-              <div className="text-center py-10 text-[var(--muted)] bg-white border border-[var(--border)] rounded-xl">
-                <Users className="w-8 h-8 mx-auto mb-3 opacity-30" />
-                <p className="text-sm">Inga ansökningar ännu</p>
+              <div className="bg-white border border-[var(--border)] rounded-xl py-4">
+                <EmptyState icon={<Users className="w-8 h-8" />} title="Inga ansökningar ännu" />
               </div>
             ) : (
               <div className="space-y-4">
@@ -394,11 +391,7 @@ function Dashboard() {
     setJobs((prev) => prev.map((j) => j.id === jobId ? { ...j, status: "active" } : j));
   }
 
-  if (loading) return (
-    <div className="min-h-screen bg-[var(--bg)] flex items-center justify-center">
-      <div className="w-8 h-8 border-2 border-[var(--primary)] border-t-transparent rounded-full animate-spin" />
-    </div>
-  );
+  if (loading) return <Spinner />;
 
   return (
     <div className="min-h-screen bg-[var(--bg)]">
@@ -417,22 +410,18 @@ function Dashboard() {
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
         {!businesses.length ? (
-          <div className="text-center py-16 text-[var(--muted)]">
-            <Briefcase className="w-10 h-10 mx-auto mb-4 opacity-30" />
-            <p className="font-medium text-[var(--primary)]">Du har inget anslutet företag ännu</p>
-            <p className="text-sm mt-1">Claima ditt företag i katalogen för att börja lägga upp jobb</p>
-            <Link href="/" className="inline-block mt-5 px-5 py-2.5 rounded-lg bg-[var(--primary)] text-white text-sm font-medium">
-              Gå till företagskatalogen →
-            </Link>
-          </div>
+          <EmptyState
+            icon={<Briefcase className="w-10 h-10" />}
+            title="Du har inget anslutet företag ännu"
+            subtitle="Claima ditt företag i katalogen för att börja lägga upp jobb"
+            action={{ label: "Gå till företagskatalogen", href: "/" }}
+          />
         ) : !jobs.length ? (
-          <div className="text-center py-16 text-[var(--muted)]">
-            <Briefcase className="w-10 h-10 mx-auto mb-4 opacity-30" />
-            <p className="font-medium text-[var(--primary)]">Inga annonser ännu</p>
-            <Link href="/arbetsgivare/annons/new" className="inline-block mt-5 px-5 py-2.5 rounded-lg bg-[var(--primary)] text-white text-sm font-medium">
-              Lägg upp din första annons →
-            </Link>
-          </div>
+          <EmptyState
+            icon={<Briefcase className="w-10 h-10" />}
+            title="Inga annonser ännu"
+            action={{ label: "Lägg upp din första annons", href: "/arbetsgivare/annons/new" }}
+          />
         ) : (
           <div className="space-y-3">
             {jobs.map((job) => {
