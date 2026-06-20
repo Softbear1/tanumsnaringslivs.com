@@ -4,6 +4,8 @@ import { createServerClient } from "@/lib/supabase-server";
 import Header from "@/components/Header";
 import DirectoryClient from "@/components/DirectoryClient";
 import RegisterCTA from "@/components/RegisterCTA";
+import VisitorCTAs from "@/components/VisitorCTAs";
+import JobSpotlight from "@/components/JobSpotlight";
 import Footer from "@/components/Footer";
 import type { Ad } from "@/components/AdCard";
 import type { FlashDeal, FlashTeaser } from "@/components/FlashDeals";
@@ -98,6 +100,15 @@ export default async function Home() {
 
   const dealsEndAt = endOfStockholmDayISO();
 
+  // Featured jobs for homepage spotlight (newest 3 active)
+  const { data: featuredJobRows } = await supabase
+    .from("jobs")
+    .select("id, title, location, job_type")
+    .eq("status", "active")
+    .order("created_at", { ascending: false })
+    .limit(3);
+  const featuredJobs = (featuredJobRows ?? []) as { id: string; title: string; location: string; job_type: string }[];
+
   return (
     <>
       <Header />
@@ -111,6 +122,8 @@ export default async function Home() {
           flashTeasers={flashTeasers}
           dealsEndAt={dealsEndAt}
         />
+        {featuredJobs.length > 0 && <JobSpotlight jobs={featuredJobs} />}
+        <VisitorCTAs />
         <RegisterCTA />
       </main>
       <Footer />
