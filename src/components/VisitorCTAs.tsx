@@ -14,8 +14,8 @@ const cards = [
     title: "Sommarjobb i Tanum",
     subtitle: "Se lediga tjänster och anmäl jobbevakning — gratis",
     href: "/sommarjobb",
-    color: "#B45309",
-    bg: "#FFFBEB",
+    color: "var(--boost)",
+    bg: "var(--boost-bg)",
   },
   {
     icon: Building2,

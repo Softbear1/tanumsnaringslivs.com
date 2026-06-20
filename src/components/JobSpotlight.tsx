@@ -8,7 +8,7 @@ const TYPE_LABELS: Record<string, string> = {
 };
 
 const TYPE_COLORS: Record<string, string> = {
-  sommarjobb: "bg-amber-100 text-amber-800",
+  sommarjobb: "bg-[var(--boost-bg)] text-[var(--boost)]",
   deltid: "bg-blue-100 text-blue-800",
   heltid: "bg-green-100 text-green-800",
   praktik: "bg-purple-100 text-purple-800",
@@ -28,7 +28,7 @@ export default function JobSpotlight({ jobs }: { jobs: Job[] }) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-2">
-            <Briefcase className="w-5 h-5 text-amber-600" />
+            <Briefcase className="w-5 h-5 text-[var(--boost)]" />
             <h2 className="font-semibold text-[var(--primary)] text-base">Aktuella sommarjobb</h2>
           </div>
           <a
@@ -50,7 +50,7 @@ export default function JobSpotlight({ jobs }: { jobs: Job[] }) {
               </p>
               <div className="flex items-center gap-2 flex-wrap">
                 <span
-                  className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium ${TYPE_COLORS[job.job_type] ?? "bg-gray-100 text-gray-700"}`}
+                  className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium ${TYPE_COLORS[job.job_type] ?? "bg-[var(--hover-bg)] text-[var(--muted)]"}`}
                 >
                   {TYPE_LABELS[job.job_type] ?? job.job_type}
                 </span>
