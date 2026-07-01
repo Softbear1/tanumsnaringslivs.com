@@ -420,7 +420,7 @@ export default function Hero({ search, onSearch, onStartChat, theme }: Props) {
       {/* Tunn accentlinje längs toppen — färgad efter årstid */}
       <div className="absolute top-0 left-0 right-0 h-[3px] opacity-80" style={{ backgroundColor: theme.accent }} />
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-7 sm:py-14">
         {/* Logga + rubrik — sammanhållen enhet */}
         <div className="flex items-start justify-between mb-7">
           <div className="flex items-center gap-4">

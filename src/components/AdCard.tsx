@@ -24,7 +24,7 @@ export default function AdCard({ ad, variant = "gallery" }: Props) {
   if (variant === "chat") {
     return (
       <div className="relative bg-amber-50 border border-amber-200 rounded-2xl p-4">
-        <span className="absolute top-2.5 right-3 text-[9px] font-semibold uppercase tracking-wide text-amber-600/70">Annons</span>
+        <span className="absolute top-2.5 right-3 text-[10px] font-semibold uppercase tracking-wide text-amber-700">Annons</span>
         <div className="flex items-center gap-2.5 mb-2 min-w-0">
           <div className="w-8 h-8 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center text-xs font-bold shrink-0">
             {ad.business_initials}

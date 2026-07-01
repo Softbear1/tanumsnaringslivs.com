@@ -78,7 +78,7 @@ export default function FlashDeals({ deals, teasers, endsAt }: Props) {
 
   return (
     <section className="bg-gradient-to-b from-[var(--boost-bg)] to-white border-b border-[var(--boost-border)]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ${deals.length > 0 ? "py-6" : "py-4 sm:py-6"}`}>
         {/* Header */}
         <div className="flex items-center gap-2 mb-4">
           <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-[var(--boost)] text-white shadow-sm">
@@ -120,12 +120,12 @@ export default function FlashDeals({ deals, teasers, endsAt }: Props) {
             ))}
           </div>
         ) : (
-          <p className="text-sm text-[var(--muted)] mb-2">Inga blixterbjudanden just nu — men kolla in vad som kommer:</p>
+          <p className="hidden sm:block text-sm text-[var(--muted)] mb-2">Inga blixterbjudanden just nu — men kolla in vad som kommer:</p>
         )}
 
         {/* Upcoming teasers — who, but not what */}
         {teasers.length > 0 && (
-          <div className="mt-5">
+          <div className={deals.length > 0 ? "mt-5" : "mt-2 sm:mt-5 hidden sm:block"}>
             <div className="flex items-center gap-1.5 mb-2.5 text-sm font-semibold text-[var(--primary)]">
               <Eye className="w-4 h-4 text-[var(--boost)]" />
               Snart: håll utkik
