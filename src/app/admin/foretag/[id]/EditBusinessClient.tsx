@@ -8,6 +8,7 @@ import type { BusinessDraft, AdDraft } from "@/lib/chat";
 import Link from "next/link";
 import { Plus, Trash2, Pause, Play, Megaphone, Sparkles, Zap, Briefcase, Users, Pencil } from "lucide-react";
 import AIBoostTextarea from "@/components/admin/AIBoostTextarea";
+import ShareProfile from "@/components/ShareProfile";
 
 interface Ad {
   id: string;
@@ -433,6 +434,9 @@ export default function EditBusinessClient({ business, categories, ads, flashDea
             loading={loading}
           />
         </div>
+
+        {/* Share profile — link + printable QR */}
+        <ShareProfile businessId={business.id} businessName={business.name} />
 
         {/* Ads section */}
         <div id="annonser" className="bg-white rounded-2xl border border-[var(--border)] shadow-sm p-6">

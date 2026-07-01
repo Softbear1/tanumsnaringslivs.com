@@ -1,7 +1,8 @@
 export const runtime = "edge";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Zap } from "lucide-react";
+import EmptyState from "@/components/EmptyState";
 import { createServerClient } from "@/lib/supabase-server";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -81,8 +82,13 @@ export default async function BlixterbjudandenPage() {
           <FlashDeals deals={flashDeals} teasers={flashTeasers} endsAt={dealsEndAt} />
         ) : (
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-            <div className="text-center py-16 bg-white rounded-2xl border border-[var(--border)]">
-              <p className="text-[var(--muted)]">Inga blixterbjudanden just nu — kika in igen snart!</p>
+            <div className="bg-white rounded-2xl border border-[var(--border)]">
+              <EmptyState
+                icon={<Zap className="w-10 h-10" />}
+                title="Inga blixterbjudanden just nu"
+                subtitle="Kika in igen snart — nya erbjudanden dyker upp löpande."
+                action={{ label: "Utforska företagen", href: "/" }}
+              />
             </div>
           </div>
         )}

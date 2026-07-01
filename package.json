@@ -17,10 +17,12 @@
     "@cloudflare/next-on-pages": "^1.13.16",
     "@supabase/ssr": "^0.12.0",
     "@supabase/supabase-js": "^2.108.2",
+    "@types/qrcode": "^1.5.6",
     "clsx": "^2.1.1",
     "framer-motion": "^12.40.0",
     "lucide-react": "^1.18.0",
     "next": "16.2.9",
+    "qrcode": "^1.5.4",
     "react": "19.2.4",
     "react-dom": "19.2.4"
   },

@@ -110,7 +110,10 @@ export default async function AdminPage() {
             <h2 className="font-bold text-[var(--primary)] mb-1">Just nu: helt gratis att synas 🎉</h2>
             <p className="text-sm text-[var(--muted)] leading-relaxed">
               Det kostar ingenting att skapa annonser och blixterbjudanden just nu — men så kommer det inte
-              vara för alltid. Passa på att bygga upp din synlighet medan det är gratis!
+              vara för alltid. Passa på att bygga upp din synlighet medan det är gratis!{" "}
+              <a href="/synas-mer" className="font-medium text-amber-700 hover:underline">
+                Läs om vad som kommer →
+              </a>
             </p>
           </div>
         </div>

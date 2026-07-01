@@ -399,6 +399,9 @@ function Dashboard() {
       <div className="bg-[var(--primary)] text-white py-10">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 flex items-center justify-between">
           <div>
+            <Link href="/admin" className="inline-flex items-center gap-1.5 text-sm text-white/70 hover:text-white transition-colors mb-2">
+              ← Tillbaka till din företagssida
+            </Link>
             <h1 className="text-2xl font-bold">Mina jobbannonser</h1>
             <p className="text-white/70 text-sm mt-1">{userEmail}</p>
           </div>
