@@ -5,6 +5,8 @@ import Header from "@/components/Header";
 import DirectoryClient from "@/components/DirectoryClient";
 import RegisterCTA from "@/components/RegisterCTA";
 import JobSpotlight from "@/components/JobSpotlight";
+import GameSection from "@/components/GameSection";
+import type { Score } from "@/components/GameSection";
 import Footer from "@/components/Footer";
 import type { Ad } from "@/components/AdCard";
 import type { FlashDeal, FlashTeaser } from "@/components/FlashDeals";
@@ -108,6 +110,19 @@ export default async function Home() {
     .limit(3);
   const featuredJobs = (featuredJobRows ?? []) as { id: string; title: string; location: string; job_type: string }[];
 
+  // KOBBVAKT top-3 leaderboard. Read-only; failures render the game section
+  // without a leaderboard rather than an error.
+  let kobbvaktScores: Score[] = [];
+  try {
+    const { data } = await supabase
+      .from("kobbvakt_highscores")
+      .select("name, score, wave")
+      .order("score", { ascending: false })
+      .order("created_at", { ascending: true })
+      .limit(3);
+    kobbvaktScores = data ?? [];
+  } catch { /* ignore */ }
+
   return (
     <>
       <Header />
@@ -122,6 +137,7 @@ export default async function Home() {
           dealsEndAt={dealsEndAt}
         />
         {featuredJobs.length > 0 && <JobSpotlight jobs={featuredJobs} />}
+        <GameSection scores={kobbvaktScores} variant="card" />
         <RegisterCTA />
       </main>
       <Footer />
