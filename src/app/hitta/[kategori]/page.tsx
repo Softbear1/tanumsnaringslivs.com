@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { staticCategories, staticBusinesses, type Business } from "@/lib/data";
+import { categoryIntros } from "@/lib/categoryTexts";
 import { createStaticClient } from "@/lib/supabase-static";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -59,7 +60,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!cat) return { title: "Kategorin hittades inte – Tanums Näringsliv" };
 
   const title = `${cat.name} i Tanum – lokala företag | Tanums Näringsliv`;
-  const description = `Hitta företag inom ${cat.name.toLowerCase()} i Tanums kommun — Tanumshede, Grebbestad, Fjällbacka, Hamburgsund m.fl. Kontaktuppgifter, webbplatser och erbjudanden.`;
+  const description =
+    categoryIntros[cat.id]?.meta ??
+    `Hitta företag inom ${cat.name.toLowerCase()} i Tanums kommun — Tanumshede, Grebbestad, Fjällbacka, Hamburgsund m.fl. Kontaktuppgifter, webbplatser och erbjudanden.`;
 
   return {
     title,
@@ -117,9 +120,12 @@ export default async function KategoriPage({ params }: PageProps) {
             <h1 className="text-3xl font-bold text-[var(--primary)] mb-2">
               {cat.name} i Tanum
             </h1>
-            <p className="text-[var(--muted)] max-w-2xl">
-              {businesses.length} företag inom {cat.name.toLowerCase()} i Tanums kommun.
-              Klicka på ett företag för kontaktuppgifter och mer information.
+            <p className="text-[var(--primary)] leading-relaxed max-w-2xl mb-2">
+              {categoryIntros[cat.id]?.intro ??
+                `${businesses.length} företag inom ${cat.name.toLowerCase()} i Tanums kommun.`}
+            </p>
+            <p className="text-sm text-[var(--muted)]">
+              {businesses.length} företag i katalogen — klicka för kontaktuppgifter.
             </p>
           </div>
 
