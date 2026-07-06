@@ -14,11 +14,13 @@ interface Props {
   businessId: string;
   businessName: string;
   onClose: () => void;
+  /** Anropas när inloggningslänken har skickats. */
+  onSent?: () => void;
 }
 
 const TYPING_DELAY = 700;
 
-export default function EliasClaimModal({ businessId, businessName, onClose }: Props) {
+export default function EliasClaimModal({ businessId, businessName, onClose, onSent }: Props) {
   const [step, setStep] = useState<Step>("pitch");
   const [messages, setMessages] = useState<Msg[]>([]);
   const [typing, setTyping] = useState(false);
@@ -90,6 +92,7 @@ export default function EliasClaimModal({ businessId, businessName, onClose }: P
     if (res.ok) {
       setMessages((m) => [...m, { from: "elias", text: `Perfekt! Jag har skickat en inloggningslänk till ${email}. Klicka på länken i mejlet så är du inne direkt.` }]);
       setStep("sent");
+      onSent?.();
     } else {
       setMessages((m) => [...m, { from: "elias", text: res.error ?? "Något gick fel. Försök igen." }]);
       setErrorMsg(res.error ?? "");

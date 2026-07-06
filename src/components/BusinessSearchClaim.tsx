@@ -6,7 +6,16 @@ import EliasClaimModal from "@/components/EliasClaimModal";
 
 type Result = { id: string; name: string; postort: string | null };
 
-export default function BusinessSearchClaim() {
+interface Props {
+  /** Anropas när användaren valt sitt företag i listan. */
+  onSelect?: (name: string) => void;
+  /** Anropas när inloggningslänken har skickats. */
+  onClaimSent?: () => void;
+  /** Anropas när claim-modalen stängs. */
+  onModalClose?: () => void;
+}
+
+export default function BusinessSearchClaim({ onSelect, onClaimSent, onModalClose }: Props = {}) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<Result[]>([]);
   const [searching, setSearching] = useState(false);
@@ -56,7 +65,7 @@ export default function BusinessSearchClaim() {
           {results.map((biz) => (
             <button
               key={biz.id}
-              onClick={() => setSelected({ id: biz.id, name: biz.name })}
+              onClick={() => { setSelected({ id: biz.id, name: biz.name }); onSelect?.(biz.name); }}
               className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[var(--bg)] border border-transparent hover:border-[var(--border)] transition-colors text-left"
             >
               <Building2 className="w-4 h-4 text-[var(--muted)] shrink-0" />
@@ -73,7 +82,8 @@ export default function BusinessSearchClaim() {
         <EliasClaimModal
           businessId={selected.id}
           businessName={selected.name}
-          onClose={() => setSelected(null)}
+          onClose={() => { setSelected(null); onModalClose?.(); }}
+          onSent={onClaimSent}
         />
       )}
     </>
