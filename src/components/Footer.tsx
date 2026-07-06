@@ -37,7 +37,7 @@ export default function Footer() {
               <h4 className="text-white font-medium text-sm mb-3">Tjänster</h4>
               <ul className="space-y-2 text-sm">
                 <li><a href="#kategorier" className="hover:text-white transition-colors">Kategorier</a></li>
-                <li><a href="/admin/logga-in" className="hover:text-white transition-colors">Lägg till företag</a></li>
+                <li><a href="/kom-igang" className="hover:text-white transition-colors">Lägg till företag</a></li>
                 <li><a href="#registrera" className="hover:text-white transition-colors">Annonsera</a></li>
               </ul>
             </div>

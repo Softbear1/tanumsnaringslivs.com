@@ -54,7 +54,7 @@ export default function Header() {
               <>
                 <a href="/admin/logga-in" className="text-sm text-[var(--muted)] hover:text-[var(--primary)] transition-colors">Logga in</a>
                 <a
-                  href="/admin/logga-in"
+                  href="/kom-igang"
                   className="text-sm px-4 py-2 rounded-lg bg-[var(--brand)] text-white font-medium hover:bg-[var(--brand-hover)] transition-colors"
                 >
                   Registrera ditt företag →
@@ -85,7 +85,7 @@ export default function Header() {
           ) : (
             <>
               <a href="/admin/logga-in" onClick={() => setOpen(false)} className="text-sm text-[var(--muted)] py-2">Logga in</a>
-              <a href="/admin/logga-in" onClick={() => setOpen(false)} className="text-sm px-4 py-2 rounded-lg bg-[var(--brand)] text-white font-medium text-center">
+              <a href="/kom-igang" onClick={() => setOpen(false)} className="text-sm px-4 py-2 rounded-lg bg-[var(--brand)] text-white font-medium text-center">
                 Lägg till företag – gratis
               </a>
             </>

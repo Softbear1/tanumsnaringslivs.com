@@ -6,6 +6,7 @@ import { ExternalLink, Eye, Pause, Play, Plus, Megaphone, Zap, Pencil, TrendingU
 import { logout, toggleActive } from "./actions";
 import { isSuperAdmin } from "@/lib/auth";
 import MarketingCoach from "@/components/admin/MarketingCoach";
+import OnboardingChecklist from "@/components/admin/OnboardingChecklist";
 
 export default async function AdminPage() {
   const supabase = await createServerClient();
@@ -22,7 +23,7 @@ export default async function AdminPage() {
 
   const { data: businesses } = await supabase
     .from("businesses")
-    .select("id, name, description, initials, active, boosted, created_at, category_id")
+    .select("id, name, description, initials, active, boosted, created_at, category_id, logo_url")
     .eq("owner_id", user.id)
     .order("created_at", { ascending: false });
 
@@ -66,6 +67,26 @@ export default async function AdminPage() {
     else if (row.kind === "flash") flashClicks++;
   }
 
+  // Kom igång-guiden: har ägaren skapat annons/erbjudande/jobb ännu? Räknas
+  // över alla ägarens företag; guiden länkar till det först skapade.
+  const first = businesses?.[businesses.length - 1] ?? businesses?.[0];
+  let checklist = null;
+  if (first && businessIds.length) {
+    const [adsCount, dealsCount, jobsCount] = await Promise.all([
+      supabase.from("ads").select("id", { count: "exact", head: true }).in("business_id", businessIds),
+      supabase.from("flash_deals").select("id", { count: "exact", head: true }).in("business_id", businessIds),
+      supabase.from("jobs").select("id", { count: "exact", head: true }).in("business_id", businessIds),
+    ]);
+    checklist = {
+      businessId: first.id,
+      hasLogo: Boolean(first.logo_url),
+      hasDescription: (first.description ?? "").trim().length >= 40,
+      hasDeal: (dealsCount.count ?? 0) > 0,
+      hasAd: (adsCount.count ?? 0) > 0,
+      hasJob: (jobsCount.count ?? 0) > 0,
+    };
+  }
+
   return (
     <div className="min-h-screen bg-[var(--bg)]">
       <header className="bg-[var(--brand)] text-white shadow">
@@ -101,6 +122,8 @@ export default async function AdminPage() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        {checklist && <OnboardingChecklist state={checklist} />}
+
         {/* Kampanj-info: gratis just nu */}
         <div className="mb-8 rounded-2xl border-2 border-[var(--boost-border)] bg-gradient-to-r from-[var(--boost-bg)] to-white p-5 flex items-start gap-4">
           <span className="flex items-center justify-center w-10 h-10 rounded-xl bg-[var(--boost-bg)] text-[var(--sol-500)] shadow-sm shrink-0">

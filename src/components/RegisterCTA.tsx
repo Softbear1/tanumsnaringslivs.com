@@ -27,7 +27,7 @@ export default function RegisterCTA() {
               att det kostar något.
             </p>
             <a
-              href="/admin/logga-in"
+              href="/kom-igang"
               className="inline-block text-center px-6 py-3 rounded-xl font-medium text-sm bg-[var(--brand)] text-white hover:bg-[var(--brand-hover)] transition-colors"
             >
               Ta över din företagsprofil
