@@ -1,8 +1,8 @@
-import { Check } from "lucide-react";
+import { Check, Sparkles } from "lucide-react";
 
 const included = [
   "Företagsprofil i katalogen",
-  "Offertförfrågningar från kunder via AI",
+  "Syns i sök och kategorier",
   "Blixterbjudanden & annonser",
   "Sommarjobbsannonser",
   "Besöksstatistik (30 dagar)",
@@ -11,36 +11,43 @@ const included = [
 export default function RegisterCTA() {
   return (
     <section id="registrera" className="bg-white border-t border-[var(--border)]">
-      <div className="max-w-md mx-auto px-4 sm:px-6 py-10">
-        <p className="text-sm text-[var(--muted)] mb-4 text-center">
-          Är du företagare i Tanum?{" "}
-          <a href="/admin/logga-in" className="text-[var(--accent)] font-medium hover:underline">
-            Det är gratis.
-          </a>
-        </p>
-        <div className="relative rounded-2xl border-2 border-[var(--accent)] p-6 card-shadow text-left">
-          <div className="mb-4">
-            <h3 className="font-bold text-[var(--primary)] text-lg">Gratis</h3>
-            <p className="text-sm text-[var(--muted)]">Allt du behöver för att synas och få kunder</p>
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-12">
+        <div className="rounded-2xl border border-[var(--border)] card-shadow overflow-hidden md:flex">
+          {/* Inbjudan */}
+          <div className="p-7 sm:p-8 md:flex-1">
+            <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide bg-[var(--accent-light)] text-[var(--brand)] px-3 py-1 rounded-full">
+              <Sparkles className="w-3.5 h-3.5" />
+              Gratis, alltid
+            </span>
+            <h2 className="text-2xl font-bold text-[var(--primary)] mt-4 mb-2 leading-tight">
+              Ta plats i Tanums företagskatalog
+            </h2>
+            <p className="text-[var(--muted)] leading-relaxed mb-6">
+              Syns för kunder i hela kommunen, lägg upp erbjudanden och sommarjobb — utan
+              att det kostar något.
+            </p>
+            <a
+              href="/admin/logga-in"
+              className="inline-block text-center px-6 py-3 rounded-xl font-medium text-sm bg-[var(--brand)] text-white hover:bg-[var(--brand-hover)] transition-colors"
+            >
+              Ta över din företagsprofil
+            </a>
           </div>
-          <div className="flex items-baseline gap-1 mb-6">
-            <span className="text-3xl font-bold text-[var(--primary)]">0 kr</span>
-            <span className="text-[var(--muted)] text-sm">/alltid</span>
+
+          {/* Vad som ingår */}
+          <div className="bg-[var(--bg)] border-t md:border-t-0 md:border-l border-[var(--border)] p-7 sm:p-8 md:w-[44%]">
+            <p className="text-xs font-semibold uppercase tracking-wide text-[var(--muted)] mb-4">
+              Det här ingår
+            </p>
+            <ul className="space-y-3">
+              {included.map((f) => (
+                <li key={f} className="flex items-center gap-2.5 text-sm text-[var(--primary)]">
+                  <Check className="w-4 h-4 text-[var(--brand)] flex-shrink-0" />
+                  {f}
+                </li>
+              ))}
+            </ul>
           </div>
-          <ul className="space-y-2.5 mb-6">
-            {included.map((f) => (
-              <li key={f} className="flex items-center gap-2 text-sm text-[var(--muted)]">
-                <Check className="w-4 h-4 text-[var(--accent)] flex-shrink-0" />
-                {f}
-              </li>
-            ))}
-          </ul>
-          <a
-            href="/admin/logga-in"
-            className="block text-center w-full py-2.5 rounded-xl font-medium text-sm bg-[var(--accent)] text-white hover:bg-[var(--accent-dark)] transition-colors"
-          >
-            Ta över din företagsprofil
-          </a>
         </div>
       </div>
     </section>

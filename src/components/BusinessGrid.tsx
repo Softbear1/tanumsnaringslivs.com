@@ -5,7 +5,12 @@ import { Category, Business, getCategory } from "@/lib/data";
 import { filterBusinesses, sortBusinesses, selectRelevantAds, SORT_OPTIONS, type SortKey } from "@/lib/directory";
 import BusinessCard from "./BusinessCard";
 import AdCard, { Ad } from "./AdCard";
-import { SlidersHorizontal } from "lucide-react";
+import { SlidersHorizontal, Plus } from "lucide-react";
+
+// How many businesses to show before the first "Visa fler". A multiple of 3 so
+// the grid stays balanced across 1/2/3 columns and the ad-injection cadence lands
+// cleanly. Rendering all 900+ cards at once is both endless scroll and slow.
+const PAGE_SIZE = 24;
 
 type Props = {
   categories: Category[];
@@ -17,8 +22,22 @@ type Props = {
 
 export default function BusinessGrid({ categories, businesses, ads, categoryFilter, search }: Props) {
   const [sortKey, setSortKey] = useState<SortKey>("name-asc");
+  const [visible, setVisible] = useState(PAGE_SIZE);
   const filtered = filterBusinesses(businesses, categories, categoryFilter, search);
   const sorted = sortBusinesses(filtered, sortKey);
+
+  // Whenever the result set changes (filter/search/sort), collapse back to the
+  // first page. Adjusting state during render (React's documented pattern) avoids
+  // the flash of briefly showing the previous page's card count.
+  const resetKey = `${categoryFilter ?? ""}|${search}|${sortKey}`;
+  const [prevKey, setPrevKey] = useState(resetKey);
+  if (prevKey !== resetKey) {
+    setPrevKey(resetKey);
+    setVisible(PAGE_SIZE);
+  }
+
+  const shown = sorted.slice(0, visible);
+  const remaining = sorted.length - shown.length;
 
   // Category-aware ad pool: keeps category-targeted and general ads relevant even
   // while filtering. Each ad is shown at most once per view (cursor never wraps).
@@ -29,7 +48,7 @@ export default function BusinessGrid({ categories, businesses, ads, categoryFilt
   const items: GridItem[] = [];
   let cursor = 0;
 
-  sorted.forEach((biz, i) => {
+  shown.forEach((biz, i) => {
     items.push({ type: "business", item: biz });
     if ((i + 1) % 3 === 0 && cursor < pool.length) {
       items.push({ type: "ad", item: pool[cursor], key: `ad-${pool[cursor].id}` });
@@ -39,7 +58,7 @@ export default function BusinessGrid({ categories, businesses, ads, categoryFilt
 
   // Small result sets (1–2 businesses) never hit a 3rd slot — still surface one
   // relevant ad so advertisers aren't invisible when a category is filtered.
-  if (cursor === 0 && pool.length > 0 && sorted.length > 0) {
+  if (cursor === 0 && pool.length > 0 && shown.length > 0) {
     items.push({ type: "ad", item: pool[0], key: `ad-${pool[0].id}` });
   }
 
@@ -115,13 +134,28 @@ export default function BusinessGrid({ categories, businesses, ads, categoryFilt
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ duration: 0.2, delay: Math.min(idx * 0.03, 0.2) }}
+                  transition={{ duration: 0.2, delay: Math.min((idx % PAGE_SIZE) * 0.03, 0.2) }}
                 >
                   <BusinessCard business={item.item} categories={categories} />
                 </motion.div>
               );
             })}
           </AnimatePresence>
+        </div>
+      )}
+
+      {remaining > 0 && (
+        <div className="mt-10 flex flex-col items-center gap-3">
+          <button
+            onClick={() => setVisible((v) => v + PAGE_SIZE)}
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white border border-[var(--border)] text-[var(--primary)] font-medium text-sm card-shadow hover:border-[var(--brand)] hover:text-[var(--brand)] transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            Visa fler företag
+          </button>
+          <p className="text-xs text-[var(--muted)]">
+            Visar {shown.length} av {filtered.length}
+          </p>
         </div>
       )}
     </section>
