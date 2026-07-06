@@ -42,12 +42,16 @@ export const SORT_OPTIONS: { value: SortKey; label: string }[] = [
 
 /** Sorterar företagslistan enligt valt sorteringsval. */
 export function sortBusinesses(businesses: Business[], key: SortKey): Business[] {
+  // Verifierade (claimade) företag alltid först — de har riktigt innehåll
+  // (bild, beskrivning, kontakt) och det är samtidigt moroten för att claima.
+  // Vald sortering gäller inom respektive grupp.
+  const byClaimed = (a: Business, b: Business) => Number(b.claimed) - Number(a.claimed);
   switch (key) {
     case "name-desc":
-      return [...businesses].sort((a, b) => b.name.localeCompare(a.name, "sv"));
+      return [...businesses].sort((a, b) => byClaimed(a, b) || b.name.localeCompare(a.name, "sv"));
     case "name-asc":
     default:
-      return [...businesses].sort((a, b) => a.name.localeCompare(b.name, "sv"));
+      return [...businesses].sort((a, b) => byClaimed(a, b) || a.name.localeCompare(b.name, "sv"));
   }
 }
 

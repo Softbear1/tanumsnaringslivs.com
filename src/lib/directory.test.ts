@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { filterBusinesses, sortBoostedFirst, getCategoryCount, selectRelevantAds } from "./directory";
+import { filterBusinesses, sortBusinesses, sortBoostedFirst, getCategoryCount, selectRelevantAds } from "./directory";
 import { Business, Category } from "./data";
 
 const categories: Category[] = [
@@ -28,6 +28,26 @@ const data: Business[] = [
   biz({ id: "2", name: "Fjällbacka Måleri", categoryId: "bygg", boosted: true, description: "målar hus" }),
   biz({ id: "3", name: "Café Havsbris", categoryId: "restaurang", boosted: false, description: "fika vid havet" }),
 ];
+
+describe("sortBusinesses", () => {
+  const mixed: Business[] = [
+    biz({ id: "a", name: "Alfa Bygg", categoryId: "bygg", claimed: false }),
+    biz({ id: "b", name: "Zäta Måleri", categoryId: "bygg", claimed: true }),
+    biz({ id: "c", name: "Mellan Snickeri", categoryId: "bygg", claimed: false }),
+  ];
+
+  it("lägger verifierade (claimade) företag först oavsett sortering", () => {
+    expect(sortBusinesses(mixed, "name-asc").map((b) => b.id)).toEqual(["b", "a", "c"]);
+    expect(sortBusinesses(mixed, "name-desc").map((b) => b.id)).toEqual(["b", "c", "a"]);
+  });
+
+  it("sorterar på namn inom samma verifieringsgrupp", () => {
+    const all = mixed.map((b) => ({ ...b, claimed: true }));
+    expect(sortBusinesses(all, "name-asc").map((b) => b.name)).toEqual([
+      "Alfa Bygg", "Mellan Snickeri", "Zäta Måleri",
+    ]);
+  });
+});
 
 describe("filterBusinesses", () => {
   it("returnerar alla när inget filter eller sökning anges", () => {
