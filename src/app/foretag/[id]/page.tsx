@@ -146,12 +146,14 @@ export default async function ForetagPage({ params }: PageProps) {
                     )}
                   </div>
                   {cat && (
-                    <span
-                      className="inline-block text-xs font-medium px-2.5 py-0.5 rounded-full"
+                    <Link
+                      href={`/hitta/${cat.id}`}
+                      className="inline-block text-xs font-medium px-2.5 py-0.5 rounded-full hover:opacity-80 transition-opacity"
                       style={{ backgroundColor: cat.bgColor, color: cat.color }}
+                      title={`Fler företag inom ${cat.name}`}
                     >
                       {cat.name}
-                    </span>
+                    </Link>
                   )}
                 </div>
               </div>

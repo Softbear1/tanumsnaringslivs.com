@@ -1,4 +1,5 @@
 import { TnIcon } from "./Logo";
+import { staticCategories } from "@/lib/data";
 
 export default function Footer() {
   return (
@@ -33,6 +34,18 @@ export default function Footer() {
           </div>
 
           <div className="flex flex-wrap gap-x-10 gap-y-4">
+            <div>
+              <h4 className="text-white font-medium text-sm mb-3">Hitta företag</h4>
+              <ul className="grid grid-cols-2 gap-x-8 gap-y-2 text-sm">
+                {staticCategories.map((c) => (
+                  <li key={c.id}>
+                    <a href={`/hitta/${c.id}`} className="hover:text-white transition-colors">
+                      {c.name}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
             <div>
               <h4 className="text-white font-medium text-sm mb-3">Tjänster</h4>
               <ul className="space-y-2 text-sm">
