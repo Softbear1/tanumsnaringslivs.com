@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Search, MailCheck, PartyPopper, ArrowRight, HelpCircle } from "lucide-react";
+import { MailCheck, PartyPopper, ArrowRight, HelpCircle } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import BusinessSearchClaim from "@/components/BusinessSearchClaim";
@@ -11,24 +11,6 @@ export const metadata: Metadata = {
   alternates: { canonical: "https://tanumsnaringsliv.com/kom-igang" },
 };
 
-const steps = [
-  {
-    icon: Search,
-    title: "Hitta ditt företag",
-    text: "De flesta företag i Tanum finns redan förberedda i katalogen. Sök på namnet här nedanför.",
-  },
-  {
-    icon: MailCheck,
-    title: "Bekräfta att det är ditt",
-    text: "Ange organisationsnummer och din e-post. Du får en länk på mejlen — klicka på den, färdigt. Inget lösenord behövs.",
-  },
-  {
-    icon: PartyPopper,
-    title: "Klart — du syns",
-    text: "Din profil är live direkt. Fyll på med bild och beskrivning när du vill — vår assistent hjälper dig skriva.",
-  },
-];
-
 export default function KomIgang() {
   return (
     <>
@@ -36,7 +18,7 @@ export default function KomIgang() {
       <main className="flex-1 bg-[var(--bg)]">
         <div className="max-w-xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
           {/* Rubrik — stor, enkel, noll jargong */}
-          <div className="text-center mb-10">
+          <div className="text-center mb-8">
             <h1 className="text-3xl sm:text-4xl font-bold text-[var(--primary)] mb-3 leading-tight">
               Lägg upp ditt företag
             </h1>
@@ -45,36 +27,52 @@ export default function KomIgang() {
             </p>
           </div>
 
-          {/* Stegen — som en spelguide, ett i taget */}
-          <ol className="space-y-4 mb-10">
-            {steps.map((s, i) => (
-              <li
-                key={s.title}
-                className="flex gap-4 bg-white rounded-2xl border border-[var(--border)] card-shadow p-5"
-              >
-                <span className="flex items-center justify-center w-9 h-9 rounded-full bg-[var(--brand)] text-white font-bold text-base shrink-0">
-                  {i + 1}
-                </span>
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <s.icon className="w-4 h-4 text-[var(--brand)]" />
-                    <h2 className="font-semibold text-[var(--primary)]">{s.title}</h2>
-                  </div>
-                  <p className="text-sm text-[var(--muted)] leading-relaxed">{s.text}</p>
-                </div>
-              </li>
-            ))}
-          </ol>
-
-          {/* Steg 1 börjar här — sökfältet */}
-          <div className="bg-white rounded-2xl border-2 border-[var(--brand)] card-shadow p-6 mb-6">
-            <h2 className="font-bold text-[var(--primary)] text-lg mb-1">
-              Börja här: sök ditt företagsnamn
-            </h2>
-            <p className="text-sm text-[var(--muted)] mb-4">
-              Skriv t.ex. &quot;Gråhälla&quot; — du behöver inte skriva hela namnet.
-            </p>
+          {/* Steg 1 — aktivt: du gör direkt, ingen läsning först */}
+          <div className="bg-white rounded-2xl border-2 border-[var(--brand)] card-shadow p-6 mb-3">
+            <div className="flex items-center gap-3 mb-4">
+              <span className="flex items-center justify-center w-9 h-9 rounded-full bg-[var(--brand)] text-white font-bold text-base shrink-0">
+                1
+              </span>
+              <div>
+                <h2 className="font-bold text-[var(--primary)]">Sök ditt företagsnamn</h2>
+                <p className="text-sm text-[var(--muted)]">
+                  De flesta företag i Tanum finns redan förberedda — några bokstäver räcker.
+                </p>
+              </div>
+            </div>
             <BusinessSearchClaim />
+          </div>
+
+          {/* Steg 2–3 — kommande: nedtonade tills de blir aktuella */}
+          <div className="rounded-2xl border border-[var(--border)] bg-white/60 p-5 mb-3 flex gap-3.5 opacity-70">
+            <span className="flex items-center justify-center w-8 h-8 rounded-full border-2 border-[var(--border)] text-[var(--muted)] font-bold text-sm shrink-0">
+              2
+            </span>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <MailCheck className="w-4 h-4 text-[var(--muted)]" />
+                <h3 className="font-semibold text-[var(--primary)] text-sm">Bekräfta att det är ditt</h3>
+              </div>
+              <p className="text-sm text-[var(--muted)] mt-0.5 leading-relaxed">
+                Organisationsnummer och din e-post — du får en länk på mejlen. Inget lösenord.
+              </p>
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-[var(--border)] bg-white/60 p-5 mb-8 flex gap-3.5 opacity-70">
+            <span className="flex items-center justify-center w-8 h-8 rounded-full border-2 border-[var(--border)] text-[var(--muted)] font-bold text-sm shrink-0">
+              3
+            </span>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <PartyPopper className="w-4 h-4 text-[var(--muted)]" />
+                <h3 className="font-semibold text-[var(--primary)] text-sm">Klart — du syns</h3>
+              </div>
+              <p className="text-sm text-[var(--muted)] mt-0.5 leading-relaxed">
+                Profilen är live direkt. Bild och beskrivning fyller du på när du vill —
+                vår assistent hjälper dig skriva.
+              </p>
+            </div>
           </div>
 
           {/* Fallback: företaget finns inte */}
