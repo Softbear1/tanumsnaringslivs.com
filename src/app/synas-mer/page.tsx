@@ -40,7 +40,7 @@ export default function SynasMer() {
 
           <div className="rounded-2xl border-2 border-[var(--boost-border)] bg-white p-6 card-shadow mb-8">
             <div className="flex items-center gap-2 mb-1">
-              <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-[var(--boost)] text-white">
+              <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-[var(--boost-bg)] text-[var(--sol-500)]">
                 <Star className="w-4 h-4 fill-current" />
               </span>
               <h2 className="font-bold text-[var(--primary)] text-lg">Boost — kommer snart</h2>
@@ -58,7 +58,7 @@ export default function SynasMer() {
             </ul>
             <a
               href="mailto:elias.bengtsson@live.com?subject=Intresserad%20av%20Boost%20p%C3%A5%20Tanums%20N%C3%A4ringsliv"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[var(--boost)] text-white text-sm font-medium hover:opacity-90 transition-opacity"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[var(--brand)] text-white text-sm font-medium hover:bg-[var(--brand-hover)] transition-colors"
             >
               <Mail className="w-4 h-4" />
               Anmäl intresse

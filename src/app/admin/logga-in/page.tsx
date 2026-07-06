@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { createBrowserClient } from "@/lib/supabase-browser";
 import BusinessSearchClaim from "@/components/BusinessSearchClaim";
+import { TnIcon } from "@/components/Logo";
 
 export default function LoggaIn() {
   const [email, setEmail] = useState("");
@@ -40,9 +41,9 @@ export default function LoggaIn() {
         <div className="text-center mb-8">
           <a
             href="/"
-            className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-[var(--primary)] text-white text-2xl font-bold mb-4 hover:scale-105 transition-transform"
+            className="inline-flex items-center justify-center mb-4 hover:scale-105 transition-transform"
           >
-            T
+            <TnIcon size={64} />
           </a>
           <h1 className="text-2xl font-bold text-[var(--primary)]">Tanums Näringsliv</h1>
           <p className="text-[var(--muted)] mt-1">Logga in för företag</p>
@@ -91,7 +92,7 @@ export default function LoggaIn() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-3 px-6 bg-[var(--primary)] text-white rounded-xl font-semibold hover:bg-[var(--primary)]/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="w-full py-3 px-6 bg-[var(--brand)] text-white rounded-xl font-semibold hover:bg-[var(--brand-hover)] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {loading ? "Skickar..." : "Skicka magisk länk"}
                 </button>

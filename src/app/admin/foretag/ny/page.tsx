@@ -59,7 +59,7 @@ export default function NyForetagPage() {
 
   return (
     <div className="min-h-screen bg-[var(--background)]">
-      <header className="bg-[var(--primary)] text-white shadow">
+      <header className="bg-[var(--brand)] text-white shadow">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-4 flex items-center gap-4">
           <Link href="/admin" className="text-white/70 hover:text-white transition-colors">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

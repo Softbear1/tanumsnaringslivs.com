@@ -31,8 +31,8 @@ export default function CategoryChips({ categories, selected, onSelect, featured
             className={clsx(
               "inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-sm font-medium transition-all",
               selected === null
-                ? "bg-[var(--primary)] text-white shadow-sm"
-                : "bg-[var(--bg)] text-[var(--primary)] hover:bg-[var(--primary)]/10 border border-[var(--border)]"
+                ? "bg-[var(--brand)] text-white shadow-sm"
+                : "bg-[var(--bg)] text-[var(--primary)] hover:bg-[var(--accent-light)] border border-[var(--border)]"
             )}
           >
             <LayoutGrid className="w-3.5 h-3.5" />
@@ -50,8 +50,8 @@ export default function CategoryChips({ categories, selected, onSelect, featured
                 className={clsx(
                   "relative inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-sm font-medium transition-all",
                   isActive
-                    ? "bg-[var(--primary)] text-white shadow-sm"
-                    : "bg-[var(--bg)] text-[var(--primary)] hover:bg-[var(--primary)]/10 border border-[var(--border)]"
+                    ? "bg-[var(--brand)] text-white shadow-sm"
+                    : "bg-[var(--bg)] text-[var(--primary)] hover:bg-[var(--accent-light)] border border-[var(--border)]"
                 )}
               >
                 {Icon && (

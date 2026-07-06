@@ -3,7 +3,7 @@ import Skeleton from "@/components/Skeleton";
 export default function Loading() {
   return (
     <div className="min-h-screen bg-[var(--bg)]" aria-busy="true" aria-label="Laddar admin-portalen">
-      <header className="bg-[var(--primary)] text-white shadow">
+      <header className="bg-[var(--brand)] text-white shadow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
           <Skeleton className="h-5 w-40 !bg-white/15" />
           <Skeleton className="h-8 w-24 !bg-white/15" />

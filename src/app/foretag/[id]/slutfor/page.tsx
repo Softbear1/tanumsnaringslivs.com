@@ -85,7 +85,7 @@ function Message({ title, body }: { title: string; body: string }) {
             <p className="text-sm text-[var(--muted)] leading-relaxed mb-6">{body}</p>
             <Link
               href="/"
-              className="inline-flex items-center justify-center bg-[var(--primary)] text-white px-5 py-2.5 rounded-xl font-medium hover:bg-[var(--primary)]/90 transition-colors text-sm"
+              className="inline-flex items-center justify-center bg-[var(--brand)] text-white px-5 py-2.5 rounded-xl font-medium hover:bg-[var(--brand-hover)] transition-colors text-sm"
             >
               Till startsidan
             </Link>

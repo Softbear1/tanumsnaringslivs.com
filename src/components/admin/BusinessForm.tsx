@@ -150,7 +150,7 @@ export default function BusinessForm({ categories, business, businessId, onSubmi
               className={`${inputClass} flex-1 font-mono tracking-widest`}
             />
             <div
-              className="w-12 h-12 rounded-xl bg-[var(--primary)] text-white flex items-center justify-center font-bold text-lg shrink-0"
+              className="w-12 h-12 rounded-xl bg-[var(--brand)] text-white flex items-center justify-center font-bold text-lg shrink-0"
               aria-label="Förhandsgranskning av initialer"
             >
               {initials || "?"}
@@ -273,7 +273,7 @@ export default function BusinessForm({ categories, business, businessId, onSubmi
       <button
         type="submit"
         disabled={loading}
-        className="w-full py-3 px-6 bg-[var(--primary)] text-white rounded-xl font-semibold hover:bg-[var(--primary)]/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+        className="w-full py-3 px-6 bg-[var(--brand)] text-white rounded-xl font-semibold hover:bg-[var(--brand-hover)] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
       >
         {loading ? "Sparar..." : "Spara"}
       </button>

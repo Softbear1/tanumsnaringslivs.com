@@ -153,7 +153,7 @@ function JobForm({ annonsId }: { annonsId: string }) {
   return (
     <div className="min-h-screen bg-[var(--bg)]">
       <Header />
-      <div className="bg-[var(--primary)] text-white py-8">
+      <div className="bg-[var(--brand)] text-white py-8">
         <div className="max-w-2xl mx-auto px-4 sm:px-6">
           <Link href="/arbetsgivare" className="flex items-center gap-2 text-white/70 hover:text-white text-sm mb-3 transition-colors">
             <ArrowLeft className="w-4 h-4" />Mina annonser
@@ -165,18 +165,18 @@ function JobForm({ annonsId }: { annonsId: string }) {
 
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8 space-y-8">
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="bg-amber-50 border border-amber-200 rounded-xl p-5">
+          <div className="bg-[var(--boost-bg)] border border-[var(--boost-border)] rounded-xl p-5">
             <div className="flex items-center gap-2 mb-3">
-              <Sparkles className="w-4 h-4 text-amber-600" />
-              <span className="text-sm font-semibold text-amber-800">Skriv annons med AI</span>
-              <span className="text-xs text-amber-600 bg-amber-100 px-2 py-0.5 rounded-full">Frivilligt</span>
+              <Sparkles className="w-4 h-4 text-[var(--boost)]" />
+              <span className="text-sm font-semibold text-[var(--boost)]">Skriv annons med AI</span>
+              <span className="text-xs text-[var(--boost)] bg-[var(--boost-border)] px-2 py-0.5 rounded-full">Frivilligt</span>
             </div>
             <textarea value={aiDesc} onChange={(e) => setAiDesc(e.target.value)} rows={2}
               placeholder='Beskriv jobbet i en mening, t.ex. "Vi söker en glad servitör för sommaren på vår restaurang i Fjällbacka"'
-              className="w-full px-3.5 py-2.5 rounded-lg border border-amber-200 text-sm text-[16px] focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white resize-none" />
+              className="w-full px-3.5 py-2.5 rounded-lg border border-[var(--boost-border)] text-sm text-[16px] focus:outline-none focus:ring-2 focus:ring-[var(--sol-500)] bg-white resize-none" />
             {aiError && <p className="text-xs text-[var(--error)] mt-1">{aiError}</p>}
             <button type="button" onClick={generateWithAI} disabled={aiLoading || !aiDesc.trim()}
-              className="mt-2 flex items-center gap-2 px-4 py-2 rounded-lg bg-amber-600 text-white text-sm font-medium hover:bg-amber-700 transition-colors disabled:opacity-50">
+              className="mt-2 flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--brand)] text-white text-sm font-medium hover:bg-[var(--brand-hover)] transition-colors disabled:opacity-50">
               {aiLoading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
               {aiLoading ? "Genererar..." : "Fyll i fälten åt mig"}
             </button>
@@ -275,7 +275,7 @@ function JobForm({ annonsId }: { annonsId: string }) {
 
           <div className="flex gap-3 pt-2">
             <button type="submit" disabled={saving}
-              className="flex-1 py-3 rounded-xl bg-[var(--primary)] text-white font-medium hover:bg-[var(--primary)]/90 transition-colors disabled:opacity-50">
+              className="flex-1 py-3 rounded-xl bg-[var(--brand)] text-white font-medium hover:bg-[var(--brand-hover)] transition-colors disabled:opacity-50">
               {saving ? "Publicerar..." : isNew ? "Publicera annons" : "Spara ändringar"}
             </button>
             <Link href="/arbetsgivare" className="px-5 py-3 rounded-xl border border-[var(--border)] text-sm text-[var(--muted)] hover:text-[var(--primary)] transition-colors">
@@ -396,7 +396,7 @@ function Dashboard() {
   return (
     <div className="min-h-screen bg-[var(--bg)]">
       <Header />
-      <div className="bg-[var(--primary)] text-white py-10">
+      <div className="bg-[var(--brand)] text-white py-10">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 flex items-center justify-between">
           <div>
             <Link href="/admin" className="inline-flex items-center gap-1.5 text-sm text-white/70 hover:text-white transition-colors mb-2">

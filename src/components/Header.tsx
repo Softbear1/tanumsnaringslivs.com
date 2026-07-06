@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
 import { createBrowserClient } from "@/lib/supabase-browser";
-import RockArtLogo from "./RockArtLogo";
+import { TnIcon } from "./Logo";
 
 export default function Header() {
   const [open, setOpen] = useState(false);
@@ -26,13 +26,13 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <a href="/" className="flex items-center gap-3 text-[var(--primary)]">
-            {/* Hällristningslogga — solhjul med stickfigurer */}
-            <div className="w-9 h-9 bg-[var(--primary)] rounded-xl flex items-center justify-center shadow-sm">
-              <RockArtLogo size={22} color="white" />
-            </div>
+            {/* Loggan står direkt på ljus bakgrund, ingen färgplatta (DESIGN.md §6) */}
+            <TnIcon size={36} />
             <div>
-              <span className="font-bold text-base leading-tight block tracking-tight">Tanums Näringsliv</span>
-              <span className="text-[10px] text-[var(--muted)] leading-tight block tracking-widest uppercase">Bohuskusten</span>
+              <span className="font-bold text-base leading-tight block tracking-tight">
+                Tanums <span className="text-[var(--brand)]">Näringsliv</span>
+              </span>
+              <span className="text-[10px] text-[var(--muted)] leading-tight block tracking-[0.15em] uppercase">Hela Tanum. Ett näringsliv.</span>
             </div>
           </a>
 
@@ -55,7 +55,7 @@ export default function Header() {
                 <a href="/admin/logga-in" className="text-sm text-[var(--muted)] hover:text-[var(--primary)] transition-colors">Logga in</a>
                 <a
                   href="/admin/logga-in"
-                  className="text-sm px-4 py-2 rounded-lg bg-[var(--primary)] text-white font-medium hover:bg-[var(--primary-dark)] transition-colors"
+                  className="text-sm px-4 py-2 rounded-lg bg-[var(--brand)] text-white font-medium hover:bg-[var(--brand-hover)] transition-colors"
                 >
                   Registrera ditt företag →
                 </a>
@@ -85,7 +85,7 @@ export default function Header() {
           ) : (
             <>
               <a href="/admin/logga-in" onClick={() => setOpen(false)} className="text-sm text-[var(--muted)] py-2">Logga in</a>
-              <a href="/admin/logga-in" onClick={() => setOpen(false)} className="text-sm px-4 py-2 rounded-lg bg-[var(--primary)] text-white font-medium text-center">
+              <a href="/admin/logga-in" onClick={() => setOpen(false)} className="text-sm px-4 py-2 rounded-lg bg-[var(--brand)] text-white font-medium text-center">
                 Lägg till företag – gratis
               </a>
             </>

@@ -16,7 +16,7 @@ export default function EmptyState({ icon, title, subtitle, action }: Props) {
       {action && (
         <a
           href={action.href}
-          className="inline-block mt-5 px-5 py-2.5 rounded-lg bg-[var(--primary)] text-white text-sm font-medium hover:bg-[var(--primary-dark)] transition-colors"
+          className="inline-block mt-5 px-5 py-2.5 rounded-lg bg-[var(--brand)] text-white text-sm font-medium hover:bg-[var(--brand-hover)] transition-colors"
         >
           {action.label} →
         </a>

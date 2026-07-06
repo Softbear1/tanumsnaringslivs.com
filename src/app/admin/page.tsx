@@ -68,7 +68,7 @@ export default async function AdminPage() {
 
   return (
     <div className="min-h-screen bg-[var(--bg)]">
-      <header className="bg-[var(--primary)] text-white shadow">
+      <header className="bg-[var(--brand)] text-white shadow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Link
@@ -102,8 +102,8 @@ export default async function AdminPage() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         {/* Kampanj-info: gratis just nu */}
-        <div className="mb-8 rounded-2xl border-2 border-amber-300 bg-gradient-to-r from-amber-50 to-white p-5 flex items-start gap-4">
-          <span className="flex items-center justify-center w-10 h-10 rounded-xl bg-amber-400 text-white shadow-sm shrink-0">
+        <div className="mb-8 rounded-2xl border-2 border-[var(--boost-border)] bg-gradient-to-r from-[var(--boost-bg)] to-white p-5 flex items-start gap-4">
+          <span className="flex items-center justify-center w-10 h-10 rounded-xl bg-[var(--boost-bg)] text-[var(--sol-500)] shadow-sm shrink-0">
             <Zap className="w-5 h-5 fill-current" />
           </span>
           <div>
@@ -111,7 +111,7 @@ export default async function AdminPage() {
             <p className="text-sm text-[var(--muted)] leading-relaxed">
               Det kostar ingenting att skapa annonser och blixterbjudanden just nu — men så kommer det inte
               vara för alltid. Passa på att bygga upp din synlighet medan det är gratis!{" "}
-              <a href="/synas-mer" className="font-medium text-amber-700 hover:underline">
+              <a href="/synas-mer" className="font-medium text-[var(--boost)] hover:underline">
                 Läs om vad som kommer →
               </a>
             </p>
@@ -130,20 +130,20 @@ export default async function AdminPage() {
             <div className="text-3xl font-bold text-[var(--primary)]">{siteViews ?? 0}</div>
             <p className="text-xs text-[var(--muted)] mt-1">Hela katalogen, senaste 30 dagarna</p>
           </div>
-          <div className="rounded-2xl border border-amber-200 bg-amber-50/60 p-5">
-            <div className="flex items-center gap-2 mb-2 text-amber-700">
+          <div className="rounded-2xl border border-[var(--boost-border)] bg-[var(--boost-bg)] p-5">
+            <div className="flex items-center gap-2 mb-2 text-[var(--boost)]">
               <MousePointerClick className="w-4 h-4" />
-              <span className="text-xs font-semibold uppercase tracking-wide text-amber-700/80">
+              <span className="text-xs font-semibold uppercase tracking-wide text-[var(--boost)]">
                 Klick på dina annonser
               </span>
             </div>
             <div className="text-3xl font-bold text-[var(--primary)]">{adClicks}</div>
             <p className="text-xs text-[var(--muted)] mt-1">Senaste 30 dagarna</p>
           </div>
-          <div className="rounded-2xl border border-amber-200 bg-amber-50/60 p-5">
-            <div className="flex items-center gap-2 mb-2 text-amber-700">
-              <Zap className="w-4 h-4 fill-amber-500" />
-              <span className="text-xs font-semibold uppercase tracking-wide text-amber-700/80">
+          <div className="rounded-2xl border border-[var(--boost-border)] bg-[var(--boost-bg)] p-5">
+            <div className="flex items-center gap-2 mb-2 text-[var(--boost)]">
+              <Zap className="w-4 h-4 fill-[var(--sol-500)]" />
+              <span className="text-xs font-semibold uppercase tracking-wide text-[var(--boost)]">
                 Klick på blixterbjudanden
               </span>
             </div>
@@ -163,7 +163,7 @@ export default async function AdminPage() {
           </div>
           <Link
             href="/admin/foretag/ny"
-            className="inline-flex items-center gap-2 bg-[var(--primary)] text-white px-4 py-2.5 rounded-xl font-medium hover:bg-[var(--primary)]/90 transition-colors text-sm"
+            className="inline-flex items-center gap-2 bg-[var(--brand)] text-white px-4 py-2.5 rounded-xl font-medium hover:bg-[var(--brand-hover)] transition-colors text-sm"
           >
             <Plus className="w-4 h-4" />
             Lägg till företag
@@ -186,7 +186,7 @@ export default async function AdminPage() {
                   {/* Header */}
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-11 h-11 rounded-xl bg-[var(--primary)] text-white flex items-center justify-center font-bold text-sm shrink-0">
+                      <div className="w-11 h-11 rounded-xl bg-[var(--brand)] text-white flex items-center justify-center font-bold text-sm shrink-0">
                         {biz.initials}
                       </div>
                       <div>
@@ -221,23 +221,23 @@ export default async function AdminPage() {
                   <div className="flex gap-2 flex-wrap">
                     <Link
                       href={`/admin/foretag/${biz.id}`}
-                      className="flex items-center gap-1.5 text-sm py-2 px-3 bg-[var(--primary)]/10 text-[var(--primary)] rounded-lg hover:bg-[var(--primary)]/20 transition-colors font-medium"
+                      className="flex items-center gap-1.5 text-sm py-2 px-3 bg-[var(--accent-light)] text-[var(--primary)] rounded-lg hover:bg-[var(--accent-light)] transition-colors font-medium"
                     >
                       <Pencil className="w-3.5 h-3.5" />
                       Redigera
                     </Link>
                     <Link
                       href={`/admin/foretag/${biz.id}#annonser`}
-                      className="flex items-center gap-1.5 text-sm py-2 px-3 bg-amber-50 text-amber-700 border border-amber-200 rounded-lg hover:bg-amber-100 transition-colors font-medium"
+                      className="flex items-center gap-1.5 text-sm py-2 px-3 bg-[var(--boost-bg)] text-[var(--boost)] border border-[var(--boost-border)] rounded-lg hover:bg-[var(--boost-border)] transition-colors font-medium"
                     >
                       <Megaphone className="w-3.5 h-3.5" />
                       Annonser
                     </Link>
                     <Link
                       href={`/admin/foretag/${biz.id}#blixterbjudanden`}
-                      className="flex items-center gap-1.5 text-sm py-2 px-3 bg-amber-50 text-amber-700 border border-amber-200 rounded-lg hover:bg-amber-100 transition-colors font-medium"
+                      className="flex items-center gap-1.5 text-sm py-2 px-3 bg-[var(--boost-bg)] text-[var(--boost)] border border-[var(--boost-border)] rounded-lg hover:bg-[var(--boost-border)] transition-colors font-medium"
                     >
-                      <Zap className="w-3.5 h-3.5 fill-amber-500" />
+                      <Zap className="w-3.5 h-3.5 fill-[var(--sol-500)]" />
                       Blixterbjudanden
                     </Link>
                     <Link
@@ -274,7 +274,7 @@ export default async function AdminPage() {
           </div>
         ) : (
           <div className="text-center py-16 bg-white rounded-2xl border border-[var(--border)]">
-            <div className="w-16 h-16 bg-[var(--primary)]/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 bg-[var(--accent-light)] rounded-2xl flex items-center justify-center mx-auto mb-4">
               <svg className="w-8 h-8 text-[var(--primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
               </svg>
@@ -283,7 +283,7 @@ export default async function AdminPage() {
             <p className="text-[var(--muted)] mb-6 text-sm">Lägg till ditt första företag för att komma igång.</p>
             <Link
               href="/admin/foretag/ny"
-              className="inline-flex items-center gap-2 bg-[var(--primary)] text-white px-6 py-2.5 rounded-xl font-medium hover:bg-[var(--primary)]/90 transition-colors"
+              className="inline-flex items-center gap-2 bg-[var(--brand)] text-white px-6 py-2.5 rounded-xl font-medium hover:bg-[var(--brand-hover)] transition-colors"
             >
               <Plus className="w-4 h-4" />
               Lägg till företag
@@ -293,9 +293,9 @@ export default async function AdminPage() {
 
         {/* Ads CTA */}
         {businesses && businesses.length > 0 && (
-          <div className="mt-8 rounded-2xl border-2 border-amber-200 bg-amber-50/60 p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4">
-            <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0">
-              <Megaphone className="w-5 h-5 text-amber-700" />
+          <div className="mt-8 rounded-2xl border-2 border-[var(--boost-border)] bg-[var(--boost-bg)] p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <div className="w-10 h-10 rounded-xl bg-[var(--boost-border)] flex items-center justify-center flex-shrink-0">
+              <Megaphone className="w-5 h-5 text-[var(--boost)]" />
             </div>
             <div className="flex-1">
               <h3 className="font-semibold text-[var(--primary)] mb-0.5">Vill du synas extra?</h3>
@@ -308,7 +308,7 @@ export default async function AdminPage() {
                 <Link
                   key={biz.id}
                   href={`/admin/foretag/${biz.id}#annonser`}
-                  className="inline-flex items-center gap-1.5 text-sm font-medium text-amber-800 border border-amber-300 hover:bg-amber-100 transition-colors px-4 py-2 rounded-xl whitespace-nowrap"
+                  className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--boost)] border border-[var(--boost-border)] hover:bg-[var(--boost-border)] transition-colors px-4 py-2 rounded-xl whitespace-nowrap"
                 >
                   <Megaphone className="w-3.5 h-3.5" />
                   {businesses.length > 1 ? `Annonsera för ${biz.name}` : "Skapa annons"}

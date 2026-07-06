@@ -1,17 +1,16 @@
-import RockArtLogo from "./RockArtLogo";
+import { TnIcon } from "./Logo";
 
 export default function Footer() {
   return (
-    <footer className="bg-[var(--primary)] text-white/70">
+    <footer className="bg-[var(--hav-900)] text-white/70">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="flex flex-col md:flex-row justify-between gap-8">
           <div className="max-w-sm">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)" }}>
-                <RockArtLogo size={20} color="rgba(255,255,255,0.75)" />
-              </div>
+            <div className="flex items-center gap-3 mb-1.5">
+              <TnIcon size={32} dark />
               <span className="font-bold text-white">Tanums Näringsliv</span>
             </div>
+            <p className="text-[11px] uppercase tracking-[0.15em] text-white/50 mb-3">Hela Tanum. Ett näringsliv.</p>
             <p className="text-sm leading-relaxed mb-5">
               En lokal samlingsplats där företag i Tanum syns och hittas av kunder i närområdet —
               gratis att vara med på, byggd för bygden.

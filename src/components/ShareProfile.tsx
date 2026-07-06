@@ -48,7 +48,7 @@ export default function ShareProfile({ businessId, businessName }: Props) {
             />
             <button
               onClick={copy}
-              className="inline-flex items-center gap-1.5 text-sm font-medium px-3 py-2 rounded-lg bg-[var(--primary)] text-white hover:bg-[var(--primary-dark)] transition-colors shrink-0"
+              className="inline-flex items-center gap-1.5 text-sm font-medium px-3 py-2 rounded-lg bg-[var(--brand)] text-white hover:bg-[var(--brand-hover)] transition-colors shrink-0"
             >
               {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
               {copied ? "Kopierad" : "Kopiera"}

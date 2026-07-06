@@ -95,7 +95,7 @@ export default function ClaimClient({ businessId, hasClaimEmail }: Props) {
           <button
             onClick={handleSend}
             disabled={loading}
-            className="w-full py-3 px-6 bg-[var(--primary)] text-white rounded-xl font-semibold hover:bg-[var(--primary)]/90 transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+            className="w-full py-3 px-6 bg-[var(--brand)] text-white rounded-xl font-semibold hover:bg-[var(--brand-hover)] transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
           >
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
             Skicka inloggningslänk
@@ -134,7 +134,7 @@ export default function ClaimClient({ businessId, hasClaimEmail }: Props) {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 px-6 bg-[var(--primary)] text-white rounded-xl font-semibold hover:bg-[var(--primary)]/90 transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+            className="w-full py-3 px-6 bg-[var(--brand)] text-white rounded-xl font-semibold hover:bg-[var(--brand-hover)] transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
           >
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
             Skicka begäran

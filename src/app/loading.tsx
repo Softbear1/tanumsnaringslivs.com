@@ -8,7 +8,7 @@ export default function Loading() {
       <Header />
       <main className="flex-1" aria-busy="true" aria-label="Laddar innehåll">
         {/* Hero placeholder */}
-        <section className="bg-[var(--primary)] px-4 sm:px-6 lg:px-8 py-20 md:py-28">
+        <section className="bg-[var(--brand)] px-4 sm:px-6 lg:px-8 py-20 md:py-28">
           <div className="max-w-7xl mx-auto">
             <div className="max-w-2xl space-y-4">
               <Skeleton className="h-7 w-44 rounded-full !bg-white/10" />

@@ -36,7 +36,7 @@ export default function CategoryGrid({ categories, businesses, selected, onSelec
           className={clsx(
             "flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-200 group",
             selected === null
-              ? "border-[var(--primary)] bg-[var(--primary)] text-white shadow-md"
+              ? "border-[var(--brand)] bg-[var(--brand)] text-white shadow-md"
               : "border-[var(--border)] bg-white text-[var(--muted)] hover:border-[var(--primary)]/30 hover:text-[var(--primary)] hover:shadow-sm card-shadow"
           )}
         >
@@ -54,7 +54,7 @@ export default function CategoryGrid({ categories, businesses, selected, onSelec
               className={clsx(
                 "flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-200 group",
                 isActive
-                  ? "border-[var(--primary)] bg-[var(--primary)] text-white shadow-md scale-[1.02]"
+                  ? "border-[var(--brand)] bg-[var(--brand)] text-white shadow-md scale-[1.02]"
                   : "border-[var(--border)] bg-white hover:border-[var(--primary)]/30 hover:shadow-sm hover:scale-[1.01] card-shadow"
               )}
             >

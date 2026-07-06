@@ -148,7 +148,7 @@ export default function ChatPanel({ businesses, categories, ads, deals = [], gre
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="bg-[var(--primary)] text-white px-4 py-3 flex items-center justify-between shrink-0">
+      <div className="bg-[var(--brand)] text-white px-4 py-3 flex items-center justify-between shrink-0">
         <div className="text-sm font-semibold">Hitta rätt företag</div>
         {onClose && (
           <button onClick={onClose} className="text-white/70 hover:text-white transition-colors" aria-label="Stäng">
@@ -163,7 +163,7 @@ export default function ChatPanel({ businesses, categories, ads, deals = [], gre
           <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
             <div className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed ${
               msg.role === "user"
-                ? "bg-[var(--primary)] text-white rounded-tr-sm"
+                ? "bg-[var(--brand)] text-white rounded-tr-sm"
                 : "bg-[var(--bg)] text-[var(--primary)] rounded-tl-sm"
             }`}>
               {msg.content || (streaming && i === messages.length - 1 ? (
@@ -186,7 +186,7 @@ export default function ChatPanel({ businesses, categories, ads, deals = [], gre
                 href={`/foretag/${b.id}`}
                 className="flex items-center gap-3 bg-[var(--bg)] border border-[var(--border)] rounded-xl px-3 py-2.5 hover:border-[var(--accent)] transition-colors group"
               >
-                <div className="w-8 h-8 rounded-lg bg-[var(--primary)]/10 flex items-center justify-center text-xs font-bold shrink-0 text-[var(--primary)]">
+                <div className="w-8 h-8 rounded-lg bg-[var(--accent-light)] flex items-center justify-center text-xs font-bold shrink-0 text-[var(--primary)]">
                   {b.initials}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -214,7 +214,7 @@ export default function ChatPanel({ businesses, categories, ads, deals = [], gre
           className="flex-1 px-3.5 py-2.5 rounded-xl border border-[var(--border)] text-[16px] text-[var(--primary)] placeholder:text-[var(--muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)] disabled:opacity-60"
         />
         <button onClick={handleSend} disabled={!input.trim() || streaming}
-          className="p-2.5 bg-[var(--primary)] text-white rounded-xl hover:bg-[var(--primary)]/90 transition-colors disabled:opacity-40">
+          className="p-2.5 bg-[var(--brand)] text-white rounded-xl hover:bg-[var(--brand-hover)] transition-colors disabled:opacity-40">
           <Send className="w-4 h-4" />
         </button>
       </div>

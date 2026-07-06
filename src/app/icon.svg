@@ -1,0 +1,10 @@
+<svg viewBox="0 0 180 132" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Tanums Näringsliv">
+  <defs>
+    <clipPath id="tn-sea-icon"><rect x="0" y="0" width="180" height="112"/></clipPath>
+  </defs>
+  <g clip-path="url(#tn-sea-icon)">
+    <circle fill="#E8A13C" cx="118" cy="62" r="26"/>
+    <path fill="#C4877A" d="M 2 112 C 12 66, 56 44, 90 44 C 124 44, 108 78, 136 96 C 148 104, 162 108, 174 112 Z"/>
+  </g>
+  <line stroke="#16657A" stroke-width="6" stroke-linecap="round" x1="4" y1="114" x2="176" y2="114"/>
+</svg>

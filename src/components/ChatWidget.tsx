@@ -43,7 +43,7 @@ export default function ChatWidget({ businesses, categories, ads, deals, greetin
       {/* Floating button — hidden while the hero chat is in view */}
       <button
         onClick={() => setOpen(true)}
-        className={`fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 flex items-center gap-3 max-w-[calc(100vw-2rem)] bg-[var(--primary)] text-white pl-4 pr-5 py-3 rounded-2xl shadow-lg hover:bg-[var(--primary)]/90 hover:scale-[1.02] transition-all duration-200 ${open || heroVisible ? "opacity-0 pointer-events-none" : "opacity-100"}`}
+        className={`fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 flex items-center gap-3 max-w-[calc(100vw-2rem)] bg-[var(--brand)] text-white pl-4 pr-5 py-3 rounded-2xl shadow-lg hover:bg-[var(--brand-hover)] hover:scale-[1.02] transition-all duration-200 ${open || heroVisible ? "opacity-0 pointer-events-none" : "opacity-100"}`}
         aria-label="Chatta med oss – hitta rätt företag"
       >
         <div className="relative shrink-0">

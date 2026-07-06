@@ -87,7 +87,7 @@ export default function SuperBusinessTable({
               <tr key={b.id} className={busyId === b.id ? "opacity-50" : ""}>
                 <td className="px-4 py-3 font-medium text-[var(--primary)]">
                   {b.name}
-                  {b.boosted && <span className="ml-2 text-[10px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full">Boost</span>}
+                  {b.boosted && <span className="ml-2 text-[10px] bg-[var(--boost-border)] text-[var(--boost)] px-1.5 py-0.5 rounded-full">Boost</span>}
                   {!b.owner_id && <span className="ml-2 text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-full">Ingen ägare</span>}
                 </td>
                 <td className="px-4 py-3 text-[var(--muted)] hidden sm:table-cell">{catName[b.category_id] ?? b.category_id}</td>

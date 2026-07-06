@@ -117,7 +117,7 @@ export default function AdminChatPanel<T>({
           <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
             <div className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed ${
               msg.role === "user"
-                ? "bg-[var(--primary)] text-white rounded-tr-sm"
+                ? "bg-[var(--brand)] text-white rounded-tr-sm"
                 : "bg-[var(--bg)] text-[var(--primary)] rounded-tl-sm"
             }`}>
               {msg.content || (streaming && i === messages.length - 1 ? (
@@ -146,7 +146,7 @@ export default function AdminChatPanel<T>({
         <button
           onClick={handleSend}
           disabled={!input.trim() || streaming}
-          className="p-2.5 bg-[var(--primary)] text-white rounded-xl hover:bg-[var(--primary)]/90 transition-colors disabled:opacity-40"
+          className="p-2.5 bg-[var(--brand)] text-white rounded-xl hover:bg-[var(--brand-hover)] transition-colors disabled:opacity-40"
         >
           {streaming ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
         </button>

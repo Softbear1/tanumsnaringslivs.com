@@ -9,9 +9,9 @@ const TYPE_LABELS: Record<string, string> = {
 
 const TYPE_COLORS: Record<string, string> = {
   sommarjobb: "bg-[var(--boost-bg)] text-[var(--boost)]",
-  deltid: "bg-blue-100 text-blue-800",
-  heltid: "bg-green-100 text-green-800",
-  praktik: "bg-purple-100 text-purple-800",
+  deltid: "bg-[var(--accent-light)] text-[var(--brand-hover)]",
+  heltid: "bg-[var(--success-bg)] text-[var(--success)]",
+  praktik: "bg-[var(--granit-50)] text-[var(--granit-700)]",
 };
 
 interface Job {

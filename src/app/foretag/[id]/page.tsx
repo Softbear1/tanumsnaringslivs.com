@@ -162,8 +162,8 @@ export default async function ForetagPage({ params }: PageProps) {
               {/* Today's flash deal banner */}
               {todayDeal && (
                 <div className="mb-8 rounded-2xl bg-[var(--boost-bg)] border border-[var(--boost-border)] p-4 flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-[var(--boost)] flex items-center justify-center shrink-0 mt-0.5">
-                    <Zap className="w-4 h-4 text-white fill-white" />
+                  <div className="w-8 h-8 rounded-lg bg-[var(--boost-border)] flex items-center justify-center shrink-0 mt-0.5">
+                    <Zap className="w-4 h-4 text-[var(--sol-500)] fill-[var(--sol-500)]" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-0.5">

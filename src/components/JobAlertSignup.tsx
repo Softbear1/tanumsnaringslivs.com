@@ -23,7 +23,7 @@ export default function JobAlertSignup() {
   }
 
   return (
-    <section className="bg-[var(--primary)] text-white py-10">
+    <section className="bg-[var(--hav-900)] text-white py-10">
       <div className="max-w-xl mx-auto px-4 sm:px-6 text-center">
         <div className="flex items-center justify-center gap-2 mb-3">
           <Bell className="w-5 h-5 opacity-80" />

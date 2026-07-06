@@ -4,6 +4,7 @@ import { Search, Wand2 } from "lucide-react";
 import type { SeasonTheme } from "@/lib/season";
 import type { Business, Category } from "@/lib/data";
 import type { Ad } from "./AdCard";
+import { TnIcon } from "./Logo";
 
 const PLACEHOLDERS = [
   "Sök företag eller kategori...",
@@ -40,39 +41,6 @@ type Props = {
 };
 
 // Pre-generate stable random values to avoid hydration issues
-/** Hällristnings-solhjul — samma komponent som i headern, kopieras hit för att undvika cirkulär import */
-function RockArtLogo({ size = 24, color = "currentColor" }: { size?: number; color?: string }) {
-  const s = size;
-  const cx = s / 2;
-  const cy = s / 2;
-  const r = s * 0.28;
-  const sw = s * 0.075;
-  return (
-    <svg width={s} height={s} viewBox={`0 0 ${s} ${s}`} fill="none" aria-hidden="true">
-      <circle cx={cx} cy={cy - s * 0.06} r={r} stroke={color} strokeWidth={sw} />
-      {[0, 45, 90, 135, 180, 225, 270, 315].map((deg) => {
-        const rad = (deg * Math.PI) / 180;
-        const x1 = cx + Math.cos(rad) * r;
-        const y1 = (cy - s * 0.06) + Math.sin(rad) * r;
-        const x2 = cx + Math.cos(rad) * (r + s * 0.14);
-        const y2 = (cy - s * 0.06) + Math.sin(rad) * (r + s * 0.14);
-        return <line key={deg} x1={x1} y1={y1} x2={x2} y2={y2} stroke={color} strokeWidth={sw} strokeLinecap="round" />;
-      })}
-      <circle cx={cx - s * 0.26} cy={s * 0.72} r={sw * 0.9} fill={color} />
-      <line x1={cx - s * 0.26} y1={s * 0.74} x2={cx - s * 0.26} y2={s * 0.87} stroke={color} strokeWidth={sw} strokeLinecap="round" />
-      <line x1={cx - s * 0.26} y1={s * 0.87} x2={cx - s * 0.32} y2={s * 0.96} stroke={color} strokeWidth={sw} strokeLinecap="round" />
-      <line x1={cx - s * 0.26} y1={s * 0.87} x2={cx - s * 0.20} y2={s * 0.96} stroke={color} strokeWidth={sw} strokeLinecap="round" />
-      <line x1={cx - s * 0.26} y1={s * 0.79} x2={cx - s * 0.34} y2={s * 0.84} stroke={color} strokeWidth={sw} strokeLinecap="round" />
-      <line x1={cx - s * 0.26} y1={s * 0.79} x2={cx - s * 0.18} y2={s * 0.84} stroke={color} strokeWidth={sw} strokeLinecap="round" />
-      <circle cx={cx + s * 0.26} cy={s * 0.72} r={sw * 0.9} fill={color} />
-      <line x1={cx + s * 0.26} y1={s * 0.74} x2={cx + s * 0.26} y2={s * 0.87} stroke={color} strokeWidth={sw} strokeLinecap="round" />
-      <line x1={cx + s * 0.26} y1={s * 0.87} x2={cx + s * 0.20} y2={s * 0.96} stroke={color} strokeWidth={sw} strokeLinecap="round" />
-      <line x1={cx + s * 0.26} y1={s * 0.87} x2={cx + s * 0.32} y2={s * 0.96} stroke={color} strokeWidth={sw} strokeLinecap="round" />
-      <line x1={cx + s * 0.26} y1={s * 0.79} x2={cx + s * 0.18} y2={s * 0.84} stroke={color} strokeWidth={sw} strokeLinecap="round" />
-      <line x1={cx + s * 0.26} y1={s * 0.79} x2={cx + s * 0.34} y2={s * 0.84} stroke={color} strokeWidth={sw} strokeLinecap="round" />
-    </svg>
-  );
-}
 
 /**
  * Subtil hällristningsbakgrund — tunna etsade linjer som ekar berghällens
@@ -406,7 +374,7 @@ export default function Hero({ search, onSearch, onStartChat, theme }: Props) {
   }
 
   return (
-    <section id="hero" className="relative overflow-hidden bg-[var(--primary)] text-white">
+    <section id="hero" className="relative overflow-hidden bg-[var(--hav-900)] text-white">
       {/* Subtil hällristningsbakgrund — etsad sten-känsla */}
       <RockArtBackground />
 
@@ -424,17 +392,11 @@ export default function Hero({ search, onSearch, onStartChat, theme }: Props) {
         {/* Logga + rubrik — sammanhållen enhet */}
         <div className="flex items-start justify-between mb-7">
           <div className="flex items-center gap-4">
-            {/* Hällristningslogga i hero-format */}
-            <div
-              className="flex-shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center"
-              style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" }}
-            >
-              <RockArtLogo size={38} color="rgba(255,255,255,0.90)" />
-            </div>
+            <TnIcon size={56} dark />
             <div>
               <h1 className="text-3xl sm:text-4xl font-bold text-white leading-none tracking-tight">Tanum</h1>
-              <p className="text-sm sm:text-base text-white/55 font-normal mt-1 leading-snug">
-                Näringsliv, hantverk &amp; upplevelser
+              <p className="text-sm sm:text-base text-white/55 font-normal mt-1 leading-snug uppercase tracking-[0.15em]">
+                Hela Tanum. Ett näringsliv.
               </p>
             </div>
           </div>

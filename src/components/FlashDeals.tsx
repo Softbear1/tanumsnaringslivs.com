@@ -81,7 +81,7 @@ export default function FlashDeals({ deals, teasers, endsAt }: Props) {
       <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ${deals.length > 0 ? "py-6" : "py-4 sm:py-6"}`}>
         {/* Header */}
         <div className="flex items-center gap-2 mb-4">
-          <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-[var(--boost)] text-white shadow-sm">
+          <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-[var(--boost-bg)] text-[var(--sol-500)] shadow-sm">
             <Zap className="w-4 h-4 fill-current" />
           </span>
           <h2 className="text-lg font-bold text-[var(--primary)]">Blixterbjudanden</h2>
@@ -102,7 +102,7 @@ export default function FlashDeals({ deals, teasers, endsAt }: Props) {
                 onClick={() => trackOfferClick(deal.id, deal.business_id, "flash")}
                 className="group relative bg-white rounded-2xl border border-[var(--boost-border)] p-4 hover:border-[var(--boost)] hover:shadow-md transition-all overflow-hidden"
               >
-                <div className="absolute top-0 right-0 bg-[var(--boost)] text-white text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-bl-lg">
+                <div className="absolute top-0 right-0 bg-[var(--boost-border)] text-[var(--boost)] text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-bl-lg">
                   Blixt
                 </div>
                 <div className="flex items-center gap-2.5 mb-2">

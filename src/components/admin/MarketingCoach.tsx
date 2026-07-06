@@ -107,7 +107,7 @@ export default function MarketingCoach({ businessNames }: Props) {
       {/* Flytande knapp */}
       <button
         onClick={() => setOpen(true)}
-        className={`fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 flex items-center gap-3 max-w-[calc(100vw-2rem)] bg-[var(--primary)] text-white pl-3 pr-5 py-2.5 rounded-2xl shadow-lg hover:bg-[var(--primary)]/90 hover:scale-[1.02] transition-all duration-200 ${open ? "opacity-0 pointer-events-none" : "opacity-100"}`}
+        className={`fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 flex items-center gap-3 max-w-[calc(100vw-2rem)] bg-[var(--brand)] text-white pl-3 pr-5 py-2.5 rounded-2xl shadow-lg hover:bg-[var(--brand-hover)] hover:scale-[1.02] transition-all duration-200 ${open ? "opacity-0 pointer-events-none" : "opacity-100"}`}
         aria-label="Öppna Elias – din marknadsföringscoach"
       >
         <span className="relative shrink-0 w-9 h-9 rounded-full bg-white/15 flex items-center justify-center font-semibold">
@@ -127,7 +127,7 @@ export default function MarketingCoach({ businessNames }: Props) {
           style={{ maxHeight: "min(600px, calc(100vh - 48px))" }}
         >
           {/* Header */}
-          <div className="flex items-center justify-between gap-3 bg-[var(--primary)] text-white px-4 py-3">
+          <div className="flex items-center justify-between gap-3 bg-[var(--brand)] text-white px-4 py-3">
             <div className="flex items-center gap-3 min-w-0">
               <span className="w-9 h-9 rounded-full bg-white/15 flex items-center justify-center font-semibold shrink-0">E</span>
               <div className="min-w-0">
@@ -150,7 +150,7 @@ export default function MarketingCoach({ businessNames }: Props) {
               <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
                 <div className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed whitespace-pre-wrap ${
                   msg.role === "user"
-                    ? "bg-[var(--primary)] text-white rounded-tr-sm"
+                    ? "bg-[var(--brand)] text-white rounded-tr-sm"
                     : "bg-[var(--bg)] text-[var(--primary)] rounded-tl-sm"
                 }`}>
                   {msg.content || (streaming && i === messages.length - 1 ? (
@@ -200,7 +200,7 @@ export default function MarketingCoach({ businessNames }: Props) {
               <button
                 onClick={() => send(input)}
                 disabled={!input.trim() || streaming}
-                className="p-2.5 bg-[var(--primary)] text-white rounded-xl hover:bg-[var(--primary)]/90 transition-colors disabled:opacity-40"
+                className="p-2.5 bg-[var(--brand)] text-white rounded-xl hover:bg-[var(--brand-hover)] transition-colors disabled:opacity-40"
               >
                 {streaming ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
               </button>

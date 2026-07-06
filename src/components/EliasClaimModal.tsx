@@ -120,7 +120,7 @@ export default function EliasClaimModal({ businessId, businessName, onClose }: P
         style={{ height: "100dvh", maxHeight: "100dvh" }}
       >
         {/* Header */}
-        <div className="bg-[var(--primary)] text-white px-4 py-3 flex items-center gap-3 shrink-0 sm:rounded-t-2xl">
+        <div className="bg-[var(--brand)] text-white px-4 py-3 flex items-center gap-3 shrink-0 sm:rounded-t-2xl">
           <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-sm font-bold shrink-0">E</div>
           <div className="flex-1">
             <div className="text-sm font-semibold leading-tight">Elias</div>
@@ -136,11 +136,11 @@ export default function EliasClaimModal({ businessId, businessName, onClose }: P
           {messages.map((msg, i) => (
             <div key={i} className={`flex ${msg.from === "user" ? "justify-end" : "justify-start gap-2"}`}>
               {msg.from === "elias" && (
-                <div className="w-7 h-7 rounded-full bg-[var(--primary)] text-white flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">E</div>
+                <div className="w-7 h-7 rounded-full bg-[var(--brand)] text-white flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">E</div>
               )}
               <div className={`max-w-[80%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed whitespace-pre-line ${
                 msg.from === "user"
-                  ? "bg-[var(--primary)] text-white rounded-tr-sm"
+                  ? "bg-[var(--brand)] text-white rounded-tr-sm"
                   : "bg-white text-[var(--primary)] rounded-tl-sm shadow-sm"
               }`}>
                 {msg.text}
@@ -150,7 +150,7 @@ export default function EliasClaimModal({ businessId, businessName, onClose }: P
 
           {typing && (
             <div className="flex gap-2 items-start">
-              <div className="w-7 h-7 rounded-full bg-[var(--primary)] text-white flex items-center justify-center text-xs font-bold shrink-0">E</div>
+              <div className="w-7 h-7 rounded-full bg-[var(--brand)] text-white flex items-center justify-center text-xs font-bold shrink-0">E</div>
               <div className="bg-white rounded-2xl rounded-tl-sm px-3.5 py-3 shadow-sm flex gap-1 items-center">
                 <span className="w-1.5 h-1.5 rounded-full bg-[var(--muted)] animate-bounce" style={{ animationDelay: "0ms" }} />
                 <span className="w-1.5 h-1.5 rounded-full bg-[var(--muted)] animate-bounce" style={{ animationDelay: "150ms" }} />
@@ -175,7 +175,7 @@ export default function EliasClaimModal({ businessId, businessName, onClose }: P
           {step === "pitch" && !typing && messages.length > 0 && (
             <button
               onClick={handleStart}
-              className="w-full py-3 bg-[var(--primary)] text-white rounded-xl font-semibold hover:bg-[var(--primary)]/90 transition-colors text-sm"
+              className="w-full py-3 bg-[var(--brand)] text-white rounded-xl font-semibold hover:bg-[var(--brand-hover)] transition-colors text-sm"
             >
               Ja, kör! →
             </button>
@@ -196,7 +196,7 @@ export default function EliasClaimModal({ businessId, businessName, onClose }: P
               <button
                 onClick={step === "email" ? handleEmailSubmit : handleOrgNrSubmit}
                 disabled={!canSubmit}
-                className="p-2.5 bg-[var(--primary)] text-white rounded-xl hover:bg-[var(--primary)]/90 transition-colors disabled:opacity-40"
+                className="p-2.5 bg-[var(--brand)] text-white rounded-xl hover:bg-[var(--brand-hover)] transition-colors disabled:opacity-40"
               >
                 <Send className="w-4 h-4" />
               </button>
@@ -213,7 +213,7 @@ export default function EliasClaimModal({ businessId, businessName, onClose }: P
           )}
 
           {step === "sent" && (
-            <button onClick={onClose} className="w-full py-3 bg-[var(--primary)] text-white rounded-xl font-semibold hover:bg-[var(--primary)]/90 transition-colors text-sm flex items-center justify-center gap-2">
+            <button onClick={onClose} className="w-full py-3 bg-[var(--brand)] text-white rounded-xl font-semibold hover:bg-[var(--brand-hover)] transition-colors text-sm flex items-center justify-center gap-2">
               <BadgeCheck className="w-4 h-4" /> Stäng
             </button>
           )}

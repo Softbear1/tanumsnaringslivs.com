@@ -21,7 +21,7 @@ const JOB_TYPE_LABELS: Record<string, string> = {
 };
 
 const JOB_TYPE_COLORS: Record<string, string> = {
-  sommarjobb: "bg-amber-100 text-amber-800",
+  sommarjobb: "bg-[var(--boost-border)] text-[var(--boost)]",
   deltid: "bg-blue-100 text-blue-800",
   heltid: "bg-green-100 text-green-800",
   praktik: "bg-purple-100 text-purple-800",
@@ -86,7 +86,7 @@ function JobDetail({ id }: { id: string }) {
         </Link>
 
         <div className="bg-white border border-[var(--border)] rounded-2xl overflow-hidden">
-          <div className="bg-[var(--primary)] text-white px-6 py-8">
+          <div className="bg-[var(--brand)] text-white px-6 py-8">
             <span className="text-xs font-medium uppercase tracking-wider opacity-70 block mb-2">
               {JOB_TYPE_LABELS[job.job_type] ?? job.job_type}
             </span>
@@ -120,7 +120,7 @@ function JobDetail({ id }: { id: string }) {
             <div className="pt-4 border-t border-[var(--border)]">
               {job.apply_url ? (
                 <a href={job.apply_url} target="_blank" rel="noopener noreferrer"
-                  className="inline-block px-6 py-3 rounded-xl bg-[var(--primary)] text-white font-medium hover:bg-[var(--primary)]/90 transition-colors">
+                  className="inline-block px-6 py-3 rounded-xl bg-[var(--brand)] text-white font-medium hover:bg-[var(--brand-hover)] transition-colors">
                   Ansök via arbetsgivarens sida →
                 </a>
               ) : sent ? (
@@ -157,7 +157,7 @@ function JobDetail({ id }: { id: string }) {
                     </div>
                     {applyError && <p className="text-sm text-[var(--error)] bg-[var(--error-bg)] border border-[var(--error-border)] rounded-lg px-3 py-2">{applyError}</p>}
                     <button type="submit" disabled={sending}
-                      className="w-full py-3 rounded-xl bg-[var(--primary)] text-white font-medium hover:bg-[var(--primary)]/90 transition-colors disabled:opacity-50">
+                      className="w-full py-3 rounded-xl bg-[var(--brand)] text-white font-medium hover:bg-[var(--brand-hover)] transition-colors disabled:opacity-50">
                       {sending ? "Skickar..." : "Skicka ansökan"}
                     </button>
                     <p className="text-xs text-[var(--muted)] text-center">Ansökan skickas till {job.apply_email}</p>
@@ -219,7 +219,7 @@ function JobBoard() {
   return (
     <div className="min-h-screen bg-[var(--bg)]">
       <Header />
-      <div className="bg-[var(--primary)] text-white py-12">
+      <div className="bg-[var(--brand)] text-white py-12">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
           <div className="flex items-center gap-3 mb-3">
             <Briefcase className="w-6 h-6 opacity-80" />
@@ -246,7 +246,7 @@ function JobBoard() {
             <option value="">Alla typer</option>
             {Object.entries(JOB_TYPE_LABELS).map(([v, label]) => <option key={v} value={v}>{label}</option>)}
           </select>
-          <button type="submit" className="px-5 py-2 rounded-lg bg-[var(--primary)] text-white text-sm font-medium hover:bg-[var(--primary)]/90 transition-colors">Sök</button>
+          <button type="submit" className="px-5 py-2 rounded-lg bg-[var(--brand)] text-white text-sm font-medium hover:bg-[var(--brand-hover)] transition-colors">Sök</button>
           {(ort || typ || q) && (
             <a href="/sommarjobb" className="px-4 py-2 rounded-lg border border-[var(--border)] text-sm text-[var(--muted)] hover:text-[var(--primary)] transition-colors">Rensa</a>
           )}

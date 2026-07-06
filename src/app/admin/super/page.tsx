@@ -59,10 +59,10 @@ export default async function SuperAdminPage() {
 
   return (
     <div className="min-h-screen bg-[var(--bg)]">
-      <header className="bg-[var(--primary)] text-white shadow">
+      <header className="bg-[var(--brand)] text-white shadow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <ShieldCheck className="w-5 h-5 text-amber-300" />
+            <ShieldCheck className="w-5 h-5 text-[var(--sol-500)]" />
             <span className="font-semibold text-sm">Super-admin</span>
             <Link href="/admin" className="text-white/60 hover:text-white text-sm underline">Min vanliga vy</Link>
           </div>

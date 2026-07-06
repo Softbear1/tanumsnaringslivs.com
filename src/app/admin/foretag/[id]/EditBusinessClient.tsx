@@ -390,14 +390,14 @@ export default function EditBusinessClient({ business, categories, ads, flashDea
 
   return (
     <div className="min-h-screen bg-[var(--background)]">
-      <header className="bg-[var(--primary)] text-white shadow">
+      <header className="bg-[var(--brand)] text-white shadow">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-4 flex items-center gap-4">
           <Link href={doneHref} className="text-white/70 hover:text-white transition-colors">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </Link>
-          <h1 className="font-semibold">Redigera företag{adminActions && <span className="ml-2 text-xs font-normal text-amber-300">(super-admin)</span>}</h1>
+          <h1 className="font-semibold">Redigera företag{adminActions && <span className="ml-2 text-xs font-normal text-[var(--sol-500)]">(super-admin)</span>}</h1>
         </div>
       </header>
 
@@ -442,7 +442,7 @@ export default function EditBusinessClient({ business, categories, ads, flashDea
         <div id="annonser" className="bg-white rounded-2xl border border-[var(--border)] shadow-sm p-6">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <Megaphone className="w-5 h-5 text-amber-600" />
+              <Megaphone className="w-5 h-5 text-[var(--boost)]" />
               <h2 className="font-semibold text-[var(--primary)]">Annonser</h2>
             </div>
             <div className="flex items-center gap-2">
@@ -471,7 +471,7 @@ export default function EditBusinessClient({ business, categories, ads, flashDea
           {ads.length > 0 && (
             <div className="space-y-3 mb-4">
               {ads.map((ad) => (
-                <div key={ad.id} className={`rounded-xl border p-4 ${ad.active ? "border-amber-200 bg-amber-50/50" : "border-gray-200 bg-gray-50 opacity-60"}`}>
+                <div key={ad.id} className={`rounded-xl border p-4 ${ad.active ? "border-[var(--boost-border)] bg-[var(--boost-bg)]/50" : "border-gray-200 bg-gray-50 opacity-60"}`}>
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-sm text-[var(--primary)] leading-snug">{ad.headline}</p>
@@ -610,7 +610,7 @@ export default function EditBusinessClient({ business, categories, ads, flashDea
                 <button
                   type="submit"
                   disabled={adSubmitting}
-                  className="flex-1 py-2 bg-[var(--primary)] text-white rounded-lg text-sm font-medium hover:bg-[var(--primary)]/90 transition-colors disabled:opacity-60"
+                  className="flex-1 py-2 bg-[var(--brand)] text-white rounded-lg text-sm font-medium hover:bg-[var(--brand-hover)] transition-colors disabled:opacity-60"
                 >
                   {adSubmitting ? "Sparar..." : "Skapa annons"}
                 </button>
@@ -630,12 +630,12 @@ export default function EditBusinessClient({ business, categories, ads, flashDea
         <div id="blixterbjudanden" className="bg-white rounded-2xl border border-[var(--border)] shadow-sm p-6">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <Zap className="w-5 h-5 text-amber-500 fill-amber-500" />
+              <Zap className="w-5 h-5 text-[var(--sol-500)] fill-[var(--sol-500)]" />
               <h2 className="font-semibold text-[var(--primary)]">Blixterbjudanden</h2>
             </div>
             <button
               onClick={() => setDealFormOpen((v) => !v)}
-              className="flex items-center gap-1.5 text-sm text-amber-600 border border-amber-300 px-3 py-1.5 rounded-lg hover:bg-amber-50 transition-colors font-medium"
+              className="flex items-center gap-1.5 text-sm text-[var(--boost)] border border-[var(--boost-border)] px-3 py-1.5 rounded-lg hover:bg-[var(--boost-bg)] transition-colors font-medium"
             >
               <Plus className="w-4 h-4" />
               Nytt erbjudande
@@ -655,13 +655,13 @@ export default function EditBusinessClient({ business, categories, ads, flashDea
                 const isPast = deal.deal_date < todayISO;
                 const isToday = deal.deal_date === todayISO;
                 return (
-                  <div key={deal.id} className={`rounded-xl border p-4 ${deal.active && !isPast ? "border-amber-200 bg-amber-50/50" : "border-gray-200 bg-gray-50 opacity-60"}`}>
+                  <div key={deal.id} className={`rounded-xl border p-4 ${deal.active && !isPast ? "border-[var(--boost-border)] bg-[var(--boost-bg)]/50" : "border-gray-200 bg-gray-50 opacity-60"}`}>
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1 min-w-0">
                         <p className="font-medium text-sm text-[var(--primary)] leading-snug">{deal.headline}</p>
                         {deal.description && <p className="text-xs text-[var(--muted)] mt-0.5 line-clamp-1">{deal.description}</p>}
                         <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                          <span className="text-[10px] font-semibold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">
+                          <span className="text-[10px] font-semibold bg-[var(--boost-border)] text-[var(--boost)] px-2 py-0.5 rounded-full">
                             {formatDealDate(deal.deal_date)}
                           </span>
                           {isToday && <span className="text-[10px] font-semibold bg-red-100 text-red-700 px-2 py-0.5 rounded-full">Live idag</span>}
@@ -693,7 +693,7 @@ export default function EditBusinessClient({ business, categories, ads, flashDea
 
           {/* New deal form */}
           {dealFormOpen && (
-            <form onSubmit={handleCreateDeal} className="border border-amber-200 rounded-xl p-4 space-y-3 bg-amber-50/40">
+            <form onSubmit={handleCreateDeal} className="border border-[var(--boost-border)] rounded-xl p-4 space-y-3 bg-[var(--boost-bg)]/40">
               <h3 className="text-sm font-semibold text-[var(--primary)]">Nytt blixterbjudande</h3>
 
               <div>
@@ -702,7 +702,7 @@ export default function EditBusinessClient({ business, categories, ads, flashDea
                   name="headline"
                   required
                   placeholder='T.ex. "20% på all pizza idag"'
-                  className="w-full px-3 py-2 rounded-lg border border-[var(--border)] text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
+                  className="w-full px-3 py-2 rounded-lg border border-[var(--border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--sol-500)]"
                 />
               </div>
 
@@ -715,7 +715,7 @@ export default function EditBusinessClient({ business, categories, ads, flashDea
                   rows={2}
                   placeholder="Villkor eller detaljer..."
                   context="blixterbjudande, kortfattat och lockande"
-                  className="w-full px-3 py-2 rounded-lg border border-[var(--border)] text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 resize-none"
+                  className="w-full px-3 py-2 rounded-lg border border-[var(--border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--sol-500)] resize-none"
                 />
               </div>
 
@@ -728,7 +728,7 @@ export default function EditBusinessClient({ business, categories, ads, flashDea
                     required
                     min={todayISO}
                     defaultValue={tomorrowISO}
-                    className="w-full px-3 py-2 rounded-lg border border-[var(--border)] text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
+                    className="w-full px-3 py-2 rounded-lg border border-[var(--border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--sol-500)]"
                   />
                 </div>
                 <div>
@@ -736,7 +736,7 @@ export default function EditBusinessClient({ business, categories, ads, flashDea
                   <select
                     name="category_id"
                     defaultValue=""
-                    className="w-full px-3 py-2 rounded-lg border border-[var(--border)] text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white"
+                    className="w-full px-3 py-2 rounded-lg border border-[var(--border)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--sol-500)] bg-white"
                   >
                     <option value="">Ingen</option>
                     {categories.map((c) => (
@@ -751,7 +751,7 @@ export default function EditBusinessClient({ business, categories, ads, flashDea
                   type="checkbox"
                   name="post_to_fb"
                   defaultChecked
-                  className="mt-0.5 w-4 h-4 rounded border-[var(--border)] accent-amber-500 focus:ring-2 focus:ring-amber-400"
+                  className="mt-0.5 w-4 h-4 rounded border-[var(--border)] accent-[var(--sol-500)] focus:ring-2 focus:ring-[var(--sol-500)]"
                 />
                 <span className="text-xs text-[var(--primary)]">
                   Publicera automatiskt på vår Facebook-sida på morgonen
@@ -763,7 +763,7 @@ export default function EditBusinessClient({ business, categories, ads, flashDea
                 <button
                   type="submit"
                   disabled={dealSubmitting}
-                  className="flex-1 py-2 bg-amber-500 text-white rounded-lg text-sm font-medium hover:bg-amber-600 transition-colors disabled:opacity-60"
+                  className="flex-1 py-2 bg-[var(--brand)] text-white rounded-lg text-sm font-medium hover:bg-[var(--brand-hover)] transition-colors disabled:opacity-60"
                 >
                   {dealSubmitting ? "Sparar..." : "Skapa blixterbjudande"}
                 </button>
