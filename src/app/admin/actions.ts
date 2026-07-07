@@ -14,11 +14,14 @@ export async function toggleActive(id: string, currentlyActive: boolean) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/admin/logga-in");
 
-  await supabase
+  const { error } = await supabase
     .from("businesses")
     .update({ active: !currentlyActive })
     .eq("id", id)
     .eq("owner_id", user.id);
+
+  // Tidigare slukades felet tyst — RLS-avvisningar såg ut som en död knapp.
+  if (error) throw new Error(`Kunde inte ändra status: ${error.message}`);
 
   revalidatePath("/admin");
 }
