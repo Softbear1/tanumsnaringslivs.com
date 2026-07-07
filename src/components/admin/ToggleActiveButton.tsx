@@ -2,17 +2,16 @@
 import { useFormStatus } from "react-dom";
 import { Pause, Play, Loader2 } from "lucide-react";
 
-// Submit-knapp för pausa/aktivera-formen på admin-dashboarden. Visar spinner
-// medan server-actionen kör — utan den ser knappen död ut i sekunden innan
-// sidan revalideras och användaren hinner klicka igen.
+// Pausa/aktivera på admin-dashboardens företagskort. Text + ikon: en ensam
+// paus-ikon läses lätt som status ("är pausad") när den betyder handlingen
+// ("tryck för att pausa"). Spinner medan server-actionen kör.
 export default function ToggleActiveButton({ active }: { active: boolean }) {
   const { pending } = useFormStatus();
   return (
     <button
       type="submit"
       disabled={pending}
-      className="p-2.5 text-[var(--muted)] hover:text-[var(--primary)] border border-[var(--border)] rounded-lg transition-colors disabled:opacity-50"
-      title={active ? "Pausa företaget" : "Aktivera företaget"}
+      className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-[var(--muted)] hover:text-[var(--primary)] border border-[var(--border)] rounded-lg transition-colors disabled:opacity-50"
     >
       {pending ? (
         <Loader2 className="w-4 h-4 animate-spin" />
@@ -21,6 +20,7 @@ export default function ToggleActiveButton({ active }: { active: boolean }) {
       ) : (
         <Play className="w-4 h-4" />
       )}
+      {pending ? "Sparar…" : active ? "Pausa" : "Aktivera"}
     </button>
   );
 }

@@ -216,9 +216,11 @@ export default async function AdminPage() {
                       <div>
                         <h3 className="font-semibold text-[var(--primary)] leading-tight">{biz.name}</h3>
                         <span className={`inline-block text-[10px] font-semibold mt-0.5 px-2 py-0.5 rounded-full ${
-                          biz.active ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"
+                          biz.active
+                            ? "bg-[var(--success-bg)] text-[var(--success)]"
+                            : "bg-[var(--boost-bg)] text-[var(--boost)] border border-[var(--boost-border)]"
                         }`}>
-                          {biz.active ? "Aktiv" : "Pausad"}
+                          {biz.active ? "Aktiv — syns i katalogen" : "Pausad — syns inte i katalogen"}
                         </span>
                       </div>
                     </div>
