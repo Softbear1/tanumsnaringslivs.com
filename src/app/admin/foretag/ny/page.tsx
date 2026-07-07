@@ -50,6 +50,9 @@ export default function NyForetagPage() {
     const { error } = await supabase.from("businesses").insert({
       ...data,
       owner_id: user.id,
+      // Självskapade företag är verifierade per definition — ägaren skapade dem
+      // inloggad. Utan flaggan får de varken Verifierad-badge eller topplacering.
+      claimed: true,
     });
 
     setLoading(false);
