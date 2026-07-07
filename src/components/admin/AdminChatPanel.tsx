@@ -24,10 +24,14 @@ export default function AdminChatPanel<T>({
   const [messages, setMessages] = useState<ChatMessage[]>([{ role: "assistant", content: greeting }]);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    // Scrolla ENDAST meddelandelistan — scrollIntoView drar med sig hela
+    // sidan (särskilt illa på iOS när tangentbordet öppnas och fokus flyttar
+    // vyn så att chatten hamnar utanför skärmen).
+    const el = listRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
   }, [messages]);
 
   async function sendToAI(msgs: ChatMessage[]) {
@@ -112,7 +116,7 @@ export default function AdminChatPanel<T>({
         {hint}
       </div>
 
-      <div className="flex-1 overflow-y-auto space-y-3 pr-1">
+      <div ref={listRef} className="flex-1 overflow-y-auto space-y-3 pr-1">
         {messages.map((msg, i) => (
           <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
             <div className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed ${
@@ -130,7 +134,6 @@ export default function AdminChatPanel<T>({
             </div>
           </div>
         ))}
-        <div ref={bottomRef} />
       </div>
 
       <div className="border-t border-[var(--border)] pt-3 mt-3 flex gap-2">

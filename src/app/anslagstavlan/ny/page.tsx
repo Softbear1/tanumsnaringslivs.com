@@ -6,7 +6,6 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import AdminChatPanel from "@/components/admin/AdminChatPanel";
 import { extractBoardAd, BOARD_CATEGORIES, type BoardAdDraft } from "@/lib/chat";
-import { submitBoardAd } from "../actions";
 
 export default function NyRadannons() {
   const [mode, setMode] = useState<"chat" | "form">("chat");
@@ -23,17 +22,28 @@ export default function NyRadannons() {
     setSubmitting(true);
     setError(null);
     const fd = new FormData(e.currentTarget);
-    const res = await submitBoardAd({
-      category: (fd.get("category") as string) || draft?.category || "diverse",
-      title: (fd.get("title") as string) ?? "",
-      body: (fd.get("body") as string) ?? "",
-      contact_phone: (fd.get("phone") as string) || null,
-      contact_email: (fd.get("email") as string) ?? "",
-      suspicious: draft?.suspicious ?? false,
-    });
-    setSubmitting(false);
-    if (res.error) setError(res.error);
-    else setSent(res.published ? "published" : "pending");
+    try {
+      const r = await fetch("/api/anslagstavla", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          category: (fd.get("category") as string) || draft?.category || "diverse",
+          title: (fd.get("title") as string) ?? "",
+          body: (fd.get("body") as string) ?? "",
+          contact_phone: (fd.get("phone") as string) || null,
+          contact_email: (fd.get("email") as string) ?? "",
+          suspicious: draft?.suspicious ?? false,
+          website,
+        }),
+      });
+      const res = (await r.json()) as { published?: boolean; error?: string };
+      if (res.error) setError(res.error);
+      else setSent(res.published ? "published" : "pending");
+    } catch {
+      setError("Kunde inte skicka annonsen — kontrollera uppkopplingen och försök igen.");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (

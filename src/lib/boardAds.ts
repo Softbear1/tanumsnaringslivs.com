@@ -1,4 +1,6 @@
-"use server";
+// Delad serverlogik för anslagstavlan — anropas från API-routen
+// /api/anslagstavla. Kördes tidigare som server actions från den statiska
+// inlämningssidan, vilket inte fungerade tillförlitligt på next-on-pages.
 import { createAdminClient } from "@/lib/supabase-admin";
 import { sendEmail, renderEmail } from "@/lib/email";
 import { BOARD_CATEGORIES } from "@/lib/chat";

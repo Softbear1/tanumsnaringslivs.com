@@ -5,7 +5,6 @@ import Link from "next/link";
 import { Trash2, Check } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { deleteBoardAd } from "../actions";
 
 function HanteraInner() {
   const token = useSearchParams().get("token") ?? "";
@@ -17,10 +16,20 @@ function HanteraInner() {
   async function handleDelete() {
     if (!confirm) { setConfirm(true); return; }
     setBusy(true);
-    const res = await deleteBoardAd(token);
-    setBusy(false);
-    if (res.error) setError(res.error);
-    else setDone(true);
+    try {
+      const r = await fetch("/api/anslagstavla", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token }),
+      });
+      const res = (await r.json()) as { ok?: boolean; error?: string };
+      if (res.error) setError(res.error);
+      else setDone(true);
+    } catch {
+      setError("Kunde inte ta bort annonsen — försök igen.");
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (
