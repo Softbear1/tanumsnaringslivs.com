@@ -65,7 +65,10 @@ export async function POST(request: NextRequest) {
       "content-type": "application/json",
     },
     body: JSON.stringify({
-      model: "claude-haiku-4-5-20251001",
+      // Sonnet som sajtens övriga kundmötande chattar — Elias är ansiktet utåt.
+      // (Den tysta AI-granskningen i actions.ts kör Haiku; klassificering
+      // kräver ingen finess.)
+      model: "claude-sonnet-4-6",
       max_tokens: 500,
       system: SYSTEM_PROMPT,
       messages,
