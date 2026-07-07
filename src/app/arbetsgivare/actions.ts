@@ -3,6 +3,11 @@ import { createServerClient } from "@/lib/supabase-server";
 import { createAdminClient } from "@/lib/supabase-admin";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { sendEmail, renderEmail } from "@/lib/email";
+
+function escapeHtml(s: string): string {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
 
 export async function createJob(data: {
   business_id: string;
@@ -121,5 +126,31 @@ export async function applyToJob(
   });
 
   if (error) return { error: "Något gick fel. Försök igen." };
+
+  // Mejla arbetsgivaren om den nya ansökan. Får aldrig fälla flödet —
+  // ansökan är redan sparad och syns i dashboarden oavsett.
+  try {
+    const { data: job } = await admin
+      .from("jobs")
+      .select("title, apply_email")
+      .eq("id", jobId)
+      .single();
+    if (job?.apply_email) {
+      await sendEmail({
+        to: job.apply_email,
+        subject: `Ny ansökan: ${job.title}`,
+        replyTo: data.applicant_email,
+        html: renderEmail({
+          heading: "Ny ansökan till din annons",
+          intro: `${escapeHtml(data.applicant_name)} har sökt tjänsten "${escapeHtml(job.title)}".`,
+          body: `<p style="margin:0 0 8px;font-size:14px;color:#334155;"><strong>E-post:</strong> ${escapeHtml(data.applicant_email)}${data.applicant_phone ? `<br><strong>Telefon:</strong> ${escapeHtml(data.applicant_phone)}` : ""}</p>
+                 <p style="margin:0 0 20px;font-size:14px;line-height:1.55;color:#334155;white-space:pre-wrap;">${escapeHtml(data.cover_letter)}</p>`,
+          ctaLabel: "Se alla ansökningar",
+          ctaUrl: "https://tanumsnaringsliv.com/arbetsgivare",
+        }),
+      });
+    }
+  } catch { /* mejlfel loggas i sendEmail */ }
+
   return { ok: true };
 }

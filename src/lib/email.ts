@@ -7,8 +7,51 @@ interface EmailOptions {
   ctaUrl?: string;
 }
 
-const PRIMARY = "#1B3A4B";
-const ACCENT = "#2F8765";
+// Brandfärger enligt DESIGN.md (mejlklienter kräver inline-värden, inte tokens).
+const PRIMARY = "#072B36"; // hav-900
+const ACCENT = "#16657A";  // hav-500
+
+const FROM = "Tanums Näringsliv <elias@tanumsnaringsliv.com>";
+
+/**
+ * Skickar mejl via Resend REST API (edge-säker fetch). Nyckeln ligger som
+ * Cloudflare Pages-secret RESEND_API_KEY — aldrig i repot. Misslyckade utskick
+ * loggas men får ALDRIG fälla anropande flöde: ett tappat mejl är alltid
+ * mindre allvarligt än en förlorad ansökan eller lead.
+ */
+export async function sendEmail(opts: {
+  to: string;
+  subject: string;
+  html: string;
+  replyTo?: string;
+}): Promise<boolean> {
+  const key = process.env.RESEND_API_KEY;
+  if (!key) {
+    console.warn("RESEND_API_KEY saknas — hoppar över mejl:", opts.subject);
+    return false;
+  }
+  try {
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        from: FROM,
+        to: [opts.to],
+        subject: opts.subject,
+        html: opts.html,
+        ...(opts.replyTo ? { reply_to: opts.replyTo } : {}),
+      }),
+    });
+    if (!res.ok) {
+      console.error("Resend-fel", res.status, await res.text());
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.error("Resend-anrop misslyckades:", err);
+    return false;
+  }
+}
 
 /**
  * Renders a branded, responsive HTML email used across the app (quote
@@ -30,7 +73,8 @@ export function renderEmail({ heading, intro, body = "", ctaLabel, ctaUrl }: Ema
     <tr><td align="center" style="padding:24px 12px;">
       <table role="presentation" style="width:100%;max-width:520px;border-collapse:collapse;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.08);">
         <tr><td style="background:${PRIMARY};padding:20px 28px;">
-          <span style="color:#ffffff;font-size:16px;font-weight:700;">🌲 Tanums Näringsliv</span>
+          <span style="color:#ffffff;font-size:16px;font-weight:700;">Tanums Näringsliv</span>
+          <br><span style="color:rgba(255,255,255,0.55);font-size:10px;letter-spacing:2px;">HELA TANUM. ETT NÄRINGSLIV.</span>
         </td></tr>
         <tr><td style="padding:28px;">
           <h1 style="margin:0 0 12px;font-size:20px;color:${PRIMARY};">${heading}</h1>
