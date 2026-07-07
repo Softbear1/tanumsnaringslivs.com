@@ -23,7 +23,7 @@ export default function AnslagstavlanPage() {
             <h1 className="text-3xl font-bold text-[var(--primary)] mb-2">Anslagstavlan</h1>
             <p className="text-[var(--muted)] max-w-2xl">
               Köp, sälj, hyr ut och erbjud tjänster i Tanums kommun — gratis.
-              Annonserna ligger uppe i 30 dagar.
+              Annonserna ligger uppe i 7 dagar.
             </p>
           </div>
           <BoardList />

@@ -114,7 +114,7 @@ export async function submitBoardAd(data: {
       subject: "Din radannons ligger ute på tavlan",
       html: renderEmail({
         heading: "Nu ligger din annons ute",
-        intro: `"${escapeHtml(title)}" är publicerad på anslagstavlan och syns i 30 dagar.`,
+        intro: `"${escapeHtml(title)}" är publicerad på anslagstavlan och syns i 7 dagar.`,
         body: `<p style="margin:0 0 16px;font-size:14px;color:#334155;">Spara det här mejlet — med länken nedan kan du ta bort annonsen när den är såld eller inaktuell.</p>`,
         ctaLabel: "Hantera din annons",
         ctaUrl: `${BASE}/anslagstavlan/hantera?token=${row.manage_token}`,
@@ -145,7 +145,7 @@ export async function submitBoardAd(data: {
     subject: "Din radannons är mottagen",
     html: renderEmail({
       heading: "Tack! Din annons granskas",
-      intro: `"${escapeHtml(title)}" läggs ut på anslagstavlan så fort den är granskad — oftast samma dag. Den ligger sedan uppe i 30 dagar.`,
+      intro: `"${escapeHtml(title)}" läggs ut på anslagstavlan så fort den är granskad — oftast samma dag. Den ligger sedan uppe i 7 dagar.`,
       body: `<p style="margin:0 0 16px;font-size:14px;color:#334155;">Spara det här mejlet — med länken nedan kan du ta bort annonsen när den är såld eller inaktuell.</p>`,
       ctaLabel: "Hantera din annons",
       ctaUrl: `${BASE}/anslagstavlan/hantera?token=${row.manage_token}`,

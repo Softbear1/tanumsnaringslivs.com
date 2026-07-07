@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
       subject: "Din radannons är ute på tavlan",
       html: renderEmail({
         heading: "Nu ligger din annons ute",
-        intro: `"${ad.title}" är godkänd och syns på anslagstavlan i 30 dagar.`,
+        intro: `"${ad.title}" är godkänd och syns på anslagstavlan i 7 dagar.`,
         ctaLabel: "Se anslagstavlan",
         ctaUrl: "https://tanumsnaringsliv.com/anslagstavlan",
       }),

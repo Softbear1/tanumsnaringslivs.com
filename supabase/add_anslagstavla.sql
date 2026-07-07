@@ -15,7 +15,7 @@ create table if not exists public.board_ads (
   -- moderation_token gör Godkänn/Neka-länkarna i mejlet till Elias säkra.
   manage_token uuid not null default gen_random_uuid(),
   moderation_token uuid not null default gen_random_uuid(),
-  expires_at timestamptz not null default now() + interval '30 days',
+  expires_at timestamptz not null default now() + interval '7 days',
   created_at timestamptz not null default now()
 );
 

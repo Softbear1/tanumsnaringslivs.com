@@ -55,7 +55,7 @@ export default function NyRadannons() {
               </h1>
               <p className="text-[var(--muted)] text-sm leading-relaxed mb-4">
                 {sent === "published"
-                  ? "Den syns på tavlan nu och ligger uppe i 30 dagar. Vi har mejlat dig en länk för att ta bort den när den är inaktuell."
+                  ? "Den syns på tavlan nu och ligger uppe i 7 dagar. Vi har mejlat dig en länk för att ta bort den när den är inaktuell."
                   : "Den läggs ut på tavlan så fort den är godkänd — oftast samma dag. Vi har mejlat dig en länk för att ta bort annonsen när den är inaktuell."}
               </p>
               {sent === "published" && (
@@ -128,7 +128,7 @@ export default function NyRadannons() {
                     {submitting ? "Skickar…" : "Skicka in annonsen"}
                   </button>
                   <p className="text-xs text-[var(--muted)] text-center">
-                    Annonsen granskas innan den publiceras och ligger uppe i 30 dagar.
+                    Annonsen granskas innan den publiceras och ligger uppe i 7 dagar.
                   </p>
                 </form>
               )}
