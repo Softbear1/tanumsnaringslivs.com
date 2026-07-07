@@ -42,6 +42,19 @@ export default async function SuperAdminPage() {
     admin.from("businesses").select("*", { count: "exact", head: true }).eq("claimed", false),
   ]);
 
+  // Nyligen claimade — select("*") tål att claimed_at saknas innan migrationen
+  // (supabase/add_claimed_at.sql) körts; då sorteras på created_at istället.
+  const { data: claimedRows } = await admin
+    .from("businesses")
+    .select("*")
+    .eq("claimed", true);
+  const recentClaims = (claimedRows ?? [])
+    .map((b) => b as typeof b & { claimed_at?: string | null })
+    .sort((a, b) =>
+      String(b.claimed_at ?? b.created_at ?? "").localeCompare(String(a.claimed_at ?? a.created_at ?? ""))
+    )
+    .slice(0, 8);
+
   const catName: Record<string, string> = {};
   for (const c of categories ?? []) catName[c.id] = c.name;
 
@@ -89,6 +102,35 @@ export default async function SuperAdminPage() {
             </div>
           ))}
         </div>
+
+        {/* Nyligen claimade — det du vill se först: vilka har verifierat sig? */}
+        {recentClaims.length > 0 && (
+          <section>
+            <h2 className="text-lg font-bold text-[var(--primary)] mb-3 flex items-center gap-2">
+              <BadgeCheck className="w-4 h-4 text-[var(--accent)]" /> Nyligen claimade
+            </h2>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              {recentClaims.map((b) => (
+                <div key={b.id} className="rounded-2xl border-2 border-[var(--accent-light)] bg-white p-4 card-shadow">
+                  <div className="flex items-center gap-2 mb-1">
+                    <BadgeCheck className="w-4 h-4 text-[var(--accent)] shrink-0" />
+                    <span className="font-semibold text-sm text-[var(--primary)] truncate">{b.name}</span>
+                  </div>
+                  <p className="text-xs text-[var(--muted)] mb-3">
+                    {catName[b.category_id] ?? b.category_id}
+                    {" · "}
+                    {b.claimed_at ? `Claimad ${fmtDate(b.claimed_at)}` : `Skapad ${fmtDate(b.created_at)}`}
+                  </p>
+                  <div className="flex items-center gap-2 text-xs font-medium">
+                    <Link href={`/admin/foretag/${b.id}`} className="text-[var(--brand)] hover:underline">Redigera</Link>
+                    <span className="text-[var(--border)]">·</span>
+                    <Link href={`/foretag/${b.id}`} target="_blank" rel="noopener noreferrer" className="text-[var(--brand)] hover:underline">Visa publikt</Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* Företag */}
         <section>

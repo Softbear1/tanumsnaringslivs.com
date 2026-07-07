@@ -1,7 +1,7 @@
 "use client";
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { Search, Pause, Play, Trash2, Pencil, ExternalLink } from "lucide-react";
+import { Search, Pause, Play, Trash2, Pencil, ExternalLink, BadgeCheck } from "lucide-react";
 import { adminToggleBusiness, adminDeleteBusiness } from "./actions";
 
 interface Business {
@@ -11,7 +11,16 @@ interface Business {
   boosted: boolean;
   owner_id: string | null;
   category_id: string;
+  claimed: boolean;
 }
+
+type ClaimFilter = "alla" | "claimade" | "ej-claimade";
+
+const FILTERS: { value: ClaimFilter; label: string }[] = [
+  { value: "alla", label: "Alla" },
+  { value: "claimade", label: "Claimade" },
+  { value: "ej-claimade", label: "Ej claimade" },
+];
 
 const PAGE_SIZE = 50;
 
@@ -23,18 +32,21 @@ export default function SuperBusinessTable({
   catName: Record<string, string>;
 }) {
   const [query, setQuery] = useState("");
+  const [claimFilter, setClaimFilter] = useState<ClaimFilter>("alla");
   const [visible, setVisible] = useState(PAGE_SIZE);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [confirmId, setConfirmId] = useState<string | null>(null);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return businesses;
     return businesses.filter((b) => {
+      if (claimFilter === "claimade" && !b.claimed) return false;
+      if (claimFilter === "ej-claimade" && b.claimed) return false;
+      if (!q) return true;
       const cat = (catName[b.category_id] ?? b.category_id ?? "").toLowerCase();
       return b.name.toLowerCase().includes(q) || cat.includes(q);
     });
-  }, [businesses, catName, query]);
+  }, [businesses, catName, query, claimFilter]);
 
   const shown = filtered.slice(0, visible);
 
@@ -57,14 +69,31 @@ export default function SuperBusinessTable({
 
   return (
     <div>
-      <div className="relative mb-3 max-w-sm">
-        <Search className="w-4 h-4 text-[var(--muted)] absolute left-3 top-1/2 -translate-y-1/2" />
-        <input
-          value={query}
-          onChange={(e) => { setQuery(e.target.value); setVisible(PAGE_SIZE); }}
-          placeholder="Sök på namn eller kategori…"
-          className="w-full pl-9 pr-3 py-2 rounded-xl border border-[var(--border)] bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
-        />
+      <div className="flex flex-wrap items-center gap-3 mb-3">
+        <div className="relative max-w-sm flex-1 min-w-[200px]">
+          <Search className="w-4 h-4 text-[var(--muted)] absolute left-3 top-1/2 -translate-y-1/2" />
+          <input
+            value={query}
+            onChange={(e) => { setQuery(e.target.value); setVisible(PAGE_SIZE); }}
+            placeholder="Sök på namn eller kategori…"
+            className="w-full pl-9 pr-3 py-2 rounded-xl border border-[var(--border)] bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
+          />
+        </div>
+        <div className="flex gap-1.5">
+          {FILTERS.map((f) => (
+            <button
+              key={f.value}
+              onClick={() => { setClaimFilter(f.value); setVisible(PAGE_SIZE); }}
+              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                claimFilter === f.value
+                  ? "bg-[var(--brand)] text-white"
+                  : "bg-white border border-[var(--border)] text-[var(--muted)] hover:text-[var(--primary)]"
+              }`}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       <p className="text-xs text-[var(--muted)] mb-2">
@@ -87,8 +116,13 @@ export default function SuperBusinessTable({
               <tr key={b.id} className={busyId === b.id ? "opacity-50" : ""}>
                 <td className="px-4 py-3 font-medium text-[var(--primary)]">
                   {b.name}
+                  {b.claimed && (
+                    <span className="ml-2 inline-flex items-center gap-0.5 text-[10px] bg-[var(--accent-light)] text-[var(--brand)] px-1.5 py-0.5 rounded-full font-semibold">
+                      <BadgeCheck className="w-3 h-3" /> Verifierad
+                    </span>
+                  )}
                   {b.boosted && <span className="ml-2 text-[10px] bg-[var(--boost-border)] text-[var(--boost)] px-1.5 py-0.5 rounded-full">Boost</span>}
-                  {!b.owner_id && <span className="ml-2 text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-full">Ingen ägare</span>}
+                  {!b.owner_id && !b.claimed && <span className="ml-2 text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-full">Ingen ägare</span>}
                 </td>
                 <td className="px-4 py-3 text-[var(--muted)] hidden sm:table-cell">{catName[b.category_id] ?? b.category_id}</td>
                 <td className="px-4 py-3">
