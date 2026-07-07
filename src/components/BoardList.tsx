@@ -1,10 +1,10 @@
 "use client";
-import { useState } from "react";
-import { Phone, Plus } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Phone, Plus, StickyNote } from "lucide-react";
 import Link from "next/link";
+import { createBrowserClient } from "@/lib/supabase-browser";
 import { BOARD_CATEGORIES } from "@/lib/chat";
 import EmptyState from "@/components/EmptyState";
-import { StickyNote } from "lucide-react";
 
 export interface BoardAd {
   id: string;
@@ -22,10 +22,39 @@ function daysAgo(iso: string): string {
   return `${d} dagar sedan`;
 }
 
-export default function BoardList({ ads }: { ads: BoardAd[] }) {
+export default function BoardList() {
   const [filter, setFilter] = useState<string | null>(null);
+  const [ads, setAds] = useState<BoardAd[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Klient-side hämtning — sidan är statisk (Cloudflare-bundlens 25 MB-tak)
+  // och tavlan blir alltid färsk. RLS + kolumnrättigheter i databasen ser
+  // till att bara publika fält går att läsa med anon-nyckeln.
+  useEffect(() => {
+    const supabase = createBrowserClient();
+    supabase
+      .from("board_ads")
+      .select("id, category, title, body, contact_phone, created_at")
+      .eq("status", "active")
+      .gt("expires_at", new Date().toISOString())
+      .order("created_at", { ascending: false })
+      .limit(200)
+      .then(({ data }) => {
+        setAds((data ?? []) as BoardAd[]);
+        setLoading(false);
+      });
+  }, []);
+
   const shown = filter ? ads.filter((a) => a.category === filter) : ads;
   const usedCategories = new Set(ads.map((a) => a.category));
+
+  if (loading) {
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {[0, 1, 2].map((i) => <div key={i} className="skeleton h-36" />)}
+      </div>
+    );
+  }
 
   return (
     <div>

@@ -1,6 +1,5 @@
 "use client";
-export const runtime = "edge";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Trash2, Check } from "lucide-react";
@@ -8,7 +7,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { deleteBoardAd } from "../actions";
 
-export default function HanteraAnnons() {
+function HanteraInner() {
   const token = useSearchParams().get("token") ?? "";
   const [confirm, setConfirm] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -65,5 +64,14 @@ export default function HanteraAnnons() {
       </main>
       <Footer />
     </>
+  );
+}
+
+// useSearchParams kräver en Suspense-gräns när sidan förrenderas statiskt.
+export default function HanteraAnnons() {
+  return (
+    <Suspense fallback={null}>
+      <HanteraInner />
+    </Suspense>
   );
 }

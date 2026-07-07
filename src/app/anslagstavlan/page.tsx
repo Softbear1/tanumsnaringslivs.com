@@ -1,10 +1,11 @@
-export const runtime = "edge";
 import type { Metadata } from "next";
-import { createServerClient } from "@/lib/supabase-server";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import BoardList, { type BoardAd } from "@/components/BoardList";
+import BoardList from "@/components/BoardList";
 
+// Statisk sida — annonserna hämtas klient-side i BoardList. Medvetet val:
+// varje edge-renderad sida kostar ~1,7 MB av Cloudflares 25 MB-tak, och
+// tavlans innehåll mår bra av att alltid vara färskt i webbläsaren.
 export const metadata: Metadata = {
   title: "Anslagstavlan – köp, sälj och hyr i Tanum | Tanums Näringsliv",
   description:
@@ -12,19 +13,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "https://tanumsnaringsliv.com/anslagstavlan" },
 };
 
-export default async function AnslagstavlanPage() {
-  const supabase = await createServerClient();
-  // Endast publika kolumner — kontaktmejl och tokens lämnar aldrig servern.
-  const { data } = await supabase
-    .from("board_ads")
-    .select("id, category, title, body, contact_phone, created_at")
-    .eq("status", "active")
-    .gt("expires_at", new Date().toISOString())
-    .order("created_at", { ascending: false })
-    .limit(200);
-
-  const ads = (data ?? []) as BoardAd[];
-
+export default function AnslagstavlanPage() {
   return (
     <>
       <Header />
@@ -37,7 +26,7 @@ export default async function AnslagstavlanPage() {
               Annonserna ligger uppe i 30 dagar.
             </p>
           </div>
-          <BoardList ads={ads} />
+          <BoardList />
         </div>
       </main>
       <Footer />
