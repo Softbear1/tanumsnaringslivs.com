@@ -4,7 +4,7 @@ import { createAdminClient } from "@/lib/supabase-admin";
 import { isSuperAdmin } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Building2, Zap, Megaphone, Pause, Play, Trash2, ShieldCheck, Eye, BadgeCheck } from "lucide-react";
+import { Building2, Zap, Megaphone, Pause, Play, Trash2, ShieldCheck, Eye, BadgeCheck, Sparkles } from "lucide-react";
 import { logout } from "../actions";
 import {
   adminToggleDeal, adminDeleteDeal,
@@ -53,6 +53,20 @@ export default async function SuperAdminPage() {
     .sort((a, b) =>
       String(b.claimed_at ?? b.created_at ?? "").localeCompare(String(a.claimed_at ?? a.created_at ?? ""))
     )
+    .slice(0, 8);
+
+  // Nyligen tillagda — nya listningar, inte SCB-seeden. Seedens ~900 företag
+  // bulk-skapades samma dag; den vanligaste skapelsedagen är alltså seed-dagen,
+  // och allt skapat därefter är på riktigt tillagt (självskapat eller manuellt).
+  const dayCounts = new Map<string, number>();
+  for (const b of businesses ?? []) {
+    const day = String(b.created_at ?? "").slice(0, 10);
+    dayCounts.set(day, (dayCounts.get(day) ?? 0) + 1);
+  }
+  const seedDay = [...dayCounts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? "";
+  const recentlyAdded = (businesses ?? [])
+    .filter((b) => String(b.created_at ?? "").slice(0, 10) > seedDay)
+    .sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)))
     .slice(0, 8);
 
   const catName: Record<string, string> = {};
@@ -120,6 +134,35 @@ export default async function SuperAdminPage() {
                     {catName[b.category_id] ?? b.category_id}
                     {" · "}
                     {b.claimed_at ? `Claimad ${fmtDate(b.claimed_at)}` : `Skapad ${fmtDate(b.created_at)}`}
+                  </p>
+                  <div className="flex items-center gap-2 text-xs font-medium">
+                    <Link href={`/admin/foretag/${b.id}`} className="text-[var(--brand)] hover:underline">Redigera</Link>
+                    <span className="text-[var(--border)]">·</span>
+                    <Link href={`/foretag/${b.id}`} target="_blank" rel="noopener noreferrer" className="text-[var(--brand)] hover:underline">Visa publikt</Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Nyligen tillagda — nya listningar sedan SCB-seeden */}
+        {recentlyAdded.length > 0 && (
+          <section>
+            <h2 className="text-lg font-bold text-[var(--primary)] mb-3 flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-[var(--sol-500)]" /> Nyligen tillagda
+            </h2>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              {recentlyAdded.map((b) => (
+                <div key={b.id} className="rounded-2xl border border-[var(--boost-border)] bg-white p-4 card-shadow">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="font-semibold text-sm text-[var(--primary)] truncate">{b.name}</span>
+                    {b.claimed && <BadgeCheck className="w-4 h-4 text-[var(--accent)] shrink-0" />}
+                  </div>
+                  <p className="text-xs text-[var(--muted)] mb-3">
+                    {catName[b.category_id] ?? b.category_id}
+                    {" · "}Tillagd {fmtDate(b.created_at)}
+                    {!b.claimed && " · Ej verifierad"}
                   </p>
                   <div className="flex items-center gap-2 text-xs font-medium">
                     <Link href={`/admin/foretag/${b.id}`} className="text-[var(--brand)] hover:underline">Redigera</Link>
