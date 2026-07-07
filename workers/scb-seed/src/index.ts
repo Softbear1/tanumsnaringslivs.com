@@ -114,7 +114,10 @@ async function upsertBatch(env: Env, records: object[]): Promise<void> {
       apikey: env.SUPABASE_SERVICE_ROLE_KEY,
       Authorization: `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`,
       "Content-Type": "application/json",
-      Prefer: "resolution=merge-duplicates,return=minimal",
+      // ignore-duplicates: lägg ENDAST till nya företag. merge-duplicates skrev
+      // varje natt över befintliga rader med claimed:false/owner_id:null —
+      // dvs. av-claimade verifierade företag och raderade ägarens redigeringar.
+      Prefer: "resolution=ignore-duplicates,return=minimal",
     },
     body: JSON.stringify(records),
   });
