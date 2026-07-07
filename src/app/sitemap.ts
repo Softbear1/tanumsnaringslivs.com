@@ -20,6 +20,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE}/blixterbjudanden`, changeFrequency: "daily", priority: 0.8 },
     { url: `${BASE}/spel`, changeFrequency: "monthly", priority: 0.6 },
     { url: `${BASE}/kom-igang`, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${BASE}/anslagstavlan`, changeFrequency: "daily", priority: 0.8 },
     ...staticCategories.map((c) => ({
       url: `${BASE}/hitta/${c.id}`,
       changeFrequency: "weekly" as const,

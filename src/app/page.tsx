@@ -6,6 +6,8 @@ import DirectoryClient from "@/components/DirectoryClient";
 import RegisterCTA from "@/components/RegisterCTA";
 import JobSpotlight from "@/components/JobSpotlight";
 import GameSection from "@/components/GameSection";
+import BoardSpotlight from "@/components/BoardSpotlight";
+import type { BoardAd } from "@/components/BoardList";
 import type { Score } from "@/components/GameSection";
 import Footer from "@/components/Footer";
 import type { Ad } from "@/components/AdCard";
@@ -110,6 +112,19 @@ export default async function Home() {
     .limit(3);
   const featuredJobs = (featuredJobRows ?? []) as { id: string; title: string; location: string; job_type: string }[];
 
+  // Senaste radannonserna från anslagstavlan (tom lista döljer sektionen).
+  let boardAds: BoardAd[] = [];
+  try {
+    const { data } = await supabase
+      .from("board_ads")
+      .select("id, category, title, body, contact_phone, created_at")
+      .eq("status", "active")
+      .gt("expires_at", new Date().toISOString())
+      .order("created_at", { ascending: false })
+      .limit(4);
+    boardAds = (data ?? []) as BoardAd[];
+  } catch { /* ignore */ }
+
   // KOBBVAKT top-3 leaderboard. Read-only; failures render the game section
   // without a leaderboard rather than an error.
   let kobbvaktScores: Score[] = [];
@@ -137,6 +152,7 @@ export default async function Home() {
           dealsEndAt={dealsEndAt}
         />
         {featuredJobs.length > 0 && <JobSpotlight jobs={featuredJobs} />}
+        <BoardSpotlight ads={boardAds} />
         <GameSection scores={kobbvaktScores} variant="card" />
         <RegisterCTA />
       </main>

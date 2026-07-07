@@ -92,3 +92,33 @@ export function extractAdDraft(text: string): { clean: string; ad: AdDraft | nul
     return { clean: text, ad: null };
   }
 }
+
+/** Radannons på Anslagstavlan — utkast från Elias-säljaren. */
+export interface BoardAdDraft {
+  category: "kopes" | "saljes" | "uthyres" | "arbete" | "loppis" | "bortskankes" | "diverse";
+  title: string;
+  body: string;
+  suspicious: boolean;
+}
+
+/** Parse a trailing RADANNONS:{...} marker (distinct from ANNONS:). */
+export function extractBoardAd(text: string): { clean: string; ad: BoardAdDraft | null } {
+  const idx = text.lastIndexOf("RADANNONS:");
+  if (idx === -1) return { clean: text, ad: null };
+  try {
+    const ad = JSON.parse(text.slice(idx + 10).trim()) as BoardAdDraft;
+    return { clean: text.slice(0, idx).trim(), ad };
+  } catch {
+    return { clean: text, ad: null };
+  }
+}
+
+export const BOARD_CATEGORIES: { id: BoardAdDraft["category"]; name: string }[] = [
+  { id: "kopes", name: "Köpes" },
+  { id: "saljes", name: "Säljes" },
+  { id: "uthyres", name: "Uthyres" },
+  { id: "arbete", name: "Arbete utföres" },
+  { id: "loppis", name: "Loppis" },
+  { id: "bortskankes", name: "Bortskänkes" },
+  { id: "diverse", name: "Diverse" },
+];

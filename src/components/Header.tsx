@@ -40,6 +40,7 @@ export default function Header() {
             <a href="#kategorier" className="text-sm text-[var(--muted)] hover:text-[var(--primary)] transition-colors">Kategorier</a>
             <a href="/blixterbjudanden" className="text-sm text-[var(--muted)] hover:text-[var(--primary)] transition-colors">Blixterbjudanden</a>
             <a href="/sommarjobb" className="text-sm text-[var(--muted)] hover:text-[var(--primary)] transition-colors">Sommarjobb</a>
+            <a href="/anslagstavlan" className="text-sm text-[var(--muted)] hover:text-[var(--primary)] transition-colors">Anslagstavlan</a>
             {user ? (
               <>
                 <a href="/admin" className="text-sm text-[var(--muted)] hover:text-[var(--primary)] transition-colors">Admin</a>
@@ -77,6 +78,7 @@ export default function Header() {
           <a href="#kategorier" onClick={() => setOpen(false)} className="text-sm text-[var(--muted)] py-2">Kategorier</a>
           <a href="/blixterbjudanden" onClick={() => setOpen(false)} className="text-sm text-[var(--muted)] py-2">Blixterbjudanden</a>
           <a href="/sommarjobb" onClick={() => setOpen(false)} className="text-sm text-[var(--muted)] py-2">Sommarjobb</a>
+          <a href="/anslagstavlan" onClick={() => setOpen(false)} className="text-sm text-[var(--muted)] py-2">Anslagstavlan</a>
           {user ? (
             <>
               <a href="/admin" onClick={() => setOpen(false)} className="text-sm text-[var(--muted)] py-2">Admin</a>

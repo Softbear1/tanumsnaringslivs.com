@@ -422,6 +422,48 @@ export type Database = {
         };
         Relationships: [];
       };
+      board_ads: {
+        Row: {
+          id: string;
+          category: string;
+          title: string;
+          body: string;
+          contact_phone: string | null;
+          contact_email: string;
+          status: string;
+          manage_token: string;
+          moderation_token: string;
+          expires_at: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          category: string;
+          title: string;
+          body: string;
+          contact_phone?: string | null;
+          contact_email: string;
+          status?: string;
+          manage_token?: string;
+          moderation_token?: string;
+          expires_at?: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          category?: string;
+          title?: string;
+          body?: string;
+          contact_phone?: string | null;
+          contact_email?: string;
+          status?: string;
+          manage_token?: string;
+          moderation_token?: string;
+          expires_at?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       kobbvakt_highscores: {
         Row: {
           id: string;
