@@ -98,6 +98,8 @@ export interface BoardAdDraft {
   category: "kopes" | "saljes" | "uthyres" | "arbete" | "loppis" | "bortskankes" | "diverse";
   title: string;
   body: string;
+  contact_phone: string | null;
+  contact_email: string | null;
   suspicious: boolean;
 }
 

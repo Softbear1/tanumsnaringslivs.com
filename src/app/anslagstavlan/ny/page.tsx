@@ -124,11 +124,11 @@ export default function NyRadannons() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-[var(--primary)] mb-1">Telefon (visas i annonsen)</label>
-                      <input name="phone" type="tel" placeholder="070-123 45 67" className="w-full px-3 py-2.5 rounded-xl border border-[var(--border)]" />
+                      <input name="phone" type="tel" defaultValue={draft?.contact_phone ?? ""} placeholder="070-123 45 67" className="w-full px-3 py-2.5 rounded-xl border border-[var(--border)]" />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-[var(--primary)] mb-1">Din e-post (visas inte)</label>
-                      <input name="email" type="email" required placeholder="din@email.se" className="w-full px-3 py-2.5 rounded-xl border border-[var(--border)]" />
+                      <input name="email" type="email" required defaultValue={draft?.contact_email ?? ""} placeholder="din@email.se" className="w-full px-3 py-2.5 rounded-xl border border-[var(--border)]" />
                     </div>
                   </div>
                   {/* Honeypot — osynligt för människor */}
