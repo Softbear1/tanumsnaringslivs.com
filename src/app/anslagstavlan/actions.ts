@@ -14,6 +14,36 @@ function catName(id: string): string {
   return BOARD_CATEGORIES.find((c) => c.id === id)?.name ?? id;
 }
 
+/**
+ * Server-side granskning med Claude (körs på slutgiltig text — även den som
+ * chattat kan ha redigerat efteråt). Fail-safe: går anropet inte att göra
+ * flaggas annonsen för manuell granskning i stället för att släppas igenom.
+ */
+async function aiReview(title: string, body: string): Promise<{ ok: boolean; reason: string }> {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) return { ok: false, reason: "AI-granskning otillgänglig" };
+  try {
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "x-api-key": apiKey, "anthropic-version": "2023-06-01", "content-type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-haiku-4-5-20251001",
+        max_tokens: 150,
+        system: `Du granskar radannonser för en lokal anslagstavla i Tanums kommun (köpes/säljes/uthyres/tjänster/loppis). Vardagliga annonser från privatpersoner och småföretag är OK — var generös mot normalt innehåll. Flagga ENDAST: olagligt (vapen, droger, stöldgods), bedrägerimönster (kryptoinvesteringar, förskottsbetalning, lånelöften), vuxeninnehåll, hat/trakasserier, uppenbart test-/skräpinnehåll ("asdf"), eller massreklam utan lokal koppling. Svara med ENDAST rå JSON: {"ok":true} eller {"ok":false,"reason":"kort motivering på svenska"}`,
+        messages: [{ role: "user", content: `Rubrik: ${title}\nText: ${body}` }],
+      }),
+    });
+    if (!res.ok) return { ok: false, reason: "AI-granskning svarade med fel" };
+    const data = (await res.json()) as { content?: { text?: string }[] };
+    const text = data.content?.[0]?.text ?? "";
+    const match = text.match(/\{[\s\S]*\}/);
+    const verdict = JSON.parse(match ? match[0] : text) as { ok: boolean; reason?: string };
+    return { ok: verdict.ok === true, reason: verdict.reason ?? "" };
+  } catch {
+    return { ok: false, reason: "AI-granskning misslyckades" };
+  }
+}
+
 export async function submitBoardAd(data: {
   category: string;
   title: string;
@@ -21,7 +51,7 @@ export async function submitBoardAd(data: {
   contact_phone: string | null;
   contact_email: string;
   suspicious?: boolean;
-}): Promise<{ ok?: true; error?: string }> {
+}): Promise<{ ok?: true; published?: boolean; error?: string }> {
   const admin = createAdminClient();
   if (!admin) return { error: "Tjänsten är inte tillgänglig just nu." };
 
@@ -32,6 +62,35 @@ export async function submitBoardAd(data: {
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return { error: "Ogiltig e-postadress." };
   if (!BOARD_CATEGORIES.some((c) => c.id === data.category)) return { error: "Ogiltig kategori." };
 
+  // Tveksamhetssignaler → manuell granskning i stället för auto-publicering.
+  const reasons: string[] = [];
+  if (data.suspicious) reasons.push("Flaggad av Elias i chatten");
+
+  // Dublett: samma rubrik i samma kategori som redan ligger/väntar.
+  const { count: dupCount } = await admin
+    .from("board_ads")
+    .select("id", { count: "exact", head: true })
+    .eq("category", data.category)
+    .ilike("title", title)
+    .in("status", ["pending", "active"]);
+  if ((dupCount ?? 0) > 0) reasons.push("Möjlig dublett — samma rubrik finns redan på tavlan");
+
+  // Volym: många annonser från samma avsändare senaste dygnet.
+  const dayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  const { count: recentCount } = await admin
+    .from("board_ads")
+    .select("id", { count: "exact", head: true })
+    .eq("contact_email", email)
+    .gte("created_at", dayAgo);
+  if ((recentCount ?? 0) >= 3) reasons.push(`Många annonser från samma avsändare (${recentCount} senaste dygnet)`);
+
+  // AI-granskning av slutgiltig text (körs alltid — texten kan ha ändrats
+  // efter chatten, och formulärspåret har ingen tidigare granskning).
+  const review = await aiReview(title, body);
+  if (!review.ok) reasons.push(`AI-granskningen tvekar: ${review.reason}`);
+
+  const autoApprove = reasons.length === 0;
+
   const { data: row, error } = await admin
     .from("board_ads")
     .insert({
@@ -40,31 +99,47 @@ export async function submitBoardAd(data: {
       body,
       contact_phone: data.contact_phone?.trim() || null,
       contact_email: email,
+      status: autoApprove ? "active" : "pending",
     })
     .select("id, manage_token, moderation_token")
     .single();
 
   if (error || !row) return { error: "Något gick fel. Försök igen." };
 
-  const flag = data.suspicious ? " ⚠️ AI-flaggad — granska extra noga" : "";
-  const modBase = `${BASE}/api/anslagstavla-moderate?id=${row.id}&token=${row.moderation_token}`;
+  if (autoApprove) {
+    // Direktpublicerad — annonsören får bekräftelse + hanterlänk. Inget mejl
+    // till moderatorn; rena annonser ska inte skapa arbete.
+    await sendEmail({
+      to: email,
+      subject: "Din radannons ligger ute på tavlan",
+      html: renderEmail({
+        heading: "Nu ligger din annons ute",
+        intro: `"${escapeHtml(title)}" är publicerad på anslagstavlan och syns i 30 dagar.`,
+        body: `<p style="margin:0 0 16px;font-size:14px;color:#334155;">Spara det här mejlet — med länken nedan kan du ta bort annonsen när den är såld eller inaktuell.</p>`,
+        ctaLabel: "Hantera din annons",
+        ctaUrl: `${BASE}/anslagstavlan/hantera?token=${row.manage_token}`,
+      }),
+    });
+    return { ok: true, published: true };
+  }
 
-  // Modereringsmejl till Elias — Godkänn/Neka direkt från mejlet.
+  // Tveksam → väntar på manuell granskning; Elias (människan) får mejl med skälen.
+  const modBase = `${BASE}/api/anslagstavla-moderate?id=${row.id}&token=${row.moderation_token}`;
   await sendEmail({
     to: MODERATOR,
-    subject: `Anslagstavlan: ${catName(data.category)} — ${title}${flag}`,
+    subject: `⚠️ Anslagstavlan behöver din blick: ${catName(data.category)} — ${title}`,
     replyTo: email,
     html: renderEmail({
-      heading: `Ny radannons väntar${flag}`,
+      heading: "Radannons väntar på granskning",
       intro: `${catName(data.category)}: "${escapeHtml(title)}"`,
-      body: `<p style="margin:0 0 16px;font-size:14px;line-height:1.55;color:#334155;white-space:pre-wrap;">${escapeHtml(body)}</p>
+      body: `<p style="margin:0 0 12px;font-size:13px;color:#B3402E;"><strong>Skäl:</strong> ${reasons.map(escapeHtml).join(" · ")}</p>
+             <p style="margin:0 0 16px;font-size:14px;line-height:1.55;color:#334155;white-space:pre-wrap;">${escapeHtml(body)}</p>
              <p style="margin:0 0 16px;font-size:13px;color:#64748b;">Kontakt: ${escapeHtml(email)}${data.contact_phone ? ` · ${escapeHtml(data.contact_phone)}` : ""}</p>
              <p style="margin:0 0 8px;"><a href="${modBase}&action=approve" style="display:inline-block;background:#2E7D4F;color:#fff;text-decoration:none;font-weight:600;font-size:14px;padding:10px 20px;border-radius:10px;margin-right:8px;">Godkänn</a>
              <a href="${modBase}&action=reject" style="display:inline-block;background:#B3402E;color:#fff;text-decoration:none;font-weight:600;font-size:14px;padding:10px 20px;border-radius:10px;">Neka</a></p>`,
     }),
   });
 
-  // Bekräftelse + hantera-länk till annonsören.
   await sendEmail({
     to: email,
     subject: "Din radannons är mottagen",
@@ -77,7 +152,7 @@ export async function submitBoardAd(data: {
     }),
   });
 
-  return { ok: true };
+  return { ok: true, published: false };
 }
 
 export async function deleteBoardAd(manageToken: string): Promise<{ ok?: true; error?: string }> {

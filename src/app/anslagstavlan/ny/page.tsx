@@ -13,7 +13,7 @@ export default function NyRadannons() {
   const [mode, setMode] = useState<"chat" | "form">("chat");
   const [draft, setDraft] = useState<BoardAdDraft | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [sent, setSent] = useState(false);
+  const [sent, setSent] = useState<null | "published" | "pending">(null);
   const [error, setError] = useState<string | null>(null);
   // Honeypot: robotar fyller i dolda fält, människor gör det inte.
   const [website, setWebsite] = useState("");
@@ -34,7 +34,7 @@ export default function NyRadannons() {
     });
     setSubmitting(false);
     if (res.error) setError(res.error);
-    else setSent(true);
+    else setSent(res.published ? "published" : "pending");
   }
 
   return (
@@ -51,11 +51,19 @@ export default function NyRadannons() {
               <span className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-[var(--success-bg)] text-[var(--success)] mb-4">
                 <Check className="w-6 h-6" />
               </span>
-              <h1 className="text-xl font-bold text-[var(--primary)] mb-2">Tack! Din annons granskas</h1>
-              <p className="text-[var(--muted)] text-sm leading-relaxed">
-                Den läggs ut på tavlan så fort den är godkänd — oftast samma dag.
-                Vi har mejlat dig en länk för att ta bort annonsen när den är inaktuell.
+              <h1 className="text-xl font-bold text-[var(--primary)] mb-2">
+                {sent === "published" ? "Klart! Din annons ligger ute" : "Tack! Din annons granskas"}
+              </h1>
+              <p className="text-[var(--muted)] text-sm leading-relaxed mb-4">
+                {sent === "published"
+                  ? "Den syns på tavlan nu och ligger uppe i 30 dagar. Vi har mejlat dig en länk för att ta bort den när den är inaktuell."
+                  : "Den läggs ut på tavlan så fort den är godkänd — oftast samma dag. Vi har mejlat dig en länk för att ta bort annonsen när den är inaktuell."}
               </p>
+              {sent === "published" && (
+                <Link href="/anslagstavlan" className="text-sm font-medium text-[var(--brand)] hover:underline">
+                  Se din annons på tavlan →
+                </Link>
+              )}
             </div>
           ) : (
             <>
