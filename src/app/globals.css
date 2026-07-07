@@ -41,6 +41,16 @@ html {
   scroll-behavior: smooth;
 }
 
+/* iOS Safari auto-zoomar in på formulärfält med mindre än 16px text —
+   sidan fastnar sedan inzoomad. Tvinga 16px på alla fält på små skärmar. */
+@media (max-width: 640px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
 body {
   background-color: var(--bg);
   color: var(--primary);

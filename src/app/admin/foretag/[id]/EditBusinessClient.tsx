@@ -122,6 +122,29 @@ export default function EditBusinessClient({ business, categories, ads, flashDea
   const [adMode, setAdMode] = useState<"none" | "chat" | "form">("none");
   const [adDraft, setAdDraft] = useState<AdDraft | null>(null);
 
+  // Radknappar (annonser/deals/jobb): rowBusy låser knapparna medan en åtgärd
+  // kör (mot dubbelklick), confirmRow kräver två tryck på papperskorgen —
+  // den sitter granne med paus och raderade tidigare direkt utan bekräftelse.
+  const [rowBusy, setRowBusy] = useState<string | null>(null);
+  const [confirmRow, setConfirmRow] = useState<string | null>(null);
+
+  function armDelete(id: string): boolean {
+    if (confirmRow !== id) {
+      setConfirmRow(id);
+      return false;
+    }
+    return true;
+  }
+
+  const deleteBtnClass = (id: string) =>
+    `p-2.5 border rounded-lg transition-colors disabled:opacity-50 ${
+      confirmRow === id
+        ? "bg-[var(--error)] text-white border-[var(--error)]"
+        : "text-[var(--muted)] hover:text-[var(--error)] border-[var(--border)]"
+    }`;
+  const toggleBtnClass =
+    "p-2.5 text-[var(--muted)] hover:text-[var(--primary)] border border-[var(--border)] rounded-lg transition-colors disabled:opacity-50";
+
   function handleBusinessDraft(d: BusinessDraft) {
     const valid = categories.some((c) => c.id === d.category_id);
     setFormSeed({ ...d, category_id: valid ? d.category_id : "" });
@@ -233,8 +256,10 @@ export default function EditBusinessClient({ business, categories, ads, flashDea
   }
 
   async function handleToggleAd(adId: string, currentlyActive: boolean) {
+    setRowBusy(adId);
     if (adminActions) {
       try { await adminActions.toggleAd(adId, currentlyActive); } catch (err) {
+        setRowBusy(null);
         alert("Kunde inte uppdatera annonsen: " + (err instanceof Error ? err.message : String(err)));
         return;
       }
@@ -244,6 +269,7 @@ export default function EditBusinessClient({ business, categories, ads, flashDea
     const supabase = createBrowserClient();
     const { error } = await supabase.from("ads").update({ active: !currentlyActive }).eq("id", adId);
     if (error) {
+      setRowBusy(null);
       alert("Kunde inte uppdatera annonsen: " + error.message);
       return;
     }
@@ -251,8 +277,11 @@ export default function EditBusinessClient({ business, categories, ads, flashDea
   }
 
   async function handleDeleteAd(adId: string) {
+    if (!armDelete(adId)) return;
+    setRowBusy(adId);
     if (adminActions) {
       try { await adminActions.deleteAd(adId); } catch (err) {
+        setRowBusy(null); setConfirmRow(null);
         alert("Kunde inte ta bort annonsen: " + (err instanceof Error ? err.message : String(err)));
         return;
       }
@@ -262,6 +291,7 @@ export default function EditBusinessClient({ business, categories, ads, flashDea
     const supabase = createBrowserClient();
     const { error } = await supabase.from("ads").delete().eq("id", adId);
     if (error) {
+      setRowBusy(null); setConfirmRow(null);
       alert("Kunde inte ta bort annonsen: " + error.message);
       return;
     }
@@ -301,8 +331,10 @@ export default function EditBusinessClient({ business, categories, ads, flashDea
   }
 
   async function handleToggleDeal(dealId: string, currentlyActive: boolean) {
+    setRowBusy(dealId);
     if (adminActions) {
       try { await adminActions.toggleDeal(dealId, currentlyActive); } catch (err) {
+        setRowBusy(null);
         alert("Kunde inte uppdatera blixterbjudandet: " + (err instanceof Error ? err.message : String(err)));
         return;
       }
@@ -312,6 +344,7 @@ export default function EditBusinessClient({ business, categories, ads, flashDea
     const supabase = createBrowserClient();
     const { error } = await supabase.from("flash_deals").update({ active: !currentlyActive }).eq("id", dealId);
     if (error) {
+      setRowBusy(null);
       alert("Kunde inte uppdatera blixterbjudandet: " + error.message);
       return;
     }
@@ -319,8 +352,11 @@ export default function EditBusinessClient({ business, categories, ads, flashDea
   }
 
   async function handleDeleteDeal(dealId: string) {
+    if (!armDelete(dealId)) return;
+    setRowBusy(dealId);
     if (adminActions) {
       try { await adminActions.deleteDeal(dealId); } catch (err) {
+        setRowBusy(null); setConfirmRow(null);
         alert("Kunde inte ta bort blixterbjudandet: " + (err instanceof Error ? err.message : String(err)));
         return;
       }
@@ -330,6 +366,7 @@ export default function EditBusinessClient({ business, categories, ads, flashDea
     const supabase = createBrowserClient();
     const { error } = await supabase.from("flash_deals").delete().eq("id", dealId);
     if (error) {
+      setRowBusy(null); setConfirmRow(null);
       alert("Kunde inte ta bort blixterbjudandet: " + error.message);
       return;
     }
@@ -337,8 +374,10 @@ export default function EditBusinessClient({ business, categories, ads, flashDea
   }
 
   async function handleToggleJob(jobId: string, status: string) {
+    setRowBusy(jobId);
     if (adminActions) {
       try { await adminActions.toggleJob(jobId, status); } catch (err) {
+        setRowBusy(null);
         alert("Kunde inte uppdatera jobbet: " + (err instanceof Error ? err.message : String(err)));
         return;
       }
@@ -348,6 +387,7 @@ export default function EditBusinessClient({ business, categories, ads, flashDea
     const supabase = createBrowserClient();
     const { error } = await supabase.from("jobs").update({ status: status === "active" ? "closed" : "active" }).eq("id", jobId);
     if (error) {
+      setRowBusy(null);
       alert("Kunde inte uppdatera jobbet: " + error.message);
       return;
     }
@@ -355,8 +395,11 @@ export default function EditBusinessClient({ business, categories, ads, flashDea
   }
 
   async function handleDeleteJob(jobId: string) {
+    if (!armDelete(jobId)) return;
+    setRowBusy(jobId);
     if (adminActions) {
       try { await adminActions.deleteJob(jobId); } catch (err) {
+        setRowBusy(null); setConfirmRow(null);
         alert("Kunde inte ta bort jobbet: " + (err instanceof Error ? err.message : String(err)));
         return;
       }
@@ -366,6 +409,7 @@ export default function EditBusinessClient({ business, categories, ads, flashDea
     const supabase = createBrowserClient();
     const { error } = await supabase.from("jobs").delete().eq("id", jobId);
     if (error) {
+      setRowBusy(null); setConfirmRow(null);
       alert("Kunde inte ta bort jobbet: " + error.message);
       return;
     }
@@ -493,10 +537,10 @@ export default function EditBusinessClient({ business, categories, ads, flashDea
                       </div>
                     </div>
                     <div className="flex items-center gap-1.5 shrink-0">
-                      <button onClick={() => handleToggleAd(ad.id, ad.active)} className="p-2.5 text-[var(--muted)] hover:text-[var(--primary)] border border-[var(--border)] rounded-lg transition-colors" title={ad.active ? "Pausa" : "Aktivera"}>
+                      <button onClick={() => handleToggleAd(ad.id, ad.active)} disabled={rowBusy !== null} className={toggleBtnClass} title={ad.active ? "Pausa" : "Aktivera"}>
                         {ad.active ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
                       </button>
-                      <button onClick={() => handleDeleteAd(ad.id)} className="p-2.5 text-[var(--muted)] hover:text-red-600 border border-[var(--border)] rounded-lg transition-colors" title="Ta bort">
+                      <button onClick={() => handleDeleteAd(ad.id)} disabled={rowBusy !== null} className={deleteBtnClass(ad.id)} title={confirmRow === ad.id ? "Klicka igen för att bekräfta" : "Ta bort"}>
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </div>
@@ -551,7 +595,7 @@ export default function EditBusinessClient({ business, categories, ads, flashDea
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-medium text-[var(--primary)] mb-1">Knapptext (valfri)</label>
                   <input
@@ -587,7 +631,7 @@ export default function EditBusinessClient({ business, categories, ads, flashDea
                 </select>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-medium text-[var(--primary)] mb-1">Starttid (valfri)</label>
                   <input
@@ -673,10 +717,10 @@ export default function EditBusinessClient({ business, categories, ads, flashDea
                         </div>
                       </div>
                       <div className="flex items-center gap-1.5 shrink-0">
-                        <button onClick={() => handleToggleDeal(deal.id, deal.active)} className="p-2.5 text-[var(--muted)] hover:text-[var(--primary)] border border-[var(--border)] rounded-lg transition-colors" title={deal.active ? "Pausa" : "Aktivera"}>
+                        <button onClick={() => handleToggleDeal(deal.id, deal.active)} disabled={rowBusy !== null} className={toggleBtnClass} title={deal.active ? "Pausa" : "Aktivera"}>
                           {deal.active ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
                         </button>
-                        <button onClick={() => handleDeleteDeal(deal.id)} className="p-2.5 text-[var(--muted)] hover:text-red-600 border border-[var(--border)] rounded-lg transition-colors" title="Ta bort">
+                        <button onClick={() => handleDeleteDeal(deal.id)} disabled={rowBusy !== null} className={deleteBtnClass(deal.id)} title={confirmRow === deal.id ? "Klicka igen för att bekräfta" : "Ta bort"}>
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       </div>
@@ -719,7 +763,7 @@ export default function EditBusinessClient({ business, categories, ads, flashDea
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-medium text-[var(--primary)] mb-1">Datum *</label>
                   <input
@@ -823,10 +867,10 @@ export default function EditBusinessClient({ business, categories, ads, flashDea
                         <Link href={`/arbetsgivare/annons/${job.id}`} className="p-2.5 text-[var(--muted)] hover:text-[var(--primary)] border border-[var(--border)] rounded-lg transition-colors" title="Redigera & ansökningar">
                           <Pencil className="w-3.5 h-3.5" />
                         </Link>
-                        <button onClick={() => handleToggleJob(job.id, job.status)} className="p-2.5 text-[var(--muted)] hover:text-[var(--primary)] border border-[var(--border)] rounded-lg transition-colors" title={isActive ? "Stäng" : "Återöppna"}>
+                        <button onClick={() => handleToggleJob(job.id, job.status)} disabled={rowBusy !== null} className={toggleBtnClass} title={isActive ? "Stäng" : "Återöppna"}>
                           {isActive ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
                         </button>
-                        <button onClick={() => handleDeleteJob(job.id)} className="p-2.5 text-[var(--muted)] hover:text-red-600 border border-[var(--border)] rounded-lg transition-colors" title="Ta bort">
+                        <button onClick={() => handleDeleteJob(job.id)} disabled={rowBusy !== null} className={deleteBtnClass(job.id)} title={confirmRow === job.id ? "Klicka igen för att bekräfta" : "Ta bort"}>
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       </div>

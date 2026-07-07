@@ -7,6 +7,7 @@ import { logout, toggleActive } from "./actions";
 import { isSuperAdmin } from "@/lib/auth";
 import MarketingCoach from "@/components/admin/MarketingCoach";
 import OnboardingChecklist from "@/components/admin/OnboardingChecklist";
+import ToggleActiveButton from "@/components/admin/ToggleActiveButton";
 
 export default async function AdminPage() {
   const supabase = await createServerClient();
@@ -282,13 +283,7 @@ export default async function AdminPage() {
                       <ExternalLink className="w-4 h-4" />
                     </Link>
                     <form action={toggleActive.bind(null, biz.id, biz.active)}>
-                      <button
-                        type="submit"
-                        className="p-2.5 text-[var(--muted)] hover:text-[var(--primary)] border border-[var(--border)] rounded-lg transition-colors"
-                        title={biz.active ? "Pausa företaget" : "Aktivera företaget"}
-                      >
-                        {biz.active ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-                      </button>
+                      <ToggleActiveButton active={biz.active} />
                     </form>
                   </div>
                 </div>
