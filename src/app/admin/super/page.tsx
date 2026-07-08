@@ -4,7 +4,8 @@ import { createAdminClient } from "@/lib/supabase-admin";
 import { isSuperAdmin } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Building2, Zap, Megaphone, Pause, Play, Trash2, ShieldCheck, Eye, BadgeCheck, Sparkles } from "lucide-react";
+import { Building2, Zap, Megaphone, Pause, Play, Trash2, ShieldCheck, Eye, BadgeCheck, Sparkles, Sunrise, StickyNote, Send, MousePointerClick, Users } from "lucide-react";
+import { startOfStockholmDayISO } from "@/lib/time";
 import { logout } from "../actions";
 import {
   adminToggleDeal, adminDeleteDeal,
@@ -41,6 +42,42 @@ export default async function SuperAdminPage() {
     admin.from("businesses").select("*", { count: "exact", head: true }).eq("claimed", true),
     admin.from("businesses").select("*", { count: "exact", head: true }).eq("claimed", false),
   ]);
+
+  // Dagens rapport — allt som hänt sedan svensk midnatt, med gårdagen som
+  // jämförelse för besöken. Head-counts är billiga; åtta parallella queries.
+  const dayStart = startOfStockholmDayISO();
+  const yesterdayStart = new Date(new Date(dayStart).getTime() - 24 * 60 * 60 * 1000).toISOString();
+  const [
+    { count: viewsToday }, { count: viewsYesterday },
+    { count: claimsToday }, { count: newBizToday },
+    { count: boardToday }, { count: boardPending },
+    { count: applicationsToday }, { count: quotesToday },
+    { count: clicksToday },
+  ] = await Promise.all([
+    admin.from("page_views").select("*", { count: "exact", head: true }).gte("viewed_at", dayStart),
+    admin.from("page_views").select("*", { count: "exact", head: true }).gte("viewed_at", yesterdayStart).lt("viewed_at", dayStart),
+    admin.from("businesses").select("*", { count: "exact", head: true }).eq("claimed", true).gte("claimed_at", dayStart),
+    admin.from("businesses").select("*", { count: "exact", head: true }).gte("created_at", dayStart),
+    admin.from("board_ads").select("*", { count: "exact", head: true }).gte("created_at", dayStart),
+    admin.from("board_ads").select("*", { count: "exact", head: true }).eq("status", "pending"),
+    admin.from("applications").select("*", { count: "exact", head: true }).gte("created_at", dayStart),
+    admin.from("quote_requests").select("*", { count: "exact", head: true }).gte("created_at", dayStart),
+    admin.from("offer_clicks").select("*", { count: "exact", head: true }).gte("clicked_at", dayStart),
+  ]);
+
+  const dayReport = [
+    { icon: Eye, label: "Besök", value: viewsToday ?? 0, sub: `igår ${viewsYesterday ?? 0}` },
+    { icon: BadgeCheck, label: "Claimade företag", value: claimsToday ?? 0 },
+    { icon: Building2, label: "Nya företag", value: newBizToday ?? 0, sub: "inkl. SCB-synk" },
+    { icon: StickyNote, label: "Radannonser", value: boardToday ?? 0, sub: (boardPending ?? 0) > 0 ? `${boardPending} väntar på dig` : undefined },
+    { icon: Users, label: "Jobbansökningar", value: applicationsToday ?? 0 },
+    { icon: Send, label: "Offertförfrågningar", value: quotesToday ?? 0 },
+    { icon: MousePointerClick, label: "Klick på erbjudanden", value: clicksToday ?? 0 },
+  ];
+
+  const todayLabel = new Intl.DateTimeFormat("sv-SE", {
+    timeZone: "Europe/Stockholm", weekday: "long", day: "numeric", month: "long",
+  }).format(new Date());
 
   // Nyligen claimade — select("*") tål att claimed_at saknas innan migrationen
   // (supabase/add_claimed_at.sql) körts; då sorteras på created_at istället.
@@ -103,6 +140,29 @@ export default async function SuperAdminPage() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
+        {/* Dagens rapport — morgonöverblicken */}
+        <section className="rounded-2xl border-2 border-[var(--accent-light)] bg-white card-shadow overflow-hidden">
+          <div className="flex items-center gap-2.5 px-5 py-4 border-b border-[var(--border)] bg-[var(--accent-light)]/40">
+            <Sunrise className="w-5 h-5 text-[var(--sol-500)]" />
+            <h2 className="font-bold text-[var(--primary)]">Dagens rapport</h2>
+            <span className="text-sm text-[var(--muted)] capitalize">— {todayLabel}</span>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 divide-x divide-y sm:divide-y-0 lg:divide-y-0 divide-[var(--border)]">
+            {dayReport.map((s) => (
+              <div key={s.label} className="px-4 py-4">
+                <div className="flex items-center gap-1.5 mb-1 text-[var(--muted)]">
+                  <s.icon className="w-3.5 h-3.5" />
+                  <span className="text-[10px] font-semibold uppercase tracking-wide">{s.label}</span>
+                </div>
+                <div className={`text-2xl font-bold ${s.value > 0 ? "text-[var(--primary)]" : "text-[var(--muted)]"}`}>
+                  {s.value}
+                </div>
+                {s.sub && <div className="text-[11px] text-[var(--muted)] mt-0.5">{s.sub}</div>}
+              </div>
+            ))}
+          </div>
+        </section>
+
         {/* Statistik */}
         <div className="grid gap-4 grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
           {stats.map((s) => (

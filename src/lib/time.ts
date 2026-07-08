@@ -35,6 +35,14 @@ export function endOfStockholmDayISO(at: Date = new Date()): string {
   return new Date(nextMidnightWall - offset).toISOString();
 }
 
+/** Tidpunkten då dagens svenska dygn började (senaste midnatt), ISO i UTC. */
+export function startOfStockholmDayISO(at: Date = new Date()): string {
+  const [y, m, d] = stockholmToday(at).split("-").map(Number);
+  const offset = stockholmOffsetMs(at);
+  const midnightWall = Date.UTC(y, m - 1, d, 0, 0, 0, 0);
+  return new Date(midnightWall - offset).toISOString();
+}
+
 /** Antal dagar mellan dagens svenska datum och ett "YYYY-MM-DD"-datum. */
 export function daysFromToday(dealDate: string, at: Date = new Date()): number {
   const today = stockholmToday(at);
