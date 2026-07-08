@@ -87,6 +87,7 @@ export type Database = {
           logo_url: string | null;
           scb_org_nr: string | null;
           claimed: boolean;
+          claimed_at: string | null;
           claim_email: string | null;
           reklamsparr: boolean;
           source: string;
@@ -113,6 +114,7 @@ export type Database = {
           logo_url?: string | null;
           scb_org_nr?: string | null;
           claimed?: boolean;
+          claimed_at?: string | null;
           claim_email?: string | null;
           reklamsparr?: boolean;
           source?: string;
@@ -139,6 +141,7 @@ export type Database = {
           logo_url?: string | null;
           scb_org_nr?: string | null;
           claimed?: boolean;
+          claimed_at?: string | null;
           claim_email?: string | null;
           reklamsparr?: boolean;
           source?: string;

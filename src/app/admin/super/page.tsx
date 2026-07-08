@@ -33,7 +33,7 @@ export default async function SuperAdminPage() {
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
 
   const [{ data: businesses }, { data: deals }, { data: ads }, { data: categories }, { count: views7d }, { count: views30d }, { count: claimedCount }, { count: unclaimedCount }] = await Promise.all([
-    admin.from("businesses").select("id, name, active, boosted, owner_id, created_at, category_id, claimed").order("created_at", { ascending: false }),
+    admin.from("businesses").select("id, name, active, boosted, owner_id, created_at, category_id, claimed, claimed_at").order("created_at", { ascending: false }),
     admin.from("flash_deals").select("id, headline, deal_date, active, post_to_fb, fb_post_id, business_id").order("deal_date", { ascending: false }),
     admin.from("ads").select("id, headline, active, category_id, business_id").order("created_at", { ascending: false }),
     admin.from("categories").select("id, name"),
@@ -79,22 +79,24 @@ export default async function SuperAdminPage() {
     timeZone: "Europe/Stockholm", weekday: "long", day: "numeric", month: "long",
   }).format(new Date());
 
-  // Nyligen claimade — select("*") tål att claimed_at saknas innan migrationen
-  // (supabase/add_claimed_at.sql) körts; då sorteras på created_at istället.
-  const { data: claimedRows } = await admin
-    .from("businesses")
-    .select("*")
-    .eq("claimed", true);
-  const recentClaims = (claimedRows ?? [])
-    .map((b) => b as typeof b & { claimed_at?: string | null })
+  // Nyligen claimade = ÄKTA övertaganden. claimed_at sätts bara av triggern vid
+  // övergången oclaimerad→claimad, så ett självskapat företag (som föds med
+  // claimed=true men aldrig UPDATE:as) har claimed_at=null och räknas INTE som
+  // claim. Det skiljer ett övertagande från en nyskapad listning.
+  type BizRow = NonNullable<typeof businesses>[number];
+  const recentClaims = (businesses ?? [])
+    .filter((b) => (b as BizRow & { claimed_at?: string | null }).claimed_at)
     .sort((a, b) =>
-      String(b.claimed_at ?? b.created_at ?? "").localeCompare(String(a.claimed_at ?? a.created_at ?? ""))
+      String((b as BizRow & { claimed_at?: string | null }).claimed_at).localeCompare(
+        String((a as BizRow & { claimed_at?: string | null }).claimed_at)
+      )
     )
     .slice(0, 8);
 
   // Nyligen tillagda — nya listningar, inte SCB-seeden. Seedens ~900 företag
   // bulk-skapades samma dag; den vanligaste skapelsedagen är alltså seed-dagen,
-  // och allt skapat därefter är på riktigt tillagt (självskapat eller manuellt).
+  // och allt skapat därefter är på riktigt tillagt. Exkluderar övertaganden
+  // (claimed_at satt) så samma företag aldrig visas i båda panelerna.
   const dayCounts = new Map<string, number>();
   for (const b of businesses ?? []) {
     const day = String(b.created_at ?? "").slice(0, 10);
@@ -102,7 +104,11 @@ export default async function SuperAdminPage() {
   }
   const seedDay = [...dayCounts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? "";
   const recentlyAdded = (businesses ?? [])
-    .filter((b) => String(b.created_at ?? "").slice(0, 10) > seedDay)
+    .filter(
+      (b) =>
+        String(b.created_at ?? "").slice(0, 10) > seedDay &&
+        !(b as BizRow & { claimed_at?: string | null }).claimed_at
+    )
     .sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)))
     .slice(0, 8);
 
@@ -190,10 +196,13 @@ export default async function SuperAdminPage() {
                     <BadgeCheck className="w-4 h-4 text-[var(--accent)] shrink-0" />
                     <span className="font-semibold text-sm text-[var(--primary)] truncate">{b.name}</span>
                   </div>
-                  <p className="text-xs text-[var(--muted)] mb-3">
+                  <p className="text-xs text-[var(--muted)] mb-0.5">
                     {catName[b.category_id] ?? b.category_id}
-                    {" · "}
-                    {b.claimed_at ? `Claimad ${fmtDate(b.claimed_at)}` : `Skapad ${fmtDate(b.created_at)}`}
+                    {" · "}Claimad {fmtDate(b.claimed_at ?? null)}
+                  </p>
+                  {/* "Innan" — hur länge listningen låg oclaimerad före övertagandet */}
+                  <p className="text-[11px] text-[var(--muted)] mb-3">
+                    Låg oclaimerad sedan {fmtDate(b.created_at)}
                   </p>
                   <div className="flex items-center gap-2 text-xs font-medium">
                     <Link href={`/admin/foretag/${b.id}`} className="text-[var(--brand)] hover:underline">Redigera</Link>
