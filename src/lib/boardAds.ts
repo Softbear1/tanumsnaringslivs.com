@@ -36,12 +36,12 @@ export async function postBoardAdTeaser(
     return;
   }
   try {
+    // Rubriken först: Facebook klipper texten efter ett par rader bakom
+    // "Visa mer", så det viktigaste måste stå på rad ett.
     const caption = [
-      "📌 Ny annons på Tanums anslagstavla",
+      `📌 ${catName(ad.category)}: ${ad.title}`,
       "",
-      `${catName(ad.category)}: ${ad.title}`,
-      "",
-      "Se hela annonsen och kontaktuppgifter på hemsidan 👇",
+      "Ny annons på Tanums anslagstavla. Se hela annonsen och kontaktuppgifter på hemsidan 👇",
       `${BASE}/anslagstavlan`,
       "",
       "Vill du lägga in en egen? Det är gratis.",

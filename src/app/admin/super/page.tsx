@@ -10,7 +10,9 @@ import { logout } from "../actions";
 import {
   adminToggleDeal, adminDeleteDeal,
   adminToggleAd, adminDeleteAd,
+  adminPostBoardAdTeasers,
 } from "./actions";
+import { BOARD_CATEGORIES } from "@/lib/chat";
 import SuperBusinessTable from "./SuperBusinessTable";
 
 function fmtDate(s: string | null): string {
@@ -32,7 +34,7 @@ export default async function SuperAdminPage() {
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
 
-  const [{ data: businesses }, { data: deals }, { data: ads }, { data: categories }, { count: views7d }, { count: views30d }, { count: claimedCount }, { count: unclaimedCount }] = await Promise.all([
+  const [{ data: businesses }, { data: deals }, { data: ads }, { data: categories }, { count: views7d }, { count: views30d }, { count: claimedCount }, { count: unclaimedCount }, { data: boardAds }] = await Promise.all([
     admin.from("businesses").select("id, name, active, boosted, owner_id, created_at, category_id, claimed, claimed_at, description, logo_url").order("created_at", { ascending: false }),
     admin.from("flash_deals").select("id, headline, deal_date, active, post_to_fb, fb_post_id, business_id").order("deal_date", { ascending: false }),
     admin.from("ads").select("id, headline, active, category_id, business_id").order("created_at", { ascending: false }),
@@ -41,7 +43,12 @@ export default async function SuperAdminPage() {
     admin.from("page_views").select("*", { count: "exact", head: true }).gte("viewed_at", thirtyDaysAgo),
     admin.from("businesses").select("*", { count: "exact", head: true }).eq("claimed", true),
     admin.from("businesses").select("*", { count: "exact", head: true }).eq("claimed", false),
+    admin.from("board_ads").select("id, title, category, status, fb_post_id, created_at").order("created_at", { ascending: false }).limit(25),
   ]);
+
+  const boardCatName: Record<string, string> = {};
+  for (const c of BOARD_CATEGORIES) boardCatName[c.id] = c.name;
+  const unpostedBoardAds = (boardAds ?? []).filter((a) => a.status === "active" && !a.fb_post_id).length;
 
   // Dagens rapport — allt som hänt sedan svensk midnatt, med gårdagen som
   // jämförelse för besöken. Head-counts är billiga; åtta parallella queries.
@@ -306,6 +313,53 @@ export default async function SuperAdminPage() {
         <section>
           <h2 className="text-lg font-bold text-[var(--primary)] mb-3 flex items-center gap-2"><Building2 className="w-4 h-4" /> Alla företag</h2>
           <SuperBusinessTable businesses={businesses ?? []} catName={catName} timelineById={timelineById} />
+        </section>
+
+        {/* Anslagstavlan — radannonser med FB-status */}
+        <section>
+          <div className="flex items-center justify-between mb-3 gap-3 flex-wrap">
+            <h2 className="text-lg font-bold text-[var(--primary)] flex items-center gap-2"><StickyNote className="w-4 h-4" /> Anslagstavlan</h2>
+            {unpostedBoardAds > 0 ? (
+              <form action={adminPostBoardAdTeasers}>
+                <button type="submit" className="text-sm font-semibold text-white bg-[var(--brand)] hover:bg-[var(--brand-hover)] px-4 py-2 rounded-lg transition-colors">
+                  Posta {unpostedBoardAds} {unpostedBoardAds === 1 ? "annons" : "annonser"} på Facebook
+                </button>
+              </form>
+            ) : (
+              <span className="text-sm text-[var(--muted)]">Alla aktiva annonser är postade på Facebook</span>
+            )}
+          </div>
+          <div className="overflow-x-auto rounded-2xl border border-[var(--border)] bg-white">
+            <table className="w-full text-sm">
+              <thead className="bg-[var(--bg)] text-[var(--muted)] text-xs uppercase">
+                <tr>
+                  <th className="text-left px-4 py-3 font-semibold">Rubrik</th>
+                  <th className="text-left px-4 py-3 font-semibold hidden sm:table-cell">Kategori</th>
+                  <th className="text-left px-4 py-3 font-semibold">Status</th>
+                  <th className="text-left px-4 py-3 font-semibold">Facebook</th>
+                  <th className="text-left px-4 py-3 font-semibold hidden md:table-cell">Inlagd</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[var(--border)]">
+                {(boardAds ?? []).map((a) => (
+                  <tr key={a.id}>
+                    <td className="px-4 py-3 font-medium text-[var(--primary)]">{a.title}</td>
+                    <td className="px-4 py-3 text-[var(--muted)] hidden sm:table-cell">{boardCatName[a.category] ?? a.category}</td>
+                    <td className="px-4 py-3"><span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${a.status === "active" ? "bg-green-100 text-green-700" : a.status === "pending" ? "bg-amber-100 text-amber-700" : "bg-gray-100 text-gray-500"}`}>{a.status === "active" ? "Aktiv" : a.status === "pending" ? "Väntar" : "Nekad"}</span></td>
+                    <td className="px-4 py-3">
+                      {a.fb_post_id
+                        ? <span className="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full">Postat</span>
+                        : a.status === "active"
+                          ? <span className="text-[10px] bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded-full">Ej postat</span>
+                          : <span className="text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-full">–</span>}
+                    </td>
+                    <td className="px-4 py-3 text-[var(--muted)] hidden md:table-cell">{fmtDate(a.created_at)}</td>
+                  </tr>
+                ))}
+                {(boardAds ?? []).length === 0 && <tr><td colSpan={5} className="px-4 py-6 text-center text-[var(--muted)]">Inga radannonser.</td></tr>}
+              </tbody>
+            </table>
+          </div>
         </section>
 
         {/* Blixterbjudanden */}

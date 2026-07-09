@@ -2,6 +2,7 @@
 import { createServerClient } from "@/lib/supabase-server";
 import { createAdminClient } from "@/lib/supabase-admin";
 import { isSuperAdmin } from "@/lib/auth";
+import { postBoardAdTeaser } from "@/lib/boardAds";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
@@ -102,6 +103,23 @@ export async function adminToggleJob(id: string, status: string) {
 export async function adminDeleteJob(id: string) {
   const admin = await requireSuperAdmin();
   await admin.from("jobs").delete().eq("id", id);
+  revalidatePath("/admin/super");
+}
+
+// Efterpostar aktiva radannonser som saknar FB-inlägg (t.ex. publicerade
+// medan Facebook-kopplingen var trasig). postBoardAdTeaser sätter fb_post_id
+// per annons, så knappen är idempotent — redan postade hoppas över.
+export async function adminPostBoardAdTeasers() {
+  const admin = await requireSuperAdmin();
+  const { data: ads } = await admin
+    .from("board_ads")
+    .select("id, category, title, fb_post_id")
+    .eq("status", "active")
+    .is("fb_post_id", null)
+    .order("created_at", { ascending: true });
+  for (const ad of ads ?? []) {
+    await postBoardAdTeaser(admin, ad);
+  }
   revalidatePath("/admin/super");
 }
 
