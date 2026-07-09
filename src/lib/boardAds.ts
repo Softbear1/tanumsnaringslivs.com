@@ -30,7 +30,11 @@ export async function postBoardAdTeaser(
   admin: AdminClient,
   ad: { id: string; category: string; title: string; fb_post_id: string | null }
 ): Promise<void> {
-  if (ad.fb_post_id || !facebookConfigured()) return;
+  if (ad.fb_post_id) return;
+  if (!facebookConfigured()) {
+    console.error("FB-teaser hoppas över: FB_PAGE_ID/FB_PAGE_TOKEN saknas i runtimen");
+    return;
+  }
   try {
     const caption = [
       "📌 Ny annons på Tanums anslagstavla",
