@@ -193,6 +193,58 @@ export async function submitBoardAd(data: {
   return { ok: true, published: false };
 }
 
+export async function getBoardAd(manageToken: string): Promise<{
+  ok?: true;
+  error?: string;
+  ad?: {
+    category: string;
+    title: string;
+    body: string;
+    contact_phone: string | null;
+    status: string;
+  };
+}> {
+  const admin = createAdminClient();
+  if (!admin) return { error: "Tjänsten är inte tillgänglig just nu." };
+  if (!manageToken) return { error: "Ogiltig länk." };
+
+  const { data, error } = await admin
+    .from("board_ads")
+    .select("category, title, body, contact_phone, status")
+    .eq("manage_token", manageToken)
+    .maybeSingle();
+
+  if (error) return { error: "Något gick fel. Försök igen." };
+  if (!data) return { error: "Annonsen hittades inte — den kan redan vara borttagen." };
+  return { ok: true, ad: data };
+}
+
+export async function updateBoardAd(
+  manageToken: string,
+  data: { category: string; title: string; body: string; contact_phone: string | null }
+): Promise<{ ok?: true; error?: string }> {
+  const admin = createAdminClient();
+  if (!admin) return { error: "Tjänsten är inte tillgänglig just nu." };
+  if (!manageToken) return { error: "Ogiltig länk." };
+
+  const title = data.title.trim().slice(0, 80);
+  const body = data.body.trim().slice(0, 400);
+  if (title.length < 3 || body.length < 3) return { error: "Rubrik och text behövs." };
+  if (!BOARD_CATEGORIES.some((c) => c.id === data.category)) return { error: "Ogiltig kategori." };
+
+  const { error, count } = await admin
+    .from("board_ads")
+    .update(
+      { category: data.category, title, body, contact_phone: data.contact_phone?.trim() || null },
+      { count: "exact" }
+    )
+    .eq("manage_token", manageToken);
+
+  if (error) return { error: "Något gick fel. Försök igen." };
+  if (!count) return { error: "Annonsen hittades inte — den kan redan vara borttagen." };
+  return { ok: true };
+}
+
 export async function deleteBoardAd(manageToken: string): Promise<{ ok?: true; error?: string }> {
   const admin = createAdminClient();
   if (!admin) return { error: "Tjänsten är inte tillgänglig just nu." };
