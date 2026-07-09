@@ -25,25 +25,34 @@ function emailHtml(businessName: string, businessId: string): string {
 <br><span style="color:rgba(255,255,255,0.6);font-size:10px;letter-spacing:2px;">HELA TANUM. ETT NÄRINGSLIV.</span>
 </td></tr>
 <tr><td style="padding:28px;">
-<h1 style="margin:0 0 12px;font-size:20px;color:#072B36;">${businessName} finns redan hos oss</h1>
+<h1 style="margin:0 0 16px;font-size:20px;color:#072B36;">Jag har lagt till ${businessName} i Tanums företagskatalog</h1>
 <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#1C2B2A;">
-Hej!<br><br>
-${businessName} är redan listat på tanumsnaringsliv.com — den samlade platsen där folk i Tanums kommun hittar lokala företag. Just nu är listningen oclaimad, vilket betyder att ni inte syns med rätt kontaktuppgifter, bild eller beskrivning.
+Hej!
 </p>
-<p style="margin:0 0 20px;font-size:15px;line-height:1.6;color:#1C2B2A;">
-Att ta över listningen är gratis och tar ett par minuter. Då kan ni också:
+<p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#1C2B2A;">
+Jag heter Elias och bor i Grebbestad. Jag har byggt <strong>tanumsnaringsliv.com</strong> — en samlad plats där folk i hela kommunen hittar lokala företag, ser blixterbjudanden och letar sommarjobb. Det är gratis att vara med, och jag har redan lagt in ${businessName} så att ni finns där från start.
+</p>
+<p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#1C2B2A;">
+Nu vill jag att <strong>du</strong> tar över administrationen av ditt företag. Det tar ett par minuter, kostar ingenting, och då blir profilen din att fylla på och sköta. När du tagit över kan du:
 </p>
 <ul style="margin:0 0 20px;padding-left:20px;font-size:14px;line-height:1.7;color:#1C2B2A;">
-<li>Uppdatera kontaktuppgifter, bild och beskrivning</li>
-<li>Skapa blixterbjudanden och annonser</li>
+<li>Fylla på med rätt kontaktuppgifter, logga och en beskrivning</li>
+<li>Skapa blixterbjudanden och annonser som syns för lokala kunder</li>
 <li>Lägga upp sommarjobb</li>
-<li>Se hur många som besöker er profil</li>
+<li>Lägga en gratis annons på <strong>Anslagstavlan</strong> — köpes, säljes, uthyres eller "arbete utföres", precis som i lokaltidningen fast utan kostnad</li>
+<li>Se hur många som besöker din profil</li>
 </ul>
 <table role="presentation" style="border-collapse:collapse;">
-<tr><td style="padding:8px 0 0;">
-<a href="${url}" style="display:inline-block;background:#16657A;color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:12px 24px;border-radius:12px;">Ta över er profil — gratis</a>
+<tr><td style="padding:4px 0 16px;">
+<a href="${url}" style="display:inline-block;background:#16657A;color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:12px 24px;border-radius:12px;">Ta över ditt företag — gratis</a>
 </td></tr>
 </table>
+<p style="margin:0;font-size:15px;line-height:1.6;color:#1C2B2A;">
+Hör gärna av dig om du undrar något — svara bara på det här mejlet.<br><br>
+Vänliga hälsningar,<br>
+<strong>Elias Bengtsson</strong><br>
+<span style="color:#6B6F6C;">Tanums Näringsliv · Grebbestad</span>
+</p>
 </td></tr>
 <tr><td style="padding:18px 28px;border-top:1px solid #D8D6CF;">
 <p style="margin:0 0 8px;font-size:12px;color:#6B6F6C;line-height:1.5;">
@@ -108,7 +117,7 @@ export async function GET(request: NextRequest) {
   for (const biz of batch) {
     const ok = await sendEmail({
       to: biz.claim_email as string,
-      subject: `${biz.name} finns redan på Tanums Näringsliv — ta över gratis`,
+      subject: `Jag har lagt till ${biz.name} på Tanums Näringsliv – ta över gratis`,
       html: emailHtml(biz.name, biz.id),
     });
     if (ok) {
