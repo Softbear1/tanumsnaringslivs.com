@@ -10,7 +10,7 @@ import { logout } from "../actions";
 import {
   adminToggleDeal, adminDeleteDeal,
   adminToggleAd, adminDeleteAd,
-  adminPostBoardAdTeasers,
+  adminPostBoardAdTeaser,
 } from "./actions";
 import { BOARD_CATEGORIES } from "@/lib/chat";
 import SuperBusinessTable from "./SuperBusinessTable";
@@ -319,14 +319,8 @@ export default async function SuperAdminPage() {
         <section>
           <div className="flex items-center justify-between mb-3 gap-3 flex-wrap">
             <h2 className="text-lg font-bold text-[var(--primary)] flex items-center gap-2"><StickyNote className="w-4 h-4" /> Anslagstavlan</h2>
-            {unpostedBoardAds > 0 ? (
-              <form action={adminPostBoardAdTeasers}>
-                <button type="submit" className="text-sm font-semibold text-white bg-[var(--brand)] hover:bg-[var(--brand-hover)] px-4 py-2 rounded-lg transition-colors">
-                  Posta {unpostedBoardAds} {unpostedBoardAds === 1 ? "annons" : "annonser"} på Facebook
-                </button>
-              </form>
-            ) : (
-              <span className="text-sm text-[var(--muted)]">Alla aktiva annonser är postade på Facebook</span>
+            {unpostedBoardAds > 0 && (
+              <span className="text-sm text-[var(--muted)]">{unpostedBoardAds} {unpostedBoardAds === 1 ? "aktiv annons är inte postad" : "aktiva annonser är inte postade"} på Facebook</span>
             )}
           </div>
           <div className="overflow-x-auto rounded-2xl border border-[var(--border)] bg-white">
@@ -338,6 +332,7 @@ export default async function SuperAdminPage() {
                   <th className="text-left px-4 py-3 font-semibold">Status</th>
                   <th className="text-left px-4 py-3 font-semibold">Facebook</th>
                   <th className="text-left px-4 py-3 font-semibold hidden md:table-cell">Inlagd</th>
+                  <th className="text-right px-4 py-3 font-semibold">Åtgärder</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--border)]">
@@ -354,9 +349,20 @@ export default async function SuperAdminPage() {
                           : <span className="text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-full">–</span>}
                     </td>
                     <td className="px-4 py-3 text-[var(--muted)] hidden md:table-cell">{fmtDate(a.created_at)}</td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center justify-end">
+                        {a.status === "active" && !a.fb_post_id && (
+                          <form action={adminPostBoardAdTeaser.bind(null, a.id)}>
+                            <button type="submit" className="flex items-center gap-1.5 text-xs font-semibold text-white bg-[var(--brand)] hover:bg-[var(--brand-hover)] px-3 py-1.5 rounded-lg transition-colors" title="Posta på Facebook">
+                              <Send className="w-3 h-3" /> Posta
+                            </button>
+                          </form>
+                        )}
+                      </div>
+                    </td>
                   </tr>
                 ))}
-                {(boardAds ?? []).length === 0 && <tr><td colSpan={5} className="px-4 py-6 text-center text-[var(--muted)]">Inga radannonser.</td></tr>}
+                {(boardAds ?? []).length === 0 && <tr><td colSpan={6} className="px-4 py-6 text-center text-[var(--muted)]">Inga radannonser.</td></tr>}
               </tbody>
             </table>
           </div>

@@ -106,20 +106,18 @@ export async function adminDeleteJob(id: string) {
   revalidatePath("/admin/super");
 }
 
-// Efterpostar aktiva radannonser som saknar FB-inlägg (t.ex. publicerade
-// medan Facebook-kopplingen var trasig). postBoardAdTeaser sätter fb_post_id
-// per annons, så knappen är idempotent — redan postade hoppas över.
-export async function adminPostBoardAdTeasers() {
+// Efterpostar en enskild radannons till Facebook (t.ex. publicerad medan
+// Facebook-kopplingen var trasig). postBoardAdTeaser sätter fb_post_id,
+// så en redan postad annons hoppas alltid över — ingen dubbelpostning.
+export async function adminPostBoardAdTeaser(id: string) {
   const admin = await requireSuperAdmin();
-  const { data: ads } = await admin
+  const { data: ad } = await admin
     .from("board_ads")
     .select("id, category, title, fb_post_id")
+    .eq("id", id)
     .eq("status", "active")
-    .is("fb_post_id", null)
-    .order("created_at", { ascending: true });
-  for (const ad of ads ?? []) {
-    await postBoardAdTeaser(admin, ad);
-  }
+    .maybeSingle();
+  if (ad) await postBoardAdTeaser(admin, ad);
   revalidatePath("/admin/super");
 }
 
