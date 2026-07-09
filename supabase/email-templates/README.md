@@ -12,8 +12,12 @@ både **företag** och **beställare** får när de loggar in.
 4. Klistra in hela innehållet från `magic-link.html` i body-fältet
 5. Spara
 
-> Variabeln `{{ .ConfirmationURL }}` fylls i automatiskt av Supabase med rätt
-> inloggningslänk (inkl. vår `?next=`-redirect till `/offert/...` eller `/admin`).
+> Länken bygger på `{{ .RedirectTo }}` + `{{ .TokenHash }}` (token_hash-flödet),
+> INTE `{{ .ConfirmationURL }}`. Skälet: ConfirmationURL går via Supabases
+> PKCE-flöde och kräver en cookie satt i samma webbläsare/app som länken
+> klickas i — funkar inte om mottagaren öppnar länken i t.ex. mejlappens
+> inbyggda webbläsare. token_hash verifieras direkt server-side utan det
+> beroendet.
 
 Mallen matchar appens varumärke (mörkblå header, grön knapp). Vill du ändra
 färgerna finns de som `#1B3A4B` (primär) och `#2F8765` (accent) i filen.
