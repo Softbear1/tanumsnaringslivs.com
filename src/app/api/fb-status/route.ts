@@ -41,10 +41,30 @@ export async function GET() {
     } else {
       status.graph_ok = true;
       status.sida = { id: data.id, namn: data.name };
-      status.diagnos =
-        "Konfigurationen ser korrekt ut. Om inlägg ändå inte publiceras: kontrollera att " +
-        "token har behörigheten pages_manage_posts (se Cloudflare-loggarna för Graph-fel " +
-        "vid själva postningen).";
+
+      // Avgör om token är en sid- eller användartoken: /me svarar med den
+      // identitet token är utfärdad för. En användartoken kan läsa sidans
+      // namn men inte posta — vanligaste felet efter tokenrotation.
+      const meRes = await fetch(
+        `https://graph.facebook.com/${version}/me?fields=id,name&access_token=${encodeURIComponent(token)}`
+      );
+      const me = (await meRes.json()) as { id?: string; name?: string };
+      status.token_identitet = { id: me.id, namn: me.name };
+
+      if (me.id === pageId) {
+        status.token_typ = "sidtoken";
+        status.diagnos =
+          "Token är en Page Access Token för rätt sida. Om inlägg ändå inte publiceras " +
+          "saknar den troligen behörigheten pages_manage_posts — skapa om user-token med " +
+          "den behörigheten och hämta en ny sidtoken via /me/accounts.";
+      } else {
+        status.token_typ = "användartoken";
+        status.diagnos =
+          "FEL: FB_PAGE_TOKEN är en ANVÄNDARTOKEN (utfärdad för " +
+          `"${me.name}"), inte sidans token. Den kan läsa sidan men inte posta. ` +
+          "Hämta sidans token: kör GET /me/accounts i Graph API Explorer med denna token " +
+          "och kopiera access_token för sidan, uppdatera secreten och deploya om.";
+      }
     }
   } catch (err) {
     status.graph_ok = false;
