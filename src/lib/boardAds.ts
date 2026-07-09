@@ -4,7 +4,7 @@
 import { createAdminClient } from "@/lib/supabase-admin";
 import { sendEmail, renderEmail } from "@/lib/email";
 import { BOARD_CATEGORIES } from "@/lib/chat";
-import { facebookConfigured, postLinkToPage } from "@/lib/facebook";
+import { facebookConfigured, postLinkToPage, postPhotoToPage } from "@/lib/facebook";
 
 type AdminClient = NonNullable<ReturnType<typeof createAdminClient>>;
 
@@ -42,9 +42,20 @@ export async function postBoardAdTeaser(
       `${catName(ad.category)}: ${ad.title}`,
       "",
       "Se hela annonsen och kontaktuppgifter på hemsidan 👇",
+      `${BASE}/anslagstavlan`,
+      "",
       "Vill du lägga in en egen? Det är gratis.",
     ].join("\n");
-    const postId = await postLinkToPage(caption, `${BASE}/anslagstavlan`);
+    // Fotoinlägg med brandad kategoribild syns bättre i flödet än rena
+    // länkinlägg. Bilderna ligger statiskt i /public/fb — en per kategori.
+    // Fotoinlägg kan inte bära ett link-kort, därför står länken i texten.
+    let postId: string;
+    try {
+      postId = await postPhotoToPage(`${BASE}/fb/${ad.category}.png`, caption);
+    } catch (photoErr) {
+      console.error("FB-fotoinlägg misslyckades, faller tillbaka på länkinlägg:", photoErr);
+      postId = await postLinkToPage(caption, `${BASE}/anslagstavlan`);
+    }
     if (postId) {
       await admin.from("board_ads").update({ fb_post_id: postId }).eq("id", ad.id);
     }
