@@ -13,6 +13,7 @@ export default function LoggaIn() {
   const [error, setError] = useState<string | null>(null);
   const searchParams = useSearchParams();
   const next = searchParams.get("next") ?? "/admin";
+  const linkExpired = searchParams.get("error") === "expired_link";
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
@@ -69,6 +70,12 @@ export default function LoggaIn() {
               <p className="text-[var(--muted)] mb-6 text-sm">
                 Ange din e-postadress så skickar vi en inloggningslänk — inget lösenord behövs.
               </p>
+              {linkExpired && (
+                <p className="mb-4 text-sm bg-[var(--error-bg)] text-[var(--error)] rounded-lg px-4 py-3">
+                  Länken har gått ut eller redan använts. Öppna den i samma webbläsare som du begärde
+                  den i, eller be om en ny länk nedan.
+                </p>
+              )}
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <label htmlFor="email" className="block text-sm font-medium text-[var(--primary)] mb-1">

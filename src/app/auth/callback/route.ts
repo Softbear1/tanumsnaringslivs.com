@@ -12,11 +12,25 @@ export async function GET(request: NextRequest) {
 
   const supabase = await createServerClient();
 
+  let authError: string | null = null;
   if (code) {
-    await supabase.auth.exchangeCodeForSession(code);
+    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    authError = error?.message ?? null;
   } else if (tokenHash && type) {
     // Email OTP magic link flow
-    await supabase.auth.verifyOtp({ token_hash: tokenHash, type });
+    const { error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type });
+    authError = error?.message ?? null;
+  } else {
+    authError = "Länken saknar inloggningsuppgifter.";
+  }
+
+  if (authError) {
+    // Skicka tillbaka till inloggningssidan med ett tydligt fel i stället för
+    // att tyst landa på en skyddad sida utan session (studsar annars runt
+    // utan förklaring om länken är för gammal eller redan använd).
+    const loginUrl = new URL("/admin/logga-in", request.url);
+    loginUrl.searchParams.set("error", "expired_link");
+    return NextResponse.redirect(loginUrl);
   }
 
   // Only allow relative paths to prevent open redirect

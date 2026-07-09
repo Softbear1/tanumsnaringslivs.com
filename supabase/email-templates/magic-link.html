@@ -15,12 +15,12 @@
           </p>
           <table role="presentation" style="border-collapse:collapse;">
             <tr><td style="padding:8px 0 0;">
-              <a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#2F8765;color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:12px 24px;border-radius:12px;">Logga in</a>
+              <a href="{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=magiclink" style="display:inline-block;background:#2F8765;color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:12px 24px;border-radius:12px;">Logga in</a>
             </td></tr>
           </table>
           <p style="margin:20px 0 0;font-size:13px;line-height:1.5;color:#94a3b8;">
             Om knappen inte fungerar, kopiera och klistra in den här länken i webbläsaren:<br>
-            <a href="{{ .ConfirmationURL }}" style="color:#2F8765;word-break:break-all;">{{ .ConfirmationURL }}</a>
+            <a href="{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=magiclink" style="color:#2F8765;word-break:break-all;">{{ .RedirectTo }}&amp;token_hash={{ .TokenHash }}&amp;type=magiclink</a>
           </p>
         </td></tr>
         <tr><td style="padding:18px 28px;border-top:1px solid #e2e8f0;">
