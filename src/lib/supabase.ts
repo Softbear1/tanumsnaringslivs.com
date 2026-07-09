@@ -3,6 +3,24 @@ import { createBrowserClient as createSSRBrowserClient } from "@supabase/ssr";
 export type Database = {
   public: {
     Tables: {
+      claim_invite_log: {
+        Row: {
+          business_id: string;
+          sent_at: string;
+          campaign: string;
+        };
+        Insert: {
+          business_id: string;
+          sent_at?: string;
+          campaign?: string;
+        };
+        Update: {
+          business_id?: string;
+          sent_at?: string;
+          campaign?: string;
+        };
+        Relationships: [];
+      };
       claim_requests: {
         Row: {
           id: string;
