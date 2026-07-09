@@ -121,26 +121,29 @@ export async function GET(request: NextRequest) {
     .eq("campaign", campaign);
   const sentIds = new Set((alreadySent ?? []).map((r) => r.business_id));
 
-  const { data: candidates, error } = await admin
+  // Alla matchande kandidater hämtas utan gräns — tabellen är i storleksordningen
+  // hundratals rader, så en obegränsad fråga är billigare och korrekt, till
+  // skillnad från den tidigare gissade limit() som gjorde "kvarvarande" fel.
+  const { data: allCandidates, error } = await admin
     .from("businesses")
     .select("id, name, claim_email")
     .eq("claimed", false)
     .eq("active", true)
     .eq("reklamsparr", false)
-    .not("claim_email", "is", null)
-    .limit(BATCH_SIZE + sentIds.size + 50); // marginal för att kompensera exkludering
+    .not("claim_email", "is", null);
 
   if (error) return Response.json({ error: error.message }, { status: 500 });
 
-  const batch = (candidates ?? [])
-    .filter((b) => !sentIds.has(b.id) && b.claim_email && b.claim_email.trim() !== "")
-    .slice(0, BATCH_SIZE);
+  const remaining = (allCandidates ?? []).filter(
+    (b) => !sentIds.has(b.id) && b.claim_email && b.claim_email.trim() !== ""
+  );
+  const batch = remaining.slice(0, BATCH_SIZE);
 
   if (dryRun) {
     return Response.json({
       dryRun: true,
       campaign,
-      totalRemainingCandidates: (candidates ?? []).filter((b) => !sentIds.has(b.id)).length,
+      totalRemainingCandidates: remaining.length,
       thisBatch: batch.length,
       sample: batch.slice(0, 5).map((b) => ({ name: b.name, email: b.claim_email })),
     });

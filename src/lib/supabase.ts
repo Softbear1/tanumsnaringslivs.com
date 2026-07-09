@@ -459,6 +459,7 @@ export type Database = {
           moderation_token: string;
           expires_at: string;
           created_at: string;
+          fb_post_id: string | null;
         };
         Insert: {
           id?: string;
@@ -472,6 +473,7 @@ export type Database = {
           moderation_token?: string;
           expires_at?: string;
           created_at?: string;
+          fb_post_id?: string | null;
         };
         Update: {
           id?: string;
@@ -485,6 +487,7 @@ export type Database = {
           moderation_token?: string;
           expires_at?: string;
           created_at?: string;
+          fb_post_id?: string | null;
         };
         Relationships: [];
       };

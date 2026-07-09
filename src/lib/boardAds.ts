@@ -4,6 +4,9 @@
 import { createAdminClient } from "@/lib/supabase-admin";
 import { sendEmail, renderEmail } from "@/lib/email";
 import { BOARD_CATEGORIES } from "@/lib/chat";
+import { facebookConfigured, postLinkToPage } from "@/lib/facebook";
+
+type AdminClient = NonNullable<ReturnType<typeof createAdminClient>>;
 
 const BASE = "https://tanumsnaringsliv.com";
 const MODERATOR = "elias.bengtsson@live.com";
@@ -14,6 +17,36 @@ function escapeHtml(s: string): string {
 
 function catName(id: string): string {
   return BOARD_CATEGORIES.find((c) => c.id === id)?.name ?? id;
+}
+
+/**
+ * Postar en teaser om en nypublicerad radannons till Facebook-sidan. Bara
+ * kategori + rubrik som lockbete — själva texten och kontaktuppgifterna kräver
+ * ett besök på hemsidan, så inlägget driver trafik dit i stället för att ge
+ * bort allt i flödet. Bäst effort: FB-fel får aldrig fälla publiceringen, och
+ * fb_post_id hindrar att samma annons postas två gånger.
+ */
+export async function postBoardAdTeaser(
+  admin: AdminClient,
+  ad: { id: string; category: string; title: string; fb_post_id: string | null }
+): Promise<void> {
+  if (ad.fb_post_id || !facebookConfigured()) return;
+  try {
+    const caption = [
+      "📌 Ny annons på Tanums anslagstavla",
+      "",
+      `${catName(ad.category)}: ${ad.title}`,
+      "",
+      "Se hela annonsen och kontaktuppgifter på hemsidan 👇",
+      "Vill du lägga in en egen? Det är gratis.",
+    ].join("\n");
+    const postId = await postLinkToPage(caption, `${BASE}/anslagstavlan`);
+    if (postId) {
+      await admin.from("board_ads").update({ fb_post_id: postId }).eq("id", ad.id);
+    }
+  } catch (err) {
+    console.error("FB-teaser för anslagstavlan misslyckades:", err);
+  }
 }
 
 /**
@@ -103,12 +136,15 @@ export async function submitBoardAd(data: {
       contact_email: email,
       status: autoApprove ? "active" : "pending",
     })
-    .select("id, manage_token, moderation_token")
+    .select("id, category, title, manage_token, moderation_token, fb_post_id")
     .single();
 
   if (error || !row) return { error: "Något gick fel. Försök igen." };
 
   if (autoApprove) {
+    // Direktpublicerad → teaser till Facebook (bäst effort, blockar inte svaret).
+    await postBoardAdTeaser(admin, row);
+
     // Direktpublicerad — annonsören får bekräftelse + hanterlänk. Inget mejl
     // till moderatorn; rena annonser ska inte skapa arbete.
     await sendEmail({

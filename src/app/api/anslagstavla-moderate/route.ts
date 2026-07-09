@@ -2,6 +2,7 @@ export const runtime = "edge";
 import type { NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase-admin";
 import { sendEmail, renderEmail } from "@/lib/email";
+import { postBoardAdTeaser } from "@/lib/boardAds";
 
 // Modereringslänkar från mejlet: Godkänn/Neka utan inloggning.
 // Säkerhet: per-annons hemlig moderation_token krävs; utan den 403.
@@ -26,7 +27,7 @@ export async function GET(request: NextRequest) {
 
   const { data: ad } = await admin
     .from("board_ads")
-    .select("id, title, status, contact_email, moderation_token")
+    .select("id, category, title, status, contact_email, moderation_token, fb_post_id")
     .eq("id", id)
     .maybeSingle();
 
@@ -42,6 +43,8 @@ export async function GET(request: NextRequest) {
   if (error) return page("Fel", "Kunde inte uppdatera annonsen. Försök igen.");
 
   if (newStatus === "active") {
+    // Godkänd → teaser till Facebook (bäst effort, blockar inte svaret).
+    await postBoardAdTeaser(admin, ad);
     await sendEmail({
       to: ad.contact_email,
       subject: "Din radannons är ute på tavlan",
