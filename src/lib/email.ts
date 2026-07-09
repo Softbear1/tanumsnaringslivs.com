@@ -23,6 +23,7 @@ export async function sendEmail(opts: {
   to: string;
   subject: string;
   html: string;
+  text?: string;
   replyTo?: string;
 }): Promise<boolean> {
   const key = process.env.RESEND_API_KEY;
@@ -39,6 +40,7 @@ export async function sendEmail(opts: {
         to: [opts.to],
         subject: opts.subject,
         html: opts.html,
+        ...(opts.text ? { text: opts.text } : {}),
         ...(opts.replyTo ? { reply_to: opts.replyTo } : {}),
       }),
     });

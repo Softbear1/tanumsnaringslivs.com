@@ -33,7 +33,7 @@ export default async function SuperAdminPage() {
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
 
   const [{ data: businesses }, { data: deals }, { data: ads }, { data: categories }, { count: views7d }, { count: views30d }, { count: claimedCount }, { count: unclaimedCount }] = await Promise.all([
-    admin.from("businesses").select("id, name, active, boosted, owner_id, created_at, category_id, claimed, claimed_at").order("created_at", { ascending: false }),
+    admin.from("businesses").select("id, name, active, boosted, owner_id, created_at, category_id, claimed, claimed_at, description, logo_url").order("created_at", { ascending: false }),
     admin.from("flash_deals").select("id, headline, deal_date, active, post_to_fb, fb_post_id, business_id").order("deal_date", { ascending: false }),
     admin.from("ads").select("id, headline, active, category_id, business_id").order("created_at", { ascending: false }),
     admin.from("categories").select("id, name"),
@@ -78,6 +78,46 @@ export default async function SuperAdminPage() {
   const todayLabel = new Intl.DateTimeFormat("sv-SE", {
     timeZone: "Europe/Stockholm", weekday: "long", day: "numeric", month: "long",
   }).format(new Date());
+
+  // Inbjudningskampanjens tratt: skickade → klickade → claimade efteråt.
+  const { data: inviteRows } = await admin
+    .from("claim_invite_log")
+    .select("business_id, sent_at, clicked_at");
+  const inviteSent = (inviteRows ?? []).length;
+  const inviteClicked = (inviteRows ?? []).filter((r) => r.clicked_at).length;
+  // Claimade = skickade företag som fått claimed_at EFTER att mejlet gick ut.
+  const sentAtById = new Map((inviteRows ?? []).map((r) => [r.business_id, r.sent_at]));
+  const inviteClaimed = (businesses ?? []).filter((b) => {
+    const sentAt = sentAtById.get(b.id);
+    const claimedAt = (b as typeof b & { claimed_at?: string | null }).claimed_at;
+    return sentAt && claimedAt && claimedAt >= sentAt;
+  }).length;
+  // Per-företag bearbetnings-status för timelinen i listan. "updated" = claimad
+  // OCH har fyllt på med logga eller en riktig beskrivning (som onboarding-kravet).
+  const clickedById = new Map((inviteRows ?? []).map((r) => [r.business_id, Boolean(r.clicked_at)]));
+  const timelineById: Record<string, { sent: boolean; clicked: boolean; claimed: boolean; updated: boolean }> = {};
+  for (const b of businesses ?? []) {
+    const wasSent = sentAtById.has(b.id);
+    const claimed = Boolean((b as typeof b & { claimed_at?: string | null }).claimed_at) || b.claimed;
+    if (!wasSent && !claimed) continue; // visa timeline bara för bearbetade företag
+    const desc = ((b as typeof b & { description?: string }).description ?? "").trim();
+    const logo = (b as typeof b & { logo_url?: string | null }).logo_url;
+    timelineById[b.id] = {
+      sent: wasSent,
+      clicked: clickedById.get(b.id) ?? false,
+      claimed,
+      updated: claimed && (Boolean(logo) || desc.length >= 40),
+    };
+  }
+
+  const pct = (n: number) => (inviteSent ? Math.round((n / inviteSent) * 100) : 0);
+  const inviteFunnel = inviteSent > 0
+    ? [
+        { label: "Skickade", value: inviteSent, sub: undefined as string | undefined },
+        { label: "Klickade", value: inviteClicked, sub: `${pct(inviteClicked)}%` },
+        { label: "Claimade", value: inviteClaimed, sub: `${pct(inviteClaimed)}%` },
+      ]
+    : null;
 
   // Nyligen claimade = ÄKTA övertaganden. claimed_at sätts bara av triggern vid
   // övergången oclaimerad→claimad, så ett självskapat företag (som föds med
@@ -169,6 +209,24 @@ export default async function SuperAdminPage() {
           </div>
         </section>
 
+        {/* Inbjudningskampanjen — tratt */}
+        {inviteFunnel && (
+          <section>
+            <h2 className="text-lg font-bold text-[var(--primary)] mb-3 flex items-center gap-2">
+              <Send className="w-4 h-4 text-[var(--accent)]" /> Inbjudningskampanj
+            </h2>
+            <div className="grid grid-cols-3 gap-3">
+              {inviteFunnel.map((s) => (
+                <div key={s.label} className="rounded-2xl border border-[var(--border)] bg-white p-5 text-center">
+                  <div className="text-3xl font-bold text-[var(--primary)]">{s.value}</div>
+                  <div className="text-xs font-semibold uppercase tracking-wide text-[var(--muted)] mt-1">{s.label}</div>
+                  {s.sub && <div className="text-xs text-[var(--accent)] font-medium mt-0.5">{s.sub}</div>}
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
         {/* Statistik */}
         <div className="grid gap-4 grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
           {stats.map((s) => (
@@ -247,7 +305,7 @@ export default async function SuperAdminPage() {
         {/* Företag */}
         <section>
           <h2 className="text-lg font-bold text-[var(--primary)] mb-3 flex items-center gap-2"><Building2 className="w-4 h-4" /> Alla företag</h2>
-          <SuperBusinessTable businesses={businesses ?? []} catName={catName} />
+          <SuperBusinessTable businesses={businesses ?? []} catName={catName} timelineById={timelineById} />
         </section>
 
         {/* Blixterbjudanden */}

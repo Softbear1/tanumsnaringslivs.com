@@ -14,8 +14,42 @@ import { sendEmail } from "@/lib/email";
 
 const BATCH_SIZE = 40; // Resend-vänlig batchstorlek per körning
 
-function emailHtml(businessName: string, businessId: string): string {
-  const url = `https://tanumsnaringsliv.com/foretag/${businessId}/ta-over`;
+function claimUrl(businessId: string, campaign: string): string {
+  // Via spårlänken så klicket loggas innan mottagaren landar på claim-sidan.
+  return `https://tanumsnaringsliv.com/api/claim-invite-click?b=${businessId}&c=${encodeURIComponent(campaign)}`;
+}
+
+// Ren textversion — mejl med både HTML och text får bättre spam-poäng och
+// visas rätt i klienter som blockerar HTML.
+function emailText(businessName: string, businessId: string, campaign: string): string {
+  return [
+    `Hej!`,
+    ``,
+    `Jag heter Elias och bor i Grebbestad. Jag har byggt tanumsnaringsliv.com — en samlad plats där folk i hela kommunen hittar lokala företag, ser blixterbjudanden och letar sommarjobb. Det är gratis att vara med, och jag har redan lagt in ${businessName} så att ni finns där från start.`,
+    ``,
+    `Nu vill jag att du tar över administrationen av ditt företag. Det tar ett par minuter, kostar ingenting, och då blir profilen din att fylla på och sköta. När du tagit över kan du:`,
+    ``,
+    `- Fylla på med rätt kontaktuppgifter, logga och en beskrivning`,
+    `- Skapa blixterbjudanden och annonser som syns för lokala kunder`,
+    `- Lägga upp sommarjobb`,
+    `- Lägga en gratis annons på Anslagstavlan (köpes, säljes, uthyres, arbete utföres)`,
+    `- Se hur många som besöker din profil`,
+    ``,
+    `Ta över ditt företag gratis: ${claimUrl(businessId, campaign)}`,
+    ``,
+    `Hör gärna av dig om du undrar något — svara bara på det här mejlet.`,
+    ``,
+    `Vänliga hälsningar,`,
+    `Elias Bengtsson`,
+    `Tanums Näringsliv · Grebbestad`,
+    ``,
+    `—`,
+    `Du får det här mejlet för att ${businessName} finns med i Bolagsverkets/SCB:s register för Tanums kommun och listningen är oclaimad. Vill du inte ha fler mejl av det här slaget? Svara med "Nej tack".`,
+  ].join("\n");
+}
+
+function emailHtml(businessName: string, businessId: string, campaign: string): string {
+  const url = claimUrl(businessId, campaign);
   return `<!doctype html><html lang="sv"><body style="margin:0;padding:0;background:#FAF8F4;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
 <table role="presentation" style="width:100%;border-collapse:collapse;background:#FAF8F4;padding:24px 0;">
 <tr><td align="center" style="padding:24px 12px;">
@@ -118,7 +152,9 @@ export async function GET(request: NextRequest) {
     const ok = await sendEmail({
       to: biz.claim_email as string,
       subject: `Jag har lagt till ${biz.name} på Tanums Näringsliv – ta över gratis`,
-      html: emailHtml(biz.name, biz.id),
+      html: emailHtml(biz.name, biz.id, campaign),
+      text: emailText(biz.name, biz.id, campaign),
+      replyTo: "elias.bengtsson@live.com",
     });
     if (ok) {
       await admin.from("claim_invite_log").insert({ business_id: biz.id, campaign });

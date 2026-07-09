@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Search, Pause, Play, Trash2, Pencil, ExternalLink, BadgeCheck } from "lucide-react";
 import { adminToggleBusiness, adminDeleteBusiness } from "./actions";
+import CampaignTimeline, { type TimelineState } from "@/components/admin/CampaignTimeline";
 
 interface Business {
   id: string;
@@ -27,9 +28,11 @@ const PAGE_SIZE = 50;
 export default function SuperBusinessTable({
   businesses,
   catName,
+  timelineById,
 }: {
   businesses: Business[];
   catName: Record<string, string>;
+  timelineById: Record<string, TimelineState>;
 }) {
   const [query, setQuery] = useState("");
   const [claimFilter, setClaimFilter] = useState<ClaimFilter>("alla");
@@ -106,6 +109,7 @@ export default function SuperBusinessTable({
           <thead className="bg-[var(--bg)] text-[var(--muted)] text-xs uppercase">
             <tr>
               <th className="text-left px-4 py-3 font-semibold">Namn</th>
+              <th className="text-left px-4 py-3 font-semibold hidden md:table-cell">Bearbetning</th>
               <th className="text-left px-4 py-3 font-semibold hidden sm:table-cell">Kategori</th>
               <th className="text-left px-4 py-3 font-semibold">Status</th>
               <th className="text-right px-4 py-3 font-semibold">Åtgärder</th>
@@ -124,6 +128,9 @@ export default function SuperBusinessTable({
                   {b.boosted && <span className="ml-2 text-[10px] bg-[var(--boost-border)] text-[var(--boost)] px-1.5 py-0.5 rounded-full">Boost</span>}
                   {!b.owner_id && !b.claimed && <span className="ml-2 text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-full">Ingen ägare</span>}
                 </td>
+                <td className="px-4 py-3 hidden md:table-cell">
+                  {timelineById[b.id] ? <CampaignTimeline state={timelineById[b.id]} /> : <span className="text-[var(--border)]">–</span>}
+                </td>
                 <td className="px-4 py-3 text-[var(--muted)] hidden sm:table-cell">{catName[b.category_id] ?? b.category_id}</td>
                 <td className="px-4 py-3">
                   <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${b.active ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}>{b.active ? "Aktiv" : "Pausad"}</span>
@@ -138,7 +145,7 @@ export default function SuperBusinessTable({
                 </td>
               </tr>
             ))}
-            {shown.length === 0 && <tr><td colSpan={4} className="px-4 py-6 text-center text-[var(--muted)]">Inga företag matchar sökningen.</td></tr>}
+            {shown.length === 0 && <tr><td colSpan={5} className="px-4 py-6 text-center text-[var(--muted)]">Inga företag matchar sökningen.</td></tr>}
           </tbody>
         </table>
       </div>
