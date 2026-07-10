@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createServerClient } from "@/lib/supabase-server";
 import { createAdminClient } from "@/lib/supabase-admin";
+import { logClaimAttempt } from "@/lib/claim-log";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
@@ -57,6 +58,13 @@ export default async function SlutforPage({ params }: PageProps) {
 
   // Adressen måste matcha den registrerade — annars är det inte ett giltigt bevis.
   if (!claimEmail || userEmail !== claimEmail) {
+    await logClaimAttempt(admin, {
+      businessId: biz.id,
+      source: "slutfor",
+      outcome: "email_mismatch",
+      targetEmail: user.email,
+      detail: `claim_email: ${biz.claim_email ?? "saknas"}`,
+    });
     return (
       <Message
         title="Länken matchar inte din inloggning"
@@ -70,6 +78,8 @@ export default async function SlutforPage({ params }: PageProps) {
     .from("businesses")
     .update({ owner_id: user.id, claimed: true })
     .eq("id", biz.id);
+
+  await logClaimAttempt(admin, { businessId: biz.id, source: "slutfor", outcome: "completed", targetEmail: userEmail });
 
   redirect("/admin");
 }
