@@ -1,9 +1,17 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { X, Send, MailCheck, BadgeCheck } from "lucide-react";
-import { verifyAndSendClaim } from "@/app/foretag/[id]/ta-over/actions";
+import { verifyAndSendClaim, requestManualClaim } from "@/app/foretag/[id]/ta-over/actions";
 
-type Step = "pitch" | "email" | "orgnr" | "sending" | "sent" | "error";
+type Step =
+  | "pitch"
+  | "email"
+  | "orgnr"
+  | "sending"
+  | "sent"
+  | "error"
+  | "manualAsk"
+  | "manualSent";
 
 interface Msg {
   from: "elias" | "user";
@@ -86,7 +94,14 @@ export default function EliasClaimModal({ businessId, businessName, onClose, onS
     setStep("sending");
     setTyping(true);
 
-    const res = await verifyAndSendClaim(businessId, email, val);
+    let res: { ok: boolean; error?: string };
+    try {
+      res = await verifyAndSendClaim(businessId, email, val);
+    } catch {
+      // Server-actionen kastade (t.ex. tillfälligt nätverksfel). Fastna aldrig på
+      // "skriver…"-indikatorn — visa ett fel och låt användaren gå vidare.
+      res = { ok: false, error: "Något gick fel på vägen. Försök igen om en stund." };
+    }
 
     setTyping(false);
     if (res.ok) {
@@ -100,18 +115,55 @@ export default function EliasClaimModal({ businessId, businessName, onClose, onS
     }
   }
 
+  function startManual() {
+    setInput("");
+    elias(
+      `Inga problem. Skriv en kort rad om hur du hör till ${businessName}, så granskar jag din begäran manuellt och hör av mig till ${email}.`,
+      "manualAsk",
+    );
+  }
+
+  async function handleManualSubmit() {
+    const note = input.trim();
+    setMessages((m) => [...m, { from: "user", text: note || "(vill bli kontaktad)" }]);
+    setInput("");
+    setStep("sending");
+    setTyping(true);
+
+    let res: { ok: boolean; error?: string };
+    try {
+      res = await requestManualClaim(businessId, email, note);
+    } catch {
+      res = { ok: false, error: "Något gick fel på vägen. Försök igen om en stund." };
+    }
+
+    setTyping(false);
+    if (res.ok) {
+      setMessages((m) => [...m, { from: "elias", text: `Tack! Din begäran är inskickad. Jag återkommer till ${email} så snart jag har verifierat att du hör till företaget.` }]);
+      setStep("manualSent");
+    } else {
+      setMessages((m) => [...m, { from: "elias", text: res.error ?? "Något gick fel. Försök igen." }]);
+      setErrorMsg(res.error ?? "");
+      setStep("error");
+    }
+  }
+
   function handleKeyDown(e: React.KeyboardEvent) {
     if (e.key !== "Enter" || e.shiftKey) return;
     if (step === "email") handleEmailSubmit();
     else if (step === "orgnr") handleOrgNrSubmit();
+    else if (step === "manualAsk") handleManualSubmit();
   }
 
   const placeholder =
     step === "email" ? "din@email.se" :
-    step === "orgnr" ? "XXXXXX-XXXX" : "";
+    step === "orgnr" ? "XXXXXX-XXXX" :
+    step === "manualAsk" ? "Hur hör du till företaget? (valfritt)" : "";
 
   const inputType = step === "email" ? "email" : "text";
-  const canSubmit = input.trim().length > 0 && (step === "email" || step === "orgnr");
+  const inputActive = step === "email" || step === "orgnr" || step === "manualAsk";
+  // Org-nr och e-post kräver ifyllt värde; den manuella noteringen är valfri.
+  const canSubmit = step === "manualAsk" || (input.trim().length > 0 && (step === "email" || step === "orgnr"));
 
   return (
     <>
@@ -170,6 +222,14 @@ export default function EliasClaimModal({ businessId, businessName, onClose, onS
             </div>
           )}
 
+          {step === "manualSent" && !typing && (
+            <div className="flex justify-center pt-2">
+              <div className="flex items-center gap-2 text-green-600 text-sm font-medium bg-green-50 px-4 py-2 rounded-full">
+                <MailCheck className="w-4 h-4" /> Begäran inskickad
+              </div>
+            </div>
+          )}
+
           <div ref={bottomRef} />
         </div>
 
@@ -184,7 +244,7 @@ export default function EliasClaimModal({ businessId, businessName, onClose, onS
             </button>
           )}
 
-          {(step === "email" || step === "orgnr") && (
+          {inputActive && (
             <div className="flex gap-2">
               <input
                 ref={inputRef}
@@ -197,7 +257,7 @@ export default function EliasClaimModal({ businessId, businessName, onClose, onS
                 className="flex-1 px-3.5 py-2.5 rounded-xl border border-[var(--border)] text-[16px] text-[var(--primary)] placeholder:text-[var(--muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
               />
               <button
-                onClick={step === "email" ? handleEmailSubmit : handleOrgNrSubmit}
+                onClick={step === "email" ? handleEmailSubmit : step === "orgnr" ? handleOrgNrSubmit : handleManualSubmit}
                 disabled={!canSubmit}
                 className="p-2.5 bg-[var(--brand)] text-white rounded-xl hover:bg-[var(--brand-hover)] transition-colors disabled:opacity-40"
               >
@@ -207,15 +267,23 @@ export default function EliasClaimModal({ businessId, businessName, onClose, onS
           )}
 
           {step === "error" && (
-            <button
-              onClick={() => { setInput(""); setStep("orgnr"); }}
-              className="w-full py-3 border border-[var(--border)] rounded-xl text-sm text-[var(--primary)] hover:bg-[var(--bg)] transition-colors"
-            >
-              Försök igen
-            </button>
+            <div className="space-y-2">
+              <button
+                onClick={() => { setInput(""); setStep("orgnr"); }}
+                className="w-full py-3 bg-[var(--brand)] text-white rounded-xl font-semibold text-sm hover:bg-[var(--brand-hover)] transition-colors"
+              >
+                Försök igen
+              </button>
+              <button
+                onClick={startManual}
+                className="w-full py-3 border border-[var(--border)] rounded-xl text-sm text-[var(--primary)] hover:bg-[var(--bg)] transition-colors"
+              >
+                Numret stämmer inte — begär manuell granskning
+              </button>
+            </div>
           )}
 
-          {step === "sent" && (
+          {(step === "sent" || step === "manualSent") && (
             <button onClick={onClose} className="w-full py-3 bg-[var(--brand)] text-white rounded-xl font-semibold hover:bg-[var(--brand-hover)] transition-colors text-sm flex items-center justify-center gap-2">
               <BadgeCheck className="w-4 h-4" /> Stäng
             </button>
