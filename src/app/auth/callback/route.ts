@@ -1,5 +1,7 @@
 export const runtime = "edge";
 import { createServerClient } from "@/lib/supabase-server";
+import { createAdminClient } from "@/lib/supabase-admin";
+import { logClaimAttempt } from "@/lib/claim-log";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
@@ -25,6 +27,22 @@ export async function GET(request: NextRequest) {
   }
 
   if (authError) {
+    // Om länken var för ett företagsövertagande, logga det — annars syns
+    // aldrig när en magisk länk gått ut eller redan använts (t.ex. om ett
+    // mejlsäkerhetsfilter förbrukar länken innan mottagaren själv klickar).
+    const claimMatch = next.match(/^\/foretag\/([0-9a-f-]{36})\/slutfor$/i);
+    if (claimMatch) {
+      const admin = createAdminClient();
+      if (admin) {
+        await logClaimAttempt(admin, {
+          businessId: claimMatch[1],
+          source: "callback",
+          outcome: "link_invalid",
+          detail: authError,
+        });
+      }
+    }
+
     // Skicka tillbaka till inloggningssidan med ett tydligt fel i stället för
     // att tyst landa på en skyddad sida utan session (studsar annars runt
     // utan förklaring om länken är för gammal eller redan använd).
