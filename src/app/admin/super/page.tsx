@@ -4,8 +4,8 @@ import { createAdminClient } from "@/lib/supabase-admin";
 import { isSuperAdmin } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Building2, Zap, Megaphone, Pause, Play, Trash2, ShieldCheck, Eye, BadgeCheck, Sparkles, Sunrise, StickyNote, Send, MousePointerClick, Users } from "lucide-react";
-import { startOfStockholmDayISO } from "@/lib/time";
+import { Building2, Zap, Megaphone, Pause, Play, Trash2, ShieldCheck, Eye, BadgeCheck, Sparkles, Sunrise, StickyNote, Send, MousePointerClick, Users, CalendarClock } from "lucide-react";
+import { startOfStockholmDayISO, stockholmToday } from "@/lib/time";
 import { logout } from "../actions";
 import {
   adminToggleDeal, adminDeleteDeal,
@@ -78,6 +78,13 @@ export default async function SuperAdminPage() {
   const todayLabel = new Intl.DateTimeFormat("sv-SE", {
     timeZone: "Europe/Stockholm", weekday: "long", day: "numeric", month: "long",
   }).format(new Date());
+
+  // Dagens schemalagda Facebook-inlägg (företagspresentation m.m.).
+  const { data: todayPost } = await admin
+    .from("scheduled_posts")
+    .select("post_type, business_id, status, fb_post_id")
+    .eq("scheduled_date", stockholmToday())
+    .maybeSingle();
 
   // Inbjudningskampanjens tratt: skickade → klickade → claimade efteråt.
   const { data: inviteRows } = await admin
@@ -207,6 +214,24 @@ export default async function SuperAdminPage() {
               </div>
             ))}
           </div>
+        </section>
+
+        {/* Dagliga Facebook-inlägg — snabbstatus + länk till schemat */}
+        <section>
+          <Link href="/admin/super/schemalagda-inlagg" className="flex items-center justify-between gap-4 rounded-2xl border border-[var(--border)] bg-white p-5 card-shadow hover:border-[var(--hav-300)] transition-colors">
+            <div className="flex items-center gap-3">
+              <CalendarClock className="w-5 h-5 text-[var(--accent)] shrink-0" />
+              <div>
+                <div className="font-semibold text-[var(--primary)] text-sm">Dagliga Facebook-inlägg</div>
+                <div className="text-xs text-[var(--muted)] mt-0.5">
+                  {todayPost
+                    ? `Dagens: ${todayPost.business_id ? (bizName[todayPost.business_id] ?? "företag") : "inlägg"} — ${todayPost.fb_post_id ? "postat" : todayPost.status === "skipped" ? "överhoppat" : "köat"}`
+                    : "Dagens inlägg väljs automatiskt på morgonen"}
+                </div>
+              </div>
+            </div>
+            <span className="text-[var(--brand)] text-sm font-medium hidden sm:block">Hantera schema →</span>
+          </Link>
         </section>
 
         {/* Inbjudningskampanjen — tratt */}

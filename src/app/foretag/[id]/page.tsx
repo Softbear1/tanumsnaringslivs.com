@@ -36,6 +36,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       description,
       type: "website",
       locale: "sv_SE",
+      images: [
+        {
+          url: `https://tanumsnaringsliv.com/api/og/foretag/${business.id}`,
+          width: 1200,
+          height: 630,
+          alt: `${business.name} – Tanums Näringsliv`,
+        },
+      ],
     },
     alternates: {
       canonical: `https://tanumsnaringsliv.com/foretag/${business.id}`,

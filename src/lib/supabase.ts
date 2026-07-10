@@ -305,6 +305,54 @@ export type Database = {
         Update: { id?: string; business_id?: string; deal_date?: string };
         Relationships: [];
       };
+      scheduled_posts: {
+        Row: {
+          id: string;
+          post_type: string;
+          business_id: string | null;
+          scheduled_date: string;
+          status: string;
+          source: string;
+          payload: Record<string, unknown> | null;
+          fb_post_id: string | null;
+          image_url: string | null;
+          caption: string | null;
+          error: string | null;
+          posted_at: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          post_type?: string;
+          business_id?: string | null;
+          scheduled_date: string;
+          status?: string;
+          source?: string;
+          payload?: Record<string, unknown> | null;
+          fb_post_id?: string | null;
+          image_url?: string | null;
+          caption?: string | null;
+          error?: string | null;
+          posted_at?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          post_type?: string;
+          business_id?: string | null;
+          scheduled_date?: string;
+          status?: string;
+          source?: string;
+          payload?: Record<string, unknown> | null;
+          fb_post_id?: string | null;
+          image_url?: string | null;
+          caption?: string | null;
+          error?: string | null;
+          posted_at?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       seasonal_content: {
         Row: {
           week_key: string;

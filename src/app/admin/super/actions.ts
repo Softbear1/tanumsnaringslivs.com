@@ -4,6 +4,9 @@ import { createAdminClient } from "@/lib/supabase-admin";
 import { isSuperAdmin } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { runDailyPost } from "@/lib/socialPosts/run";
+
+const SITE_URL = "https://tanumsnaringsliv.com";
 
 async function requireSuperAdmin() {
   const supabase = await createServerClient();
@@ -115,4 +118,59 @@ export async function adminDeleteAd(id: string) {
   const admin = await requireSuperAdmin();
   await admin.from("ads").delete().eq("id", id);
   revalidatePath("/admin/super");
+}
+
+// ── Schemalagda Facebook-inlägg ────────────────────────────────────────────
+
+const SCHEDULE_PATH = "/admin/super/schemalagda-inlagg";
+
+// Köa (eller ersätt) dagens/ett datums inlägg manuellt. Överskriver inte en rad
+// som redan postats.
+export async function queuePost(formData: FormData) {
+  const admin = await requireSuperAdmin();
+  const post_type = String(formData.get("post_type") || "presentation");
+  const business_id = String(formData.get("business_id") || "") || null;
+  const scheduled_date = String(formData.get("scheduled_date") || "");
+  if (!scheduled_date) throw new Error("Datum krävs");
+
+  const { data: existing } = await admin
+    .from("scheduled_posts")
+    .select("id, fb_post_id")
+    .eq("scheduled_date", scheduled_date)
+    .maybeSingle();
+  if (existing?.fb_post_id) throw new Error("Det datumet är redan postat.");
+
+  await admin
+    .from("scheduled_posts")
+    .upsert(
+      { post_type, business_id, scheduled_date, status: "queued", source: "manual" },
+      { onConflict: "scheduled_date" },
+    );
+  revalidatePath(SCHEDULE_PATH);
+}
+
+export async function skipPost(id: string) {
+  const admin = await requireSuperAdmin();
+  await admin.from("scheduled_posts").update({ status: "skipped" }).eq("id", id).is("fb_post_id", null);
+  revalidatePath(SCHEDULE_PATH);
+}
+
+export async function removePost(id: string) {
+  const admin = await requireSuperAdmin();
+  await admin.from("scheduled_posts").delete().eq("id", id).is("fb_post_id", null);
+  revalidatePath(SCHEDULE_PATH);
+}
+
+export async function changePostBusiness(id: string, formData: FormData) {
+  const admin = await requireSuperAdmin();
+  const business_id = String(formData.get("business_id") || "") || null;
+  await admin.from("scheduled_posts").update({ business_id }).eq("id", id).is("fb_post_id", null);
+  revalidatePath(SCHEDULE_PATH);
+}
+
+// "Posta nu" — kör samma logik som cron-routen direkt.
+export async function postDailyNow() {
+  const admin = await requireSuperAdmin();
+  await runDailyPost(admin, SITE_URL, {});
+  revalidatePath(SCHEDULE_PATH);
 }
