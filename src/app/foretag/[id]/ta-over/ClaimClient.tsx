@@ -22,7 +22,14 @@ export default function ClaimClient({ businessId, hasClaimEmail }: Props) {
   async function handleSend() {
     setLoading(true);
     setError(null);
-    const res: ClaimResult = await sendClaimLink(businessId);
+    let res: ClaimResult;
+    try {
+      res = await sendClaimLink(businessId);
+    } catch {
+      // Kastad server-action fick tidigare knappen att snurra för alltid
+      // (loading gick aldrig tillbaka till false). Visa fel i stället.
+      res = { status: "error", message: "Något gick fel på vägen. Försök igen om en stund." };
+    }
     setLoading(false);
     if (res.status === "sent") setSentTo(res.email);
     else if (res.status === "already") setError("Den här listningen administreras redan.");
@@ -34,7 +41,12 @@ export default function ClaimClient({ businessId, hasClaimEmail }: Props) {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    const res = await requestManualClaim(businessId, manualEmail, manualMsg);
+    let res: { ok: boolean; error?: string };
+    try {
+      res = await requestManualClaim(businessId, manualEmail, manualMsg);
+    } catch {
+      res = { ok: false, error: "Något gick fel på vägen. Försök igen om en stund." };
+    }
     setLoading(false);
     if (res.ok) setManualDone(true);
     else setError(res.error ?? "Något gick fel.");
