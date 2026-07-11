@@ -29,9 +29,12 @@ export default function BusinessSearchClaim({ onSelect, onClaimSent, onModalClos
     timerRef.current = setTimeout(async () => {
       setSearching(true);
       const supabase = createBrowserClient();
+      // Bara oclaimade listningar — en som redan har ägare går inte att ta
+      // över, och att upptäcka det först efter e-post + org-nr är onödigt surt.
       const { data } = await supabase
         .from("businesses")
         .select("id, name, postort")
+        .eq("claimed", false)
         .ilike("name", `%${query.trim()}%`)
         .limit(6);
       setResults(data ?? []);

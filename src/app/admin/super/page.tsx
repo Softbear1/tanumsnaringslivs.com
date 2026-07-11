@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Building2, Zap, Megaphone, Pause, Play, Trash2, ShieldCheck, Eye, BadgeCheck, Sparkles, Sunrise, StickyNote, Send, MousePointerClick, Users } from "lucide-react";
 import { startOfStockholmDayISO } from "@/lib/time";
-import { logout } from "../actions";
+import LogoutButton from "@/components/admin/LogoutButton";
 import {
   adminToggleDeal, adminDeleteDeal,
   adminToggleAd, adminDeleteAd,
@@ -185,9 +185,7 @@ export default async function SuperAdminPage() {
           </div>
           <div className="flex items-center gap-4">
             <span className="text-white/60 text-sm hidden sm:block">{user.email}</span>
-            <form action={logout}>
-              <button type="submit" className="text-sm text-white/80 hover:text-white border border-white/30 hover:border-white/60 px-3 py-1.5 rounded-lg transition-colors">Logga ut</button>
-            </form>
+            <LogoutButton />
           </div>
         </div>
       </header>
