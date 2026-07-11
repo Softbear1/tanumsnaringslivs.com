@@ -3,6 +3,7 @@ export const runtime = "edge";
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { createBrowserClient } from "@/lib/supabase-browser";
+import { svAuthError } from "@/lib/auth-errors";
 import BusinessSearchClaim from "@/components/BusinessSearchClaim";
 import { TnIcon } from "@/components/Logo";
 
@@ -29,7 +30,7 @@ export default function LoggaIn() {
     });
 
     if (error) {
-      setError(error.message);
+      setError(svAuthError(error.message));
     } else {
       setSent(true);
     }
@@ -72,8 +73,8 @@ export default function LoggaIn() {
               </p>
               {linkExpired && (
                 <p className="mb-4 text-sm bg-[var(--error-bg)] text-[var(--error)] rounded-lg px-4 py-3">
-                  Länken har gått ut eller redan använts. Öppna den i samma webbläsare som du begärde
-                  den i, eller be om en ny länk nedan.
+                  Länken har gått ut eller redan använts. Ange din e-postadress nedan så skickar vi
+                  en ny — du hamnar rätt igen efter inloggningen.
                 </p>
               )}
               <form onSubmit={handleSubmit} className="space-y-4">

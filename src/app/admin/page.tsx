@@ -1,13 +1,14 @@
 export const runtime = "edge";
 import { createServerClient } from "@/lib/supabase-server";
+import { createAdminClient } from "@/lib/supabase-admin";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { ExternalLink, Eye, Pause, Play, Plus, Megaphone, Zap, Pencil, TrendingUp, MousePointerClick, Briefcase } from "lucide-react";
-import { logout, toggleActive } from "./actions";
+import { ExternalLink, Eye, Plus, Megaphone, Zap, Pencil, TrendingUp, MousePointerClick, Briefcase, BadgeCheck } from "lucide-react";
 import { isSuperAdmin } from "@/lib/auth";
 import MarketingCoach from "@/components/admin/MarketingCoach";
 import OnboardingChecklist from "@/components/admin/OnboardingChecklist";
 import ToggleActiveButton from "@/components/admin/ToggleActiveButton";
+import LogoutButton from "@/components/admin/LogoutButton";
 
 export default async function AdminPage() {
   const supabase = await createServerClient();
@@ -27,6 +28,25 @@ export default async function AdminPage() {
     .select("id, name, description, initials, active, boosted, created_at, category_id, logo_url")
     .eq("owner_id", user.id)
     .order("created_at", { ascending: false });
+
+  // Skyddsnät: den som loggat in med företagets registrerade adress men vars
+  // övertagande aldrig slutfördes (t.ex. utgången länk → ny inloggning utan
+  // next-parametern) hamnar annars på en tom dashboard och skapar lätt en
+  // dubblett. Hitta väntande övertaganden och visa en genväg till slutfor.
+  let pendingClaims: { id: string; name: string }[] = [];
+  if (user.email) {
+    const admin = createAdminClient();
+    if (admin) {
+      const { data } = await admin
+        .from("businesses")
+        .select("id, name")
+        .eq("claimed", false)
+        .is("owner_id", null)
+        .ilike("claim_email", user.email)
+        .limit(5);
+      pendingClaims = data ?? [];
+    }
+  }
 
   // Fetch view counts per business for the last 30 days
   const businessIds = (businesses ?? []).map((b) => b.id);
@@ -110,19 +130,39 @@ export default async function AdminPage() {
           </div>
           <div className="flex items-center gap-4">
             <span className="text-white/60 text-sm hidden sm:block">{user.email}</span>
-            <form action={logout}>
-              <button
-                type="submit"
-                className="text-sm text-white/80 hover:text-white border border-white/30 hover:border-white/60 px-3 py-1.5 rounded-lg transition-colors"
-              >
-                Logga ut
-              </button>
-            </form>
+            <LogoutButton />
           </div>
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        {/* Väntande övertagande — ett klick kvar till ägarskapet */}
+        {pendingClaims.map((claim) => (
+          <div
+            key={claim.id}
+            className="mb-8 rounded-2xl border-2 border-[var(--accent)]/40 bg-[var(--accent)]/5 p-5 flex flex-col sm:flex-row sm:items-center gap-4"
+          >
+            <div className="w-10 h-10 rounded-xl bg-[var(--accent)]/15 flex items-center justify-center shrink-0">
+              <BadgeCheck className="w-5 h-5 text-[var(--accent)]" />
+            </div>
+            <div className="flex-1">
+              <h2 className="font-semibold text-[var(--primary)] mb-0.5">
+                {claim.name} väntar på dig
+              </h2>
+              <p className="text-sm text-[var(--muted)]">
+                Din e-postadress är registrerad för det här företaget men övertagandet slutfördes
+                aldrig. Ett klick så är profilen din.
+              </p>
+            </div>
+            <Link
+              href={`/foretag/${claim.id}/slutfor`}
+              className="inline-flex items-center justify-center gap-1.5 bg-[var(--brand)] text-white px-4 py-2.5 rounded-xl font-medium hover:bg-[var(--brand-hover)] transition-colors text-sm whitespace-nowrap"
+            >
+              Slutför övertagandet →
+            </Link>
+          </div>
+        ))}
+
         {checklist && <OnboardingChecklist state={checklist} />}
 
         {/* Kampanj-info: gratis just nu */}
@@ -284,9 +324,7 @@ export default async function AdminPage() {
                     >
                       <ExternalLink className="w-4 h-4" />
                     </Link>
-                    <form action={toggleActive.bind(null, biz.id, biz.active)}>
-                      <ToggleActiveButton active={biz.active} />
-                    </form>
+                    <ToggleActiveButton businessId={biz.id} active={biz.active} />
                   </div>
                 </div>
               </div>

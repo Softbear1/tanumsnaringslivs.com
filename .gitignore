@@ -47,3 +47,4 @@ next-env.d.ts
 .scb/
 workers/*/node_modules/
 workers/*/package-lock.json
+.wrangler/

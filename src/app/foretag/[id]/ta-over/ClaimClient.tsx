@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { Loader2, MailCheck, ShieldQuestion } from "lucide-react";
-import { sendClaimLink, requestManualClaim, type ClaimResult } from "./actions";
+import { claimApi, type ClaimResult } from "@/lib/claim-api";
 
 type Props = {
   businessId: string;
@@ -24,10 +24,8 @@ export default function ClaimClient({ businessId, hasClaimEmail }: Props) {
     setError(null);
     let res: ClaimResult;
     try {
-      res = await sendClaimLink(businessId);
+      res = await claimApi<ClaimResult>({ op: "send-link", businessId });
     } catch {
-      // Kastad server-action fick tidigare knappen att snurra för alltid
-      // (loading gick aldrig tillbaka till false). Visa fel i stället.
       res = { status: "error", message: "Något gick fel på vägen. Försök igen om en stund." };
     }
     setLoading(false);
@@ -43,7 +41,7 @@ export default function ClaimClient({ businessId, hasClaimEmail }: Props) {
     setError(null);
     let res: { ok: boolean; error?: string };
     try {
-      res = await requestManualClaim(businessId, manualEmail, manualMsg);
+      res = await claimApi<{ ok: boolean; error?: string }>({ op: "manual", businessId, email: manualEmail, message: manualMsg });
     } catch {
       res = { ok: false, error: "Något gick fel på vägen. Försök igen om en stund." };
     }

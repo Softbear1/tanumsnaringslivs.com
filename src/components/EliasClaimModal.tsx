@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { X, Send, MailCheck, BadgeCheck } from "lucide-react";
-import { verifyAndSendClaim, requestManualClaim } from "@/app/foretag/[id]/ta-over/actions";
+import { claimApi, type ClaimVerifyResult } from "@/lib/claim-api";
 
 type Step =
   | "pitch"
@@ -94,12 +94,12 @@ export default function EliasClaimModal({ businessId, businessName, onClose, onS
     setStep("sending");
     setTyping(true);
 
-    let res: { ok: boolean; error?: string };
+    let res: ClaimVerifyResult;
     try {
-      res = await verifyAndSendClaim(businessId, email, val);
+      res = await claimApi<ClaimVerifyResult>({ op: "verify-orgnr", businessId, email, orgNr: val });
     } catch {
-      // Server-actionen kastade (t.ex. tillfälligt nätverksfel). Fastna aldrig på
-      // "skriver…"-indikatorn — visa ett fel och låt användaren gå vidare.
+      // Nätverksfel eller serverfel. Fastna aldrig på "skriver…"-indikatorn —
+      // visa ett fel och låt användaren gå vidare.
       res = { ok: false, error: "Något gick fel på vägen. Försök igen om en stund." };
     }
 
@@ -108,6 +108,11 @@ export default function EliasClaimModal({ businessId, businessName, onClose, onS
       setMessages((m) => [...m, { from: "elias", text: `Perfekt! Jag har skickat en inloggningslänk till ${email}. Klicka på länken i mejlet så är du inne direkt.` }]);
       setStep("sent");
       onSent?.();
+    } else if (res.code === "no_orgnr") {
+      // Registret saknar org-nr — automatisk verifiering är omöjlig. Gå ärligt
+      // och direkt till manuell granskning i stället för "numret stämmer inte".
+      setMessages((m) => [...m, { from: "elias", text: `Jag saknar tyvärr organisationsnummer för ${businessName} i mitt register, så jag kan inte verifiera automatiskt. Men det löser vi manuellt!` }]);
+      startManual();
     } else {
       setMessages((m) => [...m, { from: "elias", text: res.error ?? "Något gick fel. Försök igen." }]);
       setErrorMsg(res.error ?? "");
@@ -132,7 +137,7 @@ export default function EliasClaimModal({ businessId, businessName, onClose, onS
 
     let res: { ok: boolean; error?: string };
     try {
-      res = await requestManualClaim(businessId, email, note);
+      res = await claimApi<{ ok: boolean; error?: string }>({ op: "manual", businessId, email, message: note });
     } catch {
       res = { ok: false, error: "Något gick fel på vägen. Försök igen om en stund." };
     }
