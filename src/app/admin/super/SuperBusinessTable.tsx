@@ -1,9 +1,14 @@
 "use client";
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { Search, Pause, Play, Trash2, Pencil, ExternalLink, BadgeCheck } from "lucide-react";
-import { adminToggleBusiness, adminDeleteBusiness } from "./actions";
+import { useRouter } from "next/navigation";
+import { Search, Pause, Play, Trash2, Pencil, ExternalLink, BadgeCheck, MailX } from "lucide-react";
+import { createBrowserClient } from "@/lib/supabase-browser";
 import CampaignTimeline, { type TimelineState } from "@/components/admin/CampaignTimeline";
+
+// Skrivningarna går via webbläsarklienten — RLS-policyn "super admin all
+// businesses" (supabase/add_superadmin_rls.sql) släpper igenom Elias konto.
+// Tidigare låg de som server actions, som svarar 404 på Cloudflare Pages.
 
 interface Business {
   id: string;
@@ -13,6 +18,7 @@ interface Business {
   owner_id: string | null;
   category_id: string;
   claimed: boolean;
+  reklamsparr: boolean;
 }
 
 type ClaimFilter = "alla" | "claimade" | "ej-claimade";
@@ -39,6 +45,8 @@ export default function SuperBusinessTable({
   const [visible, setVisible] = useState(PAGE_SIZE);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [confirmId, setConfirmId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -53,10 +61,29 @@ export default function SuperBusinessTable({
 
   const shown = filtered.slice(0, visible);
 
-  async function toggle(b: Business) {
-    setBusyId(b.id);
-    await adminToggleBusiness(b.id, b.active);
+  async function run(id: string, op: () => PromiseLike<{ error: { message: string } | null }>) {
+    setBusyId(id);
+    setError(null);
+    const { error } = await op();
     setBusyId(null);
+    if (error) {
+      setError(`Åtgärden misslyckades: ${error.message}`);
+      return false;
+    }
+    router.refresh();
+    return true;
+  }
+
+  async function toggle(b: Business) {
+    const supabase = createBrowserClient();
+    await run(b.id, () => supabase.from("businesses").update({ active: !b.active }).eq("id", b.id));
+  }
+
+  // Reklamspärr: företaget får aldrig fler marknadsföringsutskick (claim-
+  // kampanjer m.m.), oavsett aktiv/pausad. Används när någon svarat "nej tack".
+  async function toggleSparr(b: Business) {
+    const supabase = createBrowserClient();
+    await run(b.id, () => supabase.from("businesses").update({ reklamsparr: !b.reklamsparr }).eq("id", b.id));
   }
 
   async function remove(id: string) {
@@ -64,9 +91,8 @@ export default function SuperBusinessTable({
       setConfirmId(id);
       return;
     }
-    setBusyId(id);
-    await adminDeleteBusiness(id);
-    setBusyId(null);
+    const supabase = createBrowserClient();
+    await run(id, () => supabase.from("businesses").delete().eq("id", id));
     setConfirmId(null);
   }
 
@@ -104,6 +130,10 @@ export default function SuperBusinessTable({
         {filtered.length !== businesses.length && ` (filtrerat från ${businesses.length})`}
       </p>
 
+      {error && (
+        <p className="mb-2 text-sm bg-[var(--fel-bg,#FAEAE7)] text-red-700 rounded-lg px-3 py-2">{error}</p>
+      )}
+
       <div className="overflow-x-auto rounded-2xl border border-[var(--border)] bg-white">
         <table className="w-full text-sm">
           <thead className="bg-[var(--bg)] text-[var(--muted)] text-xs uppercase">
@@ -127,6 +157,7 @@ export default function SuperBusinessTable({
                   )}
                   {b.boosted && <span className="ml-2 text-[10px] bg-[var(--boost-border)] text-[var(--boost)] px-1.5 py-0.5 rounded-full">Boost</span>}
                   {!b.owner_id && !b.claimed && <span className="ml-2 text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-full">Ingen ägare</span>}
+                  {b.reklamsparr && <span className="ml-2 inline-flex items-center gap-0.5 text-[10px] bg-red-50 text-red-600 px-1.5 py-0.5 rounded-full font-semibold"><MailX className="w-3 h-3" /> Reklamspärr</span>}
                 </td>
                 <td className="px-4 py-3 hidden md:table-cell">
                   {timelineById[b.id] ? <CampaignTimeline state={timelineById[b.id]} /> : <span className="text-[var(--border)]">–</span>}
@@ -139,6 +170,7 @@ export default function SuperBusinessTable({
                   <div className="flex items-center justify-end gap-1.5">
                     <Link href={`/admin/foretag/${b.id}`} className="p-2 text-[var(--muted)] hover:text-[var(--primary)] border border-[var(--border)] rounded-lg" title="Redigera"><Pencil className="w-3.5 h-3.5" /></Link>
                     <Link href={`/foretag/${b.id}`} target="_blank" rel="noopener noreferrer" className="p-2 text-[var(--muted)] hover:text-[var(--accent)] border border-[var(--border)] rounded-lg" title="Visa publik profil"><ExternalLink className="w-3.5 h-3.5" /></Link>
+                    <button onClick={() => toggleSparr(b)} disabled={busyId === b.id} className={`p-2 border rounded-lg disabled:opacity-50 ${b.reklamsparr ? "bg-red-50 text-red-600 border-red-200" : "text-[var(--muted)] hover:text-red-600 border-[var(--border)]"}`} title={b.reklamsparr ? "Ta bort reklamspärr" : "Reklamspärr — inga fler utskick"}><MailX className="w-3.5 h-3.5" /></button>
                     <button onClick={() => toggle(b)} disabled={busyId === b.id} className="p-2 text-[var(--muted)] hover:text-[var(--primary)] border border-[var(--border)] rounded-lg disabled:opacity-50" title={b.active ? "Pausa" : "Aktivera"}>{b.active ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}</button>
                     <button onClick={() => remove(b.id)} disabled={busyId === b.id} className={`p-2 border rounded-lg disabled:opacity-50 ${confirmId === b.id ? "bg-red-600 text-white border-red-600" : "text-[var(--muted)] hover:text-red-600 border-[var(--border)]"}`} title={confirmId === b.id ? "Klicka igen för att bekräfta" : "Ta bort"}><Trash2 className="w-3.5 h-3.5" /></button>
                   </div>

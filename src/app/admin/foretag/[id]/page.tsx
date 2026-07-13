@@ -4,7 +4,6 @@ import { createAdminClient } from "@/lib/supabase-admin";
 import { isSuperAdmin } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import EditBusinessClient from "./EditBusinessClient";
-import { adminUpdateBusiness, adminDeleteBusiness, adminCreateAd, adminToggleAd, adminDeleteAd, adminCreateDeal, adminToggleDeal, adminDeleteDeal, adminToggleJob, adminDeleteJob } from "../../super/actions";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -55,18 +54,6 @@ export default async function EditForetagPage({ params }: PageProps) {
       flashDeals={flashDeals ?? []}
       jobs={jobList}
       applicationCounts={applicationCounts}
-      adminActions={superAdmin ? {
-        updateBusiness: adminUpdateBusiness,
-        deleteBusiness: adminDeleteBusiness,
-        createAd: adminCreateAd,
-        toggleAd: adminToggleAd,
-        deleteAd: adminDeleteAd,
-        createDeal: adminCreateDeal,
-        toggleDeal: adminToggleDeal,
-        deleteDeal: adminDeleteDeal,
-        toggleJob: adminToggleJob,
-        deleteJob: adminDeleteJob,
-      } : undefined}
     />
   );
 }

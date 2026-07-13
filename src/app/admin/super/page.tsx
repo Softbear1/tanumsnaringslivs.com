@@ -4,14 +4,11 @@ import { createAdminClient } from "@/lib/supabase-admin";
 import { isSuperAdmin } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Building2, Zap, Megaphone, Pause, Play, Trash2, ShieldCheck, Eye, BadgeCheck, Sparkles, Sunrise, StickyNote, Send, MousePointerClick, Users } from "lucide-react";
+import { Building2, Zap, Megaphone, ShieldCheck, Eye, BadgeCheck, Sparkles, Sunrise, StickyNote, Send, MousePointerClick, Users } from "lucide-react";
 import { startOfStockholmDayISO } from "@/lib/time";
 import LogoutButton from "@/components/admin/LogoutButton";
-import {
-  adminToggleDeal, adminDeleteDeal,
-  adminToggleAd, adminDeleteAd,
-  adminPostBoardAdTeaser,
-} from "./actions";
+import SuperModButtons from "@/components/admin/SuperModButtons";
+import { adminPostBoardAdTeaser } from "./actions";
 import { BOARD_CATEGORIES } from "@/lib/chat";
 import SuperBusinessTable from "./SuperBusinessTable";
 
@@ -35,7 +32,7 @@ export default async function SuperAdminPage() {
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
 
   const [{ data: businesses }, { data: deals }, { data: ads }, { data: categories }, { count: views7d }, { count: views30d }, { count: claimedCount }, { count: unclaimedCount }, { data: boardAds }] = await Promise.all([
-    admin.from("businesses").select("id, name, active, boosted, owner_id, created_at, category_id, claimed, claimed_at, description, logo_url").order("created_at", { ascending: false }),
+    admin.from("businesses").select("id, name, active, boosted, owner_id, created_at, category_id, claimed, claimed_at, description, logo_url, reklamsparr").order("created_at", { ascending: false }),
     admin.from("flash_deals").select("id, headline, deal_date, active, post_to_fb, fb_post_id, business_id").order("deal_date", { ascending: false }),
     admin.from("ads").select("id, headline, active, category_id, business_id").order("created_at", { ascending: false }),
     admin.from("categories").select("id, name"),
@@ -394,14 +391,7 @@ export default async function SuperAdminPage() {
                           : <span className="text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-full">Av</span>}
                     </td>
                     <td className="px-4 py-3">
-                      <div className="flex items-center justify-end gap-1.5">
-                        <form action={adminToggleDeal.bind(null, d.id, d.active)}>
-                          <button type="submit" className="p-2 text-[var(--muted)] hover:text-[var(--primary)] border border-[var(--border)] rounded-lg" title={d.active ? "Pausa" : "Aktivera"}>{d.active ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}</button>
-                        </form>
-                        <form action={adminDeleteDeal.bind(null, d.id)}>
-                          <button type="submit" className="p-2 text-[var(--muted)] hover:text-red-600 border border-[var(--border)] rounded-lg" title="Ta bort"><Trash2 className="w-3.5 h-3.5" /></button>
-                        </form>
-                      </div>
+                      <SuperModButtons table="flash_deals" id={d.id} active={d.active} />
                     </td>
                   </tr>
                 ))}
@@ -433,14 +423,7 @@ export default async function SuperAdminPage() {
                     <td className="px-4 py-3 text-[var(--muted)] hidden md:table-cell">{a.category_id ? (catName[a.category_id] ?? a.category_id) : "Alla"}</td>
                     <td className="px-4 py-3"><span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${a.active ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}>{a.active ? "Aktiv" : "Pausad"}</span></td>
                     <td className="px-4 py-3">
-                      <div className="flex items-center justify-end gap-1.5">
-                        <form action={adminToggleAd.bind(null, a.id, a.active)}>
-                          <button type="submit" className="p-2 text-[var(--muted)] hover:text-[var(--primary)] border border-[var(--border)] rounded-lg" title={a.active ? "Pausa" : "Aktivera"}>{a.active ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}</button>
-                        </form>
-                        <form action={adminDeleteAd.bind(null, a.id)}>
-                          <button type="submit" className="p-2 text-[var(--muted)] hover:text-red-600 border border-[var(--border)] rounded-lg" title="Ta bort"><Trash2 className="w-3.5 h-3.5" /></button>
-                        </form>
-                      </div>
+                      <SuperModButtons table="ads" id={a.id} active={a.active} />
                     </td>
                   </tr>
                 ))}
