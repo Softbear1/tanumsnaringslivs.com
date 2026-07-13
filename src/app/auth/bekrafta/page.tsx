@@ -1,30 +1,18 @@
-export const runtime = "edge";
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
 import Link from "next/link";
 import { TnIcon } from "@/components/Logo";
+import BekraftaForm from "./BekraftaForm";
 
 export const metadata: Metadata = {
   title: "Bekräfta inloggning – Tanums Näringsliv",
   robots: { index: false },
 };
 
-interface PageProps {
-  searchParams: Promise<{ token_hash?: string; type?: string; next?: string }>;
-}
-
 // Mellansteg för magiska länkar: engångskoden förbrukas först när användaren
-// aktivt klickar på knappen (formulär-POST till /auth/confirm). Utan det här
+// aktivt klickar på knappen (formulär-POST till /auth/callback). Utan det här
 // steget hinner mejlens säkerhetsskannrar förbruka länken — se /auth/callback.
-export default async function BekraftaPage({ searchParams }: PageProps) {
-  const { token_hash: tokenHash, type, next } = await searchParams;
-
-  if (!tokenHash || !type) {
-    redirect("/admin/logga-in?error=expired_link");
-  }
-
-  const safeNext = next && next.startsWith("/") ? next : "/admin";
-
+// Sidan är statisk; query-parametrarna läses klient-side i BekraftaForm.
+export default function BekraftaPage() {
   return (
     <div className="min-h-screen bg-[var(--bg)] flex items-center justify-center px-4">
       <div className="w-full max-w-md">
@@ -38,17 +26,7 @@ export default async function BekraftaPage({ searchParams }: PageProps) {
           <p className="text-sm text-[var(--muted)] leading-relaxed mb-6">
             Bekräfta att det är du som klickade på länken i mejlet, så loggas du in direkt.
           </p>
-          <form method="POST" action="/auth/confirm">
-            <input type="hidden" name="token_hash" value={tokenHash} />
-            <input type="hidden" name="type" value={type} />
-            <input type="hidden" name="next" value={safeNext} />
-            <button
-              type="submit"
-              className="w-full py-3 px-6 bg-[var(--brand)] text-white rounded-xl font-semibold hover:bg-[var(--brand-hover)] transition-colors"
-            >
-              Logga in
-            </button>
-          </form>
+          <BekraftaForm />
         </div>
 
         <div className="text-center mt-6">
