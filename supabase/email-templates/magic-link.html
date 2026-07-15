@@ -1,31 +1,38 @@
 <!doctype html>
 <html lang="sv">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;padding:0;background:#f8fafc;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
-  <table role="presentation" style="width:100%;border-collapse:collapse;background:#f8fafc;padding:24px 0;">
+<body style="margin:0;padding:0;background:#F3F0E9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <table role="presentation" style="width:100%;border-collapse:collapse;background:#F3F0E9;padding:24px 0;">
     <tr><td align="center" style="padding:24px 12px;">
-      <table role="presentation" style="width:100%;max-width:520px;border-collapse:collapse;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.08);">
-        <tr><td style="background:#1B3A4B;padding:20px 28px;">
-          <span style="color:#ffffff;font-size:16px;font-weight:700;">🌲 Tanums Näringsliv</span>
+      <table role="presentation" style="width:100%;max-width:520px;border-collapse:collapse;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 1px 3px rgba(28,43,42,.08);">
+        <tr><td style="background:#072B36;padding:20px 28px;">
+          <span style="color:#ffffff;font-size:16px;font-weight:700;">Tanums Näringsliv</span>
+          <br><span style="color:rgba(255,255,255,0.55);font-size:10px;letter-spacing:2px;">HELA TANUM. ETT NÄRINGSLIV.</span>
         </td></tr>
         <tr><td style="padding:28px;">
-          <h1 style="margin:0 0 12px;font-size:20px;color:#1B3A4B;">Logga in</h1>
-          <p style="margin:0 0 20px;font-size:15px;line-height:1.55;color:#334155;">
-            Klicka på knappen nedan för att logga in på Tanums Näringsliv. Länken gäller en kort stund och kan bara användas en gång.
+          <h1 style="margin:0 0 12px;font-size:20px;color:#072B36;">Logga in</h1>
+          <p style="margin:0 0 12px;font-size:15px;line-height:1.55;color:#1C2B2A;">
+            Hej! Vi fick en begäran om att logga in på ditt konto hos Tanums Näringsliv, den lokala företagskatalogen för Tanums kommun. Klicka på knappen nedan för att logga in.
+          </p>
+          <p style="margin:0 0 20px;font-size:15px;line-height:1.55;color:#1C2B2A;">
+            Länken gäller en kort stund och kan bara användas en gång.
           </p>
           <table role="presentation" style="border-collapse:collapse;">
             <tr><td style="padding:8px 0 0;">
-              <a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#2F8765;color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:12px 24px;border-radius:12px;">Logga in</a>
+              <a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#16657A;color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:12px 24px;border-radius:10px;">Logga in</a>
             </td></tr>
           </table>
-          <p style="margin:20px 0 0;font-size:13px;line-height:1.5;color:#94a3b8;">
-            Om knappen inte fungerar, kopiera och klistra in den här länken i webbläsaren:<br>
-            <a href="{{ .ConfirmationURL }}" style="color:#2F8765;word-break:break-all;">{{ .ConfirmationURL }}</a>
+          <p style="margin:24px 0 0;font-size:13px;line-height:1.5;color:#6B6F6C;">
+            Fungerar inte knappen? Kopiera in länken i din webbläsare:<br>
+            <span style="color:#16657A;word-break:break-all;">{{ .ConfirmationURL }}</span>
           </p>
         </td></tr>
-        <tr><td style="padding:18px 28px;border-top:1px solid #e2e8f0;">
-          <p style="margin:0;font-size:12px;color:#94a3b8;line-height:1.5;">
-            Fick du inte detta mejl av en anledning? Då kan du ignorera det — ingen loggas in utan att klicka på länken.
+        <tr><td style="padding:18px 28px;border-top:1px solid #D8D6CF;">
+          <p style="margin:0 0 8px;font-size:12px;color:#6B6F6C;line-height:1.5;">
+            Begärde du inte den här inloggningen? Då kan du ignorera mejlet — ingen loggas in utan att länken klickas.
+          </p>
+          <p style="margin:0;font-size:12px;color:#6B6F6C;line-height:1.5;">
+            Tanums Näringsliv · tanumsnaringsliv.com
           </p>
         </td></tr>
       </table>

@@ -15,5 +15,17 @@ både **företag** och **beställare** får när de loggar in.
 > Variabeln `{{ .ConfirmationURL }}` fylls i automatiskt av Supabase med rätt
 > inloggningslänk (inkl. vår `?next=`-redirect till `/offert/...` eller `/admin`).
 
-Mallen matchar appens varumärke (mörkblå header, grön knapp). Vill du ändra
-färgerna finns de som `#1B3A4B` (primär) och `#2F8765` (accent) i filen.
+Mallen följer DESIGN.md: header i hav-900 (`#072B36`), knapp i hav-500
+(`#16657A`), text i skiffer/grå enligt paletten. Ändra INTE till gröna eller
+andra ofärgpalett-toner — håll dig till CSS-variablerna i DESIGN.md.
+
+## Om mejlet hamnar i skräpposten
+
+Autentiseringen (SPF/DKIM/DMARC via Resend) kan vara helt korrekt och mejlet
+ändå hamna i skräppost hos vissa mottagare (särskilt Outlook/Live) — det beror
+då på mottagarens innehålls-/ryktesfilter, inte på DNS eller Custom SMTP.
+Kontrollera `Authentication-Results`-headern i ett mottaget mejl: står det
+`dkim=pass header.d=tanumsnaringsliv.com` och `dmarc=pass` är avsändningen
+korrekt, och kvarvarande skräppost-problem löses av mottagarens ryktesuppbyggnad
+över tid (be mottagare markera "Inte skräppost"), inte av mall- eller
+DNS-ändringar.
