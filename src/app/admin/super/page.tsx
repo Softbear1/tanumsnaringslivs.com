@@ -4,10 +4,11 @@ import { createAdminClient } from "@/lib/supabase-admin";
 import { isSuperAdmin } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Building2, Zap, Megaphone, ShieldCheck, Eye, BadgeCheck, Sparkles, Sunrise, StickyNote, Send, MousePointerClick, Users } from "lucide-react";
+import { Building2, Zap, Megaphone, ShieldCheck, Eye, BadgeCheck, Sparkles, Sunrise, StickyNote, Send, MousePointerClick, Users, UserCheck } from "lucide-react";
 import { startOfStockholmDayISO } from "@/lib/time";
 import LogoutButton from "@/components/admin/LogoutButton";
 import SuperModButtons from "@/components/admin/SuperModButtons";
+import SuperClaimButtons from "@/components/admin/SuperClaimButtons";
 import { adminPostBoardAdTeaser } from "./actions";
 import { BOARD_CATEGORIES } from "@/lib/chat";
 import SuperBusinessTable from "./SuperBusinessTable";
@@ -42,6 +43,12 @@ export default async function SuperAdminPage() {
     admin.from("businesses").select("*", { count: "exact", head: true }).eq("claimed", false),
     admin.from("board_ads").select("id, title, category, status, fb_post_id, created_at").order("created_at", { ascending: false }).limit(25),
   ]);
+
+  const { data: pendingClaims } = await admin
+    .from("claim_requests")
+    .select("id, business_id, claimant_email, message, created_at")
+    .eq("status", "pending")
+    .order("created_at", { ascending: false });
 
   const boardCatName: Record<string, string> = {};
   for (const c of BOARD_CATEGORIES) boardCatName[c.id] = c.name;
@@ -210,6 +217,32 @@ export default async function SuperAdminPage() {
             ))}
           </div>
         </section>
+
+        {/* Väntande övertaganden — manuella claim-begäranden som kräver granskning */}
+        {(pendingClaims ?? []).length > 0 && (
+          <section>
+            <h2 className="text-lg font-bold text-[var(--primary)] mb-3 flex items-center gap-2">
+              <UserCheck className="w-4 h-4 text-[var(--accent)]" /> Väntande övertaganden
+              <span className="text-xs font-normal text-[var(--muted)]">({pendingClaims!.length})</span>
+            </h2>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {pendingClaims!.map((r) => (
+                <div key={r.id} className="rounded-2xl border-2 border-[var(--accent-light)] bg-white p-4 card-shadow">
+                  <div className="font-semibold text-sm text-[var(--primary)] truncate mb-0.5">
+                    {bizName[r.business_id] ?? "Okänt företag"}
+                  </div>
+                  <p className="text-xs text-[var(--muted)] mb-0.5 truncate">{r.claimant_email}</p>
+                  {r.message && <p className="text-xs text-[var(--muted)] mb-2 line-clamp-2">&ldquo;{r.message}&rdquo;</p>}
+                  <p className="text-[11px] text-[var(--muted)] mb-3">Begärd {fmtDate(r.created_at)}</p>
+                  <div className="flex items-center justify-between gap-2">
+                    <Link href={`/foretag/${r.business_id}`} target="_blank" rel="noopener noreferrer" className="text-xs text-[var(--brand)] hover:underline">Visa listning</Link>
+                    <SuperClaimButtons id={r.id} businessId={r.business_id} claimantEmail={r.claimant_email} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* Inbjudningskampanjen — tratt */}
         {inviteFunnel && (
