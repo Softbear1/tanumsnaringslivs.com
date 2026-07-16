@@ -120,12 +120,12 @@ export default function FlashDeals({ deals, teasers, endsAt }: Props) {
             ))}
           </div>
         ) : (
-          <p className="hidden sm:block text-sm text-[var(--muted)] mb-2">Inga blixterbjudanden just nu — men kolla in vad som kommer:</p>
+          <p className="text-sm text-[var(--muted)] mb-2">Inga blixterbjudanden just nu — men kolla in vad som kommer:</p>
         )}
 
         {/* Upcoming teasers — who, but not what */}
         {teasers.length > 0 && (
-          <div className={deals.length > 0 ? "mt-5" : "mt-2 sm:mt-5 hidden sm:block"}>
+          <div className={deals.length > 0 ? "mt-5" : "mt-2 sm:mt-5"}>
             <div className="flex items-center gap-1.5 mb-2.5 text-sm font-semibold text-[var(--primary)]">
               <Eye className="w-4 h-4 text-[var(--boost)]" />
               Snart: håll utkik
