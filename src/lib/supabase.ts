@@ -39,18 +39,21 @@ export type Database = {
           sent_at: string;
           campaign: string;
           clicked_at: string | null;
+          followup_sent_at: string | null;
         };
         Insert: {
           business_id: string;
           sent_at?: string;
           campaign?: string;
           clicked_at?: string | null;
+          followup_sent_at?: string | null;
         };
         Update: {
           business_id?: string;
           sent_at?: string;
           campaign?: string;
           clicked_at?: string | null;
+          followup_sent_at?: string | null;
         };
         Relationships: [];
       };
